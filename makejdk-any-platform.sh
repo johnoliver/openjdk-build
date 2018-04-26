@@ -1,4 +1,6 @@
 #!/bin/bash
+
+################################################################################
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,36 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+################################################################################
 
-################################################################################################
+################################################################################
 #
-# Script to prepare the AdoptOpenJDK build script for any platform and then call it (makejdk.sh)
+# Prepare the AdoptOpenJDK OpenJDK build for any platform and then call it
 #
-################################################################################################
+################################################################################
 
-# TODO 9 should become 9u as will 10 shortly....
+set -ex # TODO remove this once we've finished debugging
 
-# set -x # TODO remove this once we've finished
-
-# The OS kernel name, e.g. 'darwin' for Mac OS X
-export OS_KERNEL_NAME=""
-OS_KERNEL_NAME=$(uname | awk '{print tolower($0)}')
-
-# The O/S architecture, e.g. x86_64 for a modern intel / Mac OS X
-export OS_ARCHITECTURE=""
-OS_ARCHITECTURE=$(uname -m)
-
-# The full forest name, e.g. jdk8, jdk8u, jdk9, jdk9u, etc.
-export OPENJDK_FOREST_NAME=""
-
-# The abridged, core version name, e.g. jdk8, jdk9, etc. No "u"s.
-export OPENJDK_CORE_VERSION=""
-
-# The build variant, e.g. openj9
-export BUILD_VARIANT=""
-
-# The OpenJDK source code repository to build from, could be a GitHub AdoptOpenJDK repo, mercurial forest etc
-export REPOSITORY=""
+# Pull in configuration support (read / write / display)
+source sbin/config_init.sh
 
 parseCommandLineArgs()
 {
@@ -51,7 +35,7 @@ parseCommandLineArgs()
     shift;
     case "$opt" in
       "--variant" | "-bv")
-        BUILD_VARIANT=$(echo "$1" | awk "{print $string}")
+        BUILD_CONFIG[BUILD_VARIANT]=$1
         shift;;
     esac
 
@@ -62,101 +46,142 @@ parseCommandLineArgs()
   done
 
   # Now that we've processed the flags, grab the mandatory argument(s)
-  OPENJDK_FOREST_NAME=$(echo "$1" | awk "{print $string}")
-  echo "OPENJDK_FOREST_NAME=${OPENJDK_FOREST_NAME}"
-  export OPENJDK_CORE_VERSION=${OPENJDK_FOREST_NAME}
+  local forest_name=$1
+  local openjdk_version=${forest_name}
 
+  # Derive the openjdk_core_version from the forest name.
   # 'u' means it's an update repo, e.g. jdk8u
-  if [[ ${OPENJDK_FOREST_NAME} == *u ]]; then
-    export OPENJDK_CORE_VERSION=${OPENJDK_FOREST_NAME%?}
+  local openjdk_core_version=${forest_name}
+  if [[ ${forest_name} == *u ]]; then
+    openjdk_core_version=${forest_name%?}
   fi
 
-  echo "OPENJDK_CORE_VERSION=${OPENJDK_CORE_VERSION}"
-
+  BUILD_CONFIG[OPENJDK_CORE_VERSION]=$openjdk_core_version;
+  BUILD_CONFIG[OPENJDK_FOREST_NAME]=$forest_name;
 }
 
-setVariablesBeforeCallingConfigure() {
+# Set variables that the `configure` command (which builds OpenJDK) will need
+setVariablesForConfigure() {
+
+  local openjdk_core_version=${BUILD_CONFIG[OPENJDK_CORE_VERSION]}
+
   # TODO Regex this in the if or use cut to grab out the number and see if >= 9
-  if [ "$OPENJDK_CORE_VERSION" == "jdk9" ] || [ "$OPENJDK_CORE_VERSION" == "jdk10" ] || [ "$OPENJDK_CORE_VERSION" == "jdk11" ] || [ "$OPENJDK_CORE_VERSION" == "amber" ]; then
-    export JDK_PATH="jdk"
-    export JRE_PATH="jre"
-    export CONFIGURE_ARGS_FOR_ANY_PLATFORM=${CONFIGURE_ARGS_FOR_ANY_PLATFORM:-"--disable-warnings-as-errors"}
-  elif [ "$OPENJDK_CORE_VERSION" == "jdk8" ]; then
-    export COPY_MACOSX_FREE_FONT_LIB_FOR_JDK_FLAG="false"
-    export COPY_MACOSX_FREE_FONT_LIB_FOR_JRE_FLAG="true"
-    export JDK_PATH="j2sdk-image"
-    export JRE_PATH="j2re-image"
+  # TODO 9 should become 9u as will 10 shortly....
+  if [ "$openjdk_core_version" == "jdk9" ] || [ "$openjdk_core_version" == "jdk10" ] || [ "$openjdk_core_version" == "jdk11" ] || [ "$openjdk_core_version" == "amber" ]; then
+    local jdk_path="jdk"
+    local jre_path="jre"
+    BUILD_CONFIG[CONFIGURE_ARGS_FOR_ANY_PLATFORM]=${BUILD_CONFIG[CONFIGURE_ARGS_FOR_ANY_PLATFORM]:-"--disable-warnings-as-errors"}
+  elif [ "$openjdk_core_version" == "jdk8" ]; then
+    local jdk_path="j2sdk-image"
+    local jre_path="j2re-image"
   else
-    echo "Please specify a version, either jdk8, jdk9, jdk10 etc, with or without a 'u' suffix. e.g. $0 [options] jdk8u"
+    echo "Please specify a version, either jdk8u, jdk9, jdk10, amber etc, with or without a 'u' suffix. e.g. $0 [options] jdk8u"
     exit 1
   fi
 
-  echo "JDK_PATH=${JDK_PATH}"
-  echo "JRE_PATH=${JRE_PATH}"
-  echo "CONFIGURE_ARGS_FOR_ANY_PLATFORM=${CONFIGURE_ARGS_FOR_ANY_PLATFORM}"
-  echo "COPY_MACOSX_FREE_FONT_LIB_FOR_JDK_FLAG=${COPY_MACOSX_FREE_FONT_LIB_FOR_JDK_FLAG}"
-  echo "COPY_MACOSX_FREE_FONT_LIB_FOR_JRE_FLAG=${COPY_MACOSX_FREE_FONT_LIB_FOR_JRE_FLAG}"
+  BUILD_CONFIG[JDK_PATH]=$jdk_path
+  BUILD_CONFIG[JRE_PATH]=$jre_path
 }
 
-# Set the repository, defaults to AdoptOpenJDK/openjdk-$OPENJDK_FOREST_NAME
+# Set the repository to build from
 setRepository() {
-  REPOSITORY="${REPOSITORY:-adoptopenjdk/openjdk-$OPENJDK_FOREST_NAME}";
-  REPOSITORY="$(echo "${REPOSITORY}" | awk '{print tolower($0)}')";
+  local repository="${BUILD_CONFIG[REPOSITORY]:-adoptopenjdk/openjdk-${BUILD_CONFIG[OPENJDK_FOREST_NAME]}}";
+  repository="$(echo "${repository}" | awk '{print tolower($0)}')";
+
+  BUILD_CONFIG[REPOSITORY]=$repository
 }
 
-# Specific architectures needs to have special build settings
+# Specific platforms need to have special build settings
+processArgumentsforSpecificPlatforms() {
+
+  case "${BUILD_CONFIG[OS_KERNEL_NAME]}" in
+  "darwin")
+    if [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "jdk8" ] ; then
+      BUILD_CONFIG[COPY_MACOSX_FREE_FONT_LIB_FOR_JDK_FLAG]="false"
+      BUILD_CONFIG[COPY_MACOSX_FREE_FONT_LIB_FOR_JRE_FLAG]="true"
+    fi
+  ;;
+  esac
+
+}
+
+# Specific architectures need to have special build settings
 processArgumentsforSpecificArchitectures() {
-  case "$OS_ARCHITECTURE" in
+  local jvm_variant=server
+  local build_full_name
+  local make_args_for_any_platform
+  local configure_args_for_any_platform
+
+  case "${BUILD_CONFIG[OS_ARCHITECTURE]}" in
   "s390x")
-    if [ "$OPENJDK_CORE_VERSION" == "jdk8" ] && [ "$BUILD_VARIANT" != "openj9" ]; then
-      export JVM_VARIANT=${JVM_VARIANT:-zero}
+    if [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "jdk8" ] && [ "$jvm_variant" != "openj9" ]; then
+      jvm_variant=zero
     else
-      export JVM_VARIANT=${JVM_VARIANT:-server}
+      jvm_variant=server
     fi
 
-    export BUILD_FULL_NAME=${BUILD_FULL_NAME:-linux-s390x-normal-${JVM_VARIANT}-release}
-    S390X_MAKE_ARGS="CONF=${BUILD_FULL_NAME} DEBUG_BINARIES=true images"
-    export MAKE_ARGS_FOR_ANY_PLATFORM=${MAKE_ARGS_FOR_ANY_PLATFORM:-$S390X_MAKE_ARGS}
+    build_full_name=linux-s390x-normal-${jvm_variant}-release}
+    make_args_for_any_platform="CONF=${build_full_name} DEBUG_BINARIES=true images"
   ;;
 
   "ppc64le")
-    export JVM_VARIANT=${JVM_VARIANT:-server}
-    export BUILD_FULL_NAME=${BUILD_FULL_NAME:-linux-ppc64-normal-${JVM_VARIANT}-release}
+    jvm_variant=server
+    build_full_name=linux-ppc64-normal-${jvm_variant}-release
     # shellcheck disable=SC1083
-    export FREETYPE_FONT_BUILD_TYPE_PARAM=${FREETYPE_FONT_BUILD_TYPE_PARAM:="--build=$(rpm --eval %{_host})"}
+    BUILD_CONFIG[FREETYPE_FONT_BUILD_TYPE_PARAM]=${BUILD_CONFIG[FREETYPE_FONT_BUILD_TYPE_PARAM]:="--build=$(rpm --eval %{_host})"}
   ;;
 
   "armv7l")
-    export JVM_VARIANT=${JVM_VARIANT:-zero}
-    export MAKE_ARGS_FOR_ANY_PLATFORM=${MAKE_ARGS_FOR_ANY_PLATFORM:-"DEBUG_BINARIES=true images"}
-    export CONFIGURE_ARGS_FOR_ANY_PLATFORM=${CONFIGURE_ARGS_FOR_ANY_PLATFORM:-"--with-jobs=${NUM_PROCESSORS}"}
+    jvm_variant=zero
+    make_args_for_any_platform="DEBUG_BINARIES=true images"
+    configure_args_for_any_platform="--with-jobs=${NUM_PROCESSORS}"
   ;;
 
   "aarch64")
-    export FREETYPE_FONT_VERSION="2.5.2"
+    BUILD_CONFIG[FREETYPE_FONT_VERSION]="2.5.2"
   ;;
   esac
+
+  BUILD_CONFIG[JVM_VARIANT]=${BUILD_CONFIG[JVM_VARIANT]:-$jvm_variant}
+  BUILD_CONFIG[BUILD_FULL_NAME]=${BUILD_CONFIG[BUILD_FULL_NAME]:-$build_full_name}
+  BUILD_CONFIG[MAKE_ARGS_FOR_ANY_PLATFORM]=${BUILD_CONFIG[MAKE_ARGS_FOR_ANY_PLATFORM]:-$make_args_for_any_platform}
+  BUILD_CONFIG[CONFIGURE_ARGS_FOR_ANY_PLATFORM]=${BUILD_CONFIG[CONFIGURE_ARGS_FOR_ANY_PLATFORM]:-$configure_args_for_any_platform}
 }
 
 setMakeCommandForOS() {
+  local make_command_name
   case "$OS_KERNEL_NAME" in
   "aix")
-    export MAKE_COMMAND_NAME=${MAKE_COMMAND_NAME:-"gmake"}
+    make_command_name="gmake"
   ;;
   "SunOS")
-    export MAKE_COMMAND_NAME=${MAKE_COMMAND_NAME:-"gmake"}
+    make_command_name="gmake"
   ;;
-
   esac
+
+  BUILD_CONFIG[MAKE_COMMAND_NAME]=${BUILD_CONFIG[MAKE_COMMAND_NAME]:-$make_command_name}
 }
 
-echo "Starting $0 to set environment variables before calling makejdk.sh"
+# Let's do lots of platform, arch and variant config set up before we build
+echo "Starting $0 to configure and build AdoptOpenJDK binary"
 parseCommandLineArgs "$@"
-setVariablesBeforeCallingConfigure
+setVariablesForConfigure
 setRepository
+processArgumentsforSpecificPlatforms
 processArgumentsforSpecificArchitectures
 setMakeCommandForOS
 
-echo "About to call makejdk.sh"
+# Pull in support to configure and then build the binary
+source configureBuild.sh
+source build.sh
 
-./makejdk.sh "$@"
+# Configure the AdoptOpenJDK build with everything we've set
+configure_build "$@"
+
+# Display and write out the AdoptOpenJDK configuration
+displayParams
+writeConfigToFile
+
+# Let's build the AdoptOpenJDK binary
+perform_build
+
