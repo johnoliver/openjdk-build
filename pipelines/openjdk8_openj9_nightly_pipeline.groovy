@@ -6,7 +6,7 @@ buildMaps['Linux'] = [test:['openjdktest', 'systemtest', 'perftest', 'externalte
 buildMaps['zLinux'] = [test:['openjdktest', 'systemtest'], ArchOSs:'s390x_linux']
 buildMaps['ppc64le'] = [test:['openjdktest', 'systemtest'], ArchOSs:'ppc64le_linux']
 buildMaps['AIX'] = [test:false, ArchOSs:'ppc64_aix']
-buildMaps['Windows'] = [test:false, ArchOSs:'x86-64_windows']
+buildMaps['Windows'] = [test:['openjdktest'], ArchOSs:'x86-64_windows']
 
 def jobs = [:]
 for ( int i = 0; i < buildPlatforms.size(); i++ ) {
@@ -39,7 +39,7 @@ for ( int i = 0; i < buildPlatforms.size(); i++ ) {
 		stage('publish nightly') {
 			build job: 'openjdk_release_tool',
 						parameters: [string(name: 'REPO', value: 'nightly'),
-									string(name: 'TAG', value: 'jdk8u162-b12'),
+									string(name: 'TAG', value: 'jdk8u172-b11'),
 									string(name: 'VERSION', value: 'jdk8-openj9'),
 									string(name: 'CHECKSUM_JOB_NAME', value: "openjdk8_openj9_build_checksum"),
 									string(name: 'CHECKSUM_JOB_NUMBER', value: "${checksumJob.getNumber()}")]

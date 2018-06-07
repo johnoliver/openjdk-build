@@ -1,4 +1,6 @@
 #!/bin/bash
+
+################################################################################
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-set -euo pipefail
-rm -rf "$WORKSPACE/combined" "$WORKSPACE/hg"
-mkdir "$WORKSPACE/combined"
-mkdir "$WORKSPACE/hg"
-cd "$WORKSPACE/combined" || exit 1
-git init
-git checkout -b root-commit || exit 1
-git remote add github git@github.com:AdoptOpenJDK/openjdk-jdk10.git
-cd - || exit 1
-bash add-branch-without-modules.sh jdk/jdk10
+################################################################################
+
+exit_script() {
+    if [[ -z ${KEEP_CONTAINER} ]] ; then
+      docker ps -a | awk '{ print $1,$2 }' | grep "$CONTAINER_NAME" | awk '{print $1 }' | xargs -I {} docker rm -f {}
+    fi
+    echo "Process exited"
+    trap - SIGINT SIGTERM # clear the trap
+    kill -- -$$ # Sends SIGTERM to child/sub processes
+}
+
+trap exit_script SIGINT SIGTERM 
