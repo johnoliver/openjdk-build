@@ -1,9 +1,22 @@
-//TODO: make it a shared library
+import groovy.json.JsonSlurper
 
+/*
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
 
 def buildConfiguration(javaToBuild, variant, configuration) {
 
-    def buildTag = "build"
+    String buildTag = "build"
 
     if (configuration.os == "windows" && variant == "openj9") {
         buildTag = "buildj9"
@@ -11,28 +24,28 @@ def buildConfiguration(javaToBuild, variant, configuration) {
         buildTag = "openj9"
     }
 
-    def additionalNodeLabels;
+    def additionalNodeLabels
     if (configuration.containsKey("additionalNodeLabels")) {
         // hack as jenkins sandbox wont allow instanceof
-        if ("java.util.LinkedHashMap".equals(configuration.additionalNodeLabels.getClass().getName())) {
+        if ("java.util.LinkedHashMap" == configuration.additionalNodeLabels.getClass().getName()) {
             additionalNodeLabels = configuration.additionalNodeLabels.get(variant)
         } else {
-            additionalNodeLabels = configuration.additionalNodeLabels;
+            additionalNodeLabels = configuration.additionalNodeLabels
         }
 
-        additionalNodeLabels = "${additionalNodeLabels}&&${buildTag}";
+        additionalNodeLabels = "${additionalNodeLabels}&&${buildTag}"
     } else {
-        additionalNodeLabels = buildTag;
+        additionalNodeLabels = buildTag
     }
 
-    def buildParams = [
+    List buildParams = [
             string(name: 'JAVA_TO_BUILD', value: "${javaToBuild}"),
             [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: "${additionalNodeLabels}&&${configuration.os}&&${configuration.arch}"]
-    ];
+    ]
 
-    if (configuration.containsKey('bootJDK')) buildParams += string(name: 'JDK_BOOT_VERSION', value: "${configuration.bootJDK}");
-    if (configuration.containsKey('configureArgs')) buildParams += string(name: 'CONFIGURE_ARGS', value: "${configuration.configureArgs}");
-    if (configuration.containsKey('buildArgs')) buildParams += string(name: 'BUILD_ARGS', value: "${configuration.buildArgs}");
+    if (configuration.containsKey('bootJDK')) buildParams += string(name: 'JDK_BOOT_VERSION', value: "${configuration.bootJDK}")
+    if (configuration.containsKey('configureArgs')) buildParams += string(name: 'CONFIGURE_ARGS', value: "${configuration.configureArgs}")
+    if (configuration.containsKey('buildArgs')) buildParams += string(name: 'BUILD_ARGS', value: "${configuration.buildArgs}")
 
     buildParams += string(name: 'VARIANT', value: "${variant}")
     buildParams += string(name: 'ARCHITECTURE', value: "${configuration.arch}")
@@ -49,40 +62,39 @@ def buildConfiguration(javaToBuild, variant, configuration) {
     ]
 }
 
-def getJobConfigurations(javaToBuild, buildConfigurations, osTarget) {
+def getJobConfigurations(javaToBuild, buildConfigurations, String osTarget) {
     def jobConfigurations = [:]
 
-    new groovy.json.JsonSlurper().parseText(osTarget).each { target ->
+    new JsonSlurper()
+            .parseText(osTarget)
+            .each { target ->
         if (buildConfigurations.containsKey(target.key)) {
             def configuration = buildConfigurations.get(target.key)
             target.value.each { variant ->
-                def name = "${configuration.os}-${configuration.arch}-${variant}"
-                jobConfigurations[name] = buildConfiguration(javaToBuild, variant, configuration);
+                GString name = "${configuration.os}-${configuration.arch}-${variant}"
+                jobConfigurations[name] = buildConfiguration(javaToBuild, variant, configuration)
             }
         }
     }
 
-    return jobConfigurations;
+    return jobConfigurations
 }
 
-def determineTestJobName(config, testType) {
+static Integer getJavaVersionNumber(version) {
+    // version should be something like "jdk8u"
+    def matcher = (version =~ /(\d+)/)
+    return Integer.parseInt(matcher[0][1])
+}
 
-    def variant;
-    def number;
+static def determineTestJobName(config, testType) {
 
+    def variant
+    def number = getJavaVersionNumber(config.javaVersion)
 
-    if (config.javaVersion == "jdk8u") {
-        number = 8
-    } else if (config.javaVersion == "jdk9u") {
-        number = 9
-    } else if (config.javaVersion == "jdk10u") {
-        number = 10
-    }
-
-    if (config.variant == "hotspot") {
-        variant = "hs"
-    } else if (config.variant == "openj9") {
+    if (config.variant == "openj9") {
         variant = "j9"
+    } else {
+        variant = "hs"
     }
 
     def arch = config.arch
@@ -90,7 +102,7 @@ def determineTestJobName(config, testType) {
         arch = "x86-64"
     }
 
-    def os = config.os;
+    def os = config.os
     if (os == "mac") {
         os = "macos"
     }
@@ -98,28 +110,20 @@ def determineTestJobName(config, testType) {
     return "openjdk${number}_${variant}_${testType}_${arch}_${os}"
 }
 
-def determineReleaseRepoVersion(javaToBuild) {
-    def number;
-
-    if (javaToBuild == "jdk8u") {
-        number = 8
-    } else if (javaToBuild == "jdk9u") {
-        number = 9
-    } else if (javaToBuild == "jdk10u") {
-        number = 10
-    }
+static def determineReleaseRepoVersion(javaToBuild) {
+    def number = getJavaVersionNumber(javaToBuild)
 
     return "jdk${number}-test"
 }
 
 
-def doBuild(javaToBuild, buildConfigurations, osTarget, enableTests, publish) {
+def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg) {
     def jobConfigurations = getJobConfigurations(javaToBuild, buildConfigurations, osTarget)
     def jobs = [:]
     def buildJobs = [:]
 
-    enableTests = enableTests == "true" || enableTests;
-    publish = publish == "true" || publish;
+    def enableTests = enableTestsArg == "true"
+    def publish = publishArg == "true"
 
     echo "Java: ${javaToBuild}"
     echo "OS: ${osTarget}"
@@ -131,14 +135,14 @@ def doBuild(javaToBuild, buildConfigurations, osTarget, enableTests, publish) {
     jobConfigurations.each { configuration ->
         jobs[configuration.key] = {
             catchError {
-                def job;
-                def config = configuration.value;
+                def job
+                def config = configuration.value
                 stage(configuration.key) {
                     job = build job: downstreamJob, displayName: configuration.key, propagate: false, parameters: configuration.value.parameters
-                    buildJobs[configuration.key] = job;
+                    buildJobs[configuration.key] = job
                 }
 
-                if (enableTests == true && config.test) {
+                if (enableTests && config.test) {
                     if (job.getResult() == 'SUCCESS') {
                         stage("test ${configuration.key}") {
                             def testStages = [:]
@@ -161,7 +165,7 @@ def doBuild(javaToBuild, buildConfigurations, osTarget, enableTests, publish) {
                 }
 
                 node('master') {
-                    def downstreamJobName = downstreamJob;
+                    def downstreamJobName = downstreamJob
                     def jobWithReleaseArtifact = job
 
                     if (config.os == "windows" || config.os == "mac") {
@@ -187,8 +191,8 @@ def doBuild(javaToBuild, buildConfigurations, osTarget, enableTests, publish) {
                                                  string(name: 'CERTIFICATE', value: "${certificate}"),
                                                  [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: "${config.os}&&build"],
                                     ]
-                            downstreamJobName = "sign_build";
-                            jobWithReleaseArtifact = signJob;
+                            downstreamJobName = "sign_build"
+                            jobWithReleaseArtifact = signJob
                         }
                     }
 
