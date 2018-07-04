@@ -122,9 +122,9 @@ parseArguments "$@"
 extractArchive
 
 # shellcheck disable=SC2012
-jdkDir=$(find "${TMP_DIR}" ! -path "${TMP_DIR}" -type d | head -n1)
+jdkDir=$(find "${TMP_DIR}" ! -path "${TMP_DIR}" -type d -exec basename {} \; | head -n1)
 
-cd "${jdkDir}" || exit 1
+cd "${TMP_DIR}/${jdkDir}" || exit 1
 signRelease
 
 cd "${TMP_DIR}"
