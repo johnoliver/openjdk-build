@@ -407,7 +407,9 @@ createOpenJDKTarArchive()
   fi
   echo "OpenJDK repo tag is ${OPENJDK_REPO_TAG}"
 
-  archive=$(createOpenJDKArchive "${OPENJDK_REPO_TAG}")
+  createOpenJDKArchive "${OPENJDK_REPO_TAG}"
+  archiveExtension=$(getArchiveExtension)
+  archive="${PWD}/OpenJDK${archiveExtension}"
 
   echo "Your final archive was created at ${archive}"
 

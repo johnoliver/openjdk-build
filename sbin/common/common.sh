@@ -32,23 +32,30 @@ function setOpenJdkVersion() {
     BUILD_CONFIG[OPENJDK_CORE_VERSION]=${BUILD_CONFIG[OPENJDK_FOREST_NAME]%?}
   fi
 }
+# Create a Tar ball
+getArchiveExtension()
+{
+  if [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" = *"cygwin"* ]]; then
+      EXT=".zip"
+  else
+      EXT=".tar.gz"
+  fi
 
+  echo "${EXT}"
+}
 
 # Create a Tar ball
 createOpenJDKArchive()
 {
   local repoDir="$1"
 
-  if [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" = *"cygwin"* ]]; then
-      zip -r -q OpenJDK.zip ./"${repoDir}" > /dev/null 2>&1
-      EXT=".zip"
-  elif [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" == "aix" ]]; then
-      GZIP=-9 tar -cf - ./"${repoDir}"/ | gzip -c > OpenJDK.tar.gz > /dev/null 2>&1
-      EXT=".tar.gz"
-  else
-      GZIP=-9 tar -czf OpenJDK.tar.gz ./"${repoDir}" > /dev/null 2>&1
-      EXT=".tar.gz"
-  fi
+  EXT=$(getArchiveExtension)
 
-  echo "${PWD}/OpenJDK${EXT}"
+  if [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" = *"cygwin"* ]]; then
+      zip -r -q OpenJDK.zip ./"${repoDir}"
+  elif [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" == "aix" ]]; then
+      GZIP=-9 tar -cf - ./"${repoDir}"/ | gzip -c > OpenJDK.tar.gz
+  else
+      GZIP=-9 tar -czf OpenJDK.tar.gz ./"${repoDir}"
+  fi
 }
