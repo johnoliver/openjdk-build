@@ -30,7 +30,7 @@ export BUILD_ARGS="--tmp-space-build ${BUILD_ARGS}"
 if [ "${JAVA_TO_BUILD}" == "${JDK8_VERSION}" ]
 then
   export PATH="/cygdrive/c/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin/amd64/:/cygdrive/C/Projects/OpenJDK/make-3.82/:$PATH"
-  export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} with_freetype=/cygdrive/C/Projects/OpenJDK/freetype  --disable-ccache"
+  export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} with_freetype=/cygdrive/C/openjdk/freetype  --disable-ccache"
 elif [ "${JAVA_TO_BUILD}" == "${JDK9_VERSION}" ]
 then
   export PATH="/usr/bin:/cygdrive/c/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin/amd64/:$PATH"

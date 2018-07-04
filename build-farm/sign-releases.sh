@@ -34,10 +34,9 @@ ls -alh workspace/target/
 
 echo "OpenJDK*.${EXTENSION}"
 
-find workspace/target/ -name "OpenJDK*.${EXTENSION}" | while read file;
+find workspace/target/ -name "OpenJDK*.${EXTENSION}" | while read -r file;
 do
   echo "signing ${file}"
-  sha256sum "$file" > "$file.sha256.txt"
 
   # shellcheck disable=SC2086
   bash "${SCRIPT_DIR}/../sign.sh" ${CERTIFICATE} "${file}"

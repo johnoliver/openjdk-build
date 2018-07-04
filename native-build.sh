@@ -29,5 +29,5 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 buildOpenJDKInNativeEnvironment()
 {
     displayParams
-    "${SCRIPT_DIR}"/sbin/build.sh
+    bash "${SCRIPT_DIR}"/sbin/build.sh
 }

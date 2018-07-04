@@ -80,7 +80,7 @@ signRelease()
       security unlock-keychain -p `cat ~/.password`
       # Sign all files with the executable permission bit set.
       FILES=$(find "${TMP_DIR}" -perm +111 -type f || find "${TMP_DIR}" -perm /111 -type f)
-      echo "$FILES" | while read -r f; do codesign -s "${SIGNING_CERTIFICATE}" "$f"; done
+      echo "$FILES" | while read -r f; do codesign -s "Developer ID Application: London Jamocha Community CIC" "$f"; done
     ;;
     *)
       echo "Skipping code signing as it's not supported on $OPERATING_SYSTEM"
@@ -122,10 +122,10 @@ parseArguments "$@"
 extractArchive
 
 # shellcheck disable=SC2012
-jdkDir=$(find "${TMP_DIR}/*" -printf "%f\n" | head -n1)
+jdkDir=$(find "${TMP_DIR}" ! -path "${TMP_DIR}" -type d | head -n1)
 
 cd "${jdkDir}" || exit 1
-signRelease "${TMP_DIR}/${jdkDir}"
+signRelease
 
 cd "${TMP_DIR}"
 signedArchive=$(createOpenJDKArchive "${jdkDir}")
