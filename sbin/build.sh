@@ -440,7 +440,7 @@ createOpenJDKTarArchive()
   rm -r "${BUILD_CONFIG[WORKSPACE_DIR]:?}/${BUILD_CONFIG[TARGET_DIR]}" || true
   mkdir -p "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[TARGET_DIR]}" || exit
 
-  createArchive "${JRE_TARGET_PATH}" "${BUILD_CONFIG[TARGET_FILE_NAME]}-jre"
+  createArchive "${JRE_TARGET_PATH}" "${BUILD_CONFIG[TARGET_FILE_NAME]/_/-jre_}"
   createArchive "${OPENJDK_REPO_TAG}" "${BUILD_CONFIG[TARGET_FILE_NAME]}"
 }
 
