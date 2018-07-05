@@ -44,6 +44,7 @@ source "$SCRIPT_DIR/common/common.sh"
 
 export OPENJDK_REPO_TAG
 export OPENJDK_DIR
+export JRE_TARGET_PATH
 export CONFIGURE_ARGS=""
 export MAKE_TEST_IMAGE=""
 export GIT_CLONE_ARGUMENTS=()
@@ -327,13 +328,22 @@ removingUnnecessaryFiles()
   rm -rf "${OPENJDK_REPO_TAG}" || true
   mv "${BUILD_CONFIG[JDK_PATH]}" "${OPENJDK_REPO_TAG}"
 
+  JRE_TARGET_PATH="${OPENJDK_REPO_TAG}-jre"
+  [ "${JRE_TARGET_PATH}" == "${OPENJDK_REPO_TAG}" ] && JRE_TARGET_PATH="${OPENJDK_REPO_TAG}.jre"
+  echo "moving ${BUILD_CONFIG[JRE_PATH]} to ${JRE_TARGET_PATH}"
+  rm -rf "${JRE_TARGET_PATH}" || true
+  mv "${BUILD_CONFIG[JRE_PATH]}" "${JRE_TARGET_PATH}"
+
   # Remove files we don't need
   rm -rf "${OPENJDK_REPO_TAG}"/demo/applets || true
   rm -rf "${OPENJDK_REPO_TAG}"/demo/jfc/Font2DTest || true
   rm -rf "${OPENJDK_REPO_TAG}"/demo/jfc/SwingApplet || true
+  rm -rf "${JRE_TARGET_PATH}"/demo/applets || true
+  rm -rf "${JRE_TARGET_PATH}"/demo/jfc/Font2DTest || true
+  rm -rf "${JRE_TARGET_PATH}"/demo/jfc/SwingApplet || true
   find . -name "*.diz" -type f -delete || true
 
-  echo "Finished removing unnecessary files from ${OPENJDK_REPO_TAG}"
+  echo "Finished removing unnecessary files from ${OPENJDK_REPO_TAG} and ${JRE_TARGET_PATH}"
 }
 
 # If on a Mac, mac a copy of the font lib as required
@@ -397,6 +407,21 @@ getFirstTagFromOpenJDKGitRepo()
     echo "$tagNameFromRepo"
 }
 
+createArchive() {
+  repoLocation=$1
+  targetName=$2
+
+  archiveExtension=$(getArchiveExtension)
+
+  createOpenJDKArchive "${repoLocation}" "OpenJDK"
+  archive="${PWD}/OpenJDK${archiveExtension}"
+
+  echo "Your final archive was created at ${archive}"
+
+  echo "Moving the artifact to ${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[TARGET_DIR]}"
+  mv "${archive}" "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[TARGET_DIR]}/${targetName}"
+}
+
 # Create a Tar ball
 createOpenJDKTarArchive()
 {
@@ -405,20 +430,18 @@ createOpenJDKTarArchive()
   if [ -z "$OPENJDK_REPO_TAG" ]; then
     OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
   fi
-  echo "OpenJDK repo tag is ${OPENJDK_REPO_TAG}"
+  if [ -z "$JRE_TARGET_PATH" ]; then
+    JRE_TARGET_PATH="${OPENJDK_REPO_TAG}-jre"
+  fi
 
-  createOpenJDKArchive "${OPENJDK_REPO_TAG}"
-  archiveExtension=$(getArchiveExtension)
-  archive="${PWD}/OpenJDK${archiveExtension}"
-
-  echo "Your final archive was created at ${archive}"
+  echo "OpenJDK repo tag is ${OPENJDK_REPO_TAG}. JRE path will be ${JRE_TARGET_PATH}"
 
   ## clean out old builds
   rm -r "${BUILD_CONFIG[WORKSPACE_DIR]:?}/${BUILD_CONFIG[TARGET_DIR]}" || true
   mkdir -p "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[TARGET_DIR]}" || exit
 
-  echo "Moving the artifact to ${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[TARGET_DIR]}"
-  mv "${archive}" "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[TARGET_DIR]}/${BUILD_CONFIG[TARGET_FILE_NAME]}"
+  createArchive "${JRE_TARGET_PATH}" "${BUILD_CONFIG[TARGET_FILE_NAME]}-jre"
+  createArchive "${OPENJDK_REPO_TAG}" "${BUILD_CONFIG[TARGET_FILE_NAME]}"
 }
 
 # Echo success

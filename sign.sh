@@ -128,7 +128,7 @@ cd "${TMP_DIR}/${jdkDir}" || exit 1
 signRelease
 
 cd "${TMP_DIR}"
-createOpenJDKArchive "${jdkDir}"
+createOpenJDKArchive "${jdkDir}" "OpenJDK"
 archiveExtension=$(getArchiveExtension)
 signedArchive="${TMP_DIR}/OpenJDK${archiveExtension}"
 

@@ -48,14 +48,15 @@ getArchiveExtension()
 createOpenJDKArchive()
 {
   local repoDir="$1"
+  local fileName="$2"
 
   EXT=$(getArchiveExtension)
 
   if [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" = *"cygwin"* ]]; then
-      zip -r -q OpenJDK.zip ./"${repoDir}"
+      zip -r -q "${fileName}.zip" ./"${repoDir}"
   elif [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" == "aix" ]]; then
-      GZIP=-9 tar -cf - ./"${repoDir}"/ | gzip -c > OpenJDK.tar.gz
+      GZIP=-9 tar -cf - ./"${repoDir}"/ | gzip -c > $fileName.tar.gz
   else
-      GZIP=-9 tar -czf OpenJDK.tar.gz ./"${repoDir}"
+      GZIP=-9 tar -czf "${fileName}.tar.gz" ./"${repoDir}"
   fi
 }
