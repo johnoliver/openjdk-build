@@ -50,13 +50,19 @@ createOpenJDKArchive()
   local repoDir="$1"
   local fileName="$2"
 
+  COMPRESS=gzip
+  if which pigz; then
+    COMPRESS=pigz;
+  fi
+  echo "Archiving the build OpenJDK image and compressing with $COMPRESS"
+
   EXT=$(getArchiveExtension)
 
   if [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" = *"cygwin"* ]]; then
       zip -r -q "${fileName}.zip" ./"${repoDir}"
   elif [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" == "aix" ]]; then
-      GZIP=-9 tar -cf - ./"${repoDir}"/ | gzip -c > $fileName.tar.gz
+      GZIP=-9 tar -cf - ./"${repoDir}"/ | $COMPRESS -c > $fileName.tar.gz
   else
-      GZIP=-9 tar -czf "${fileName}.tar.gz" ./"${repoDir}"
+      GZIP=-9 tar --use-compress-program=$COMPRESS -cf "${fileName}.tar.gz" ./"${repoDir}"
   fi
 }

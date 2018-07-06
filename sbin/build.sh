@@ -371,10 +371,6 @@ makeACopyOfLibFreeFontForMacOSX() {
             exit -1
         fi
 
-        if [ ! -f "${SOURCE_LIB_NAME}" ]; then
-            echo "[Error] ${SOURCE_LIB_NAME} does not exist in the ${IMAGE_DIRECTORY} folder, please check if this is the right folder to refer to, aborting copy process..."
-            exit -1
-        fi
         TARGET_LIB_NAME="${IMAGE_DIRECTORY}/lib/libfreetype.6.dylib"
 
         INVOKED_BY_FONT_MANAGER="${IMAGE_DIRECTORY}/lib/libfontmanager.dylib"
