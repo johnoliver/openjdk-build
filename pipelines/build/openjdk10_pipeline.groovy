@@ -42,30 +42,45 @@ def buildConfigurations = [
         ],
 
         s390xLinux    : [
-                os                 : 'linux',
-                arch               : 's390x',
+                os                  : 'linux',
+                arch                : 's390x',
                 additionalNodeLabels: 'ubuntu',
                 test                : ['openjdktest', 'systemtest']
         ],
 
         ppc64leLinux    : [
-                os                 : 'linux',
-                arch               : 'ppc64le',
+                os                  : 'linux',
+                arch                : 'ppc64le',
                 additionalNodeLabels: 'centos7',
                 test                : ['openjdktest', 'systemtest']
         ],
 
         arm32Linux    : [
-                os                 : 'linux',
-                arch               : 'arm',
+                os                  : 'linux',
+                arch                : 'arm',
                 test                : ['openjdktest']
         ],
 
         aarch64Linux    : [
-                os                 : 'linux',
-                arch               : 'aarch64',
+                os                  : 'linux',
+                arch                : 'aarch64',
                 additionalNodeLabels: 'centos7',
                 test                : ['openjdktest']
+        ],
+
+        /*
+        "x86-32Windows"    : [
+                os                 : 'windows',
+                arch               : 'x86-32',
+                additionalNodeLabels: 'win2012&&x86-32',
+                test                : false
+        ],
+        */
+        "LinuxXL"    : [
+                os                 : 'linux&&centos6',
+                arch               : 'x64',
+                test               : false,
+                configureArgs      : '--with-noncompressedrefs'
         ],
 ]
 

@@ -67,6 +67,13 @@ def buildConfigurations = [
                 additionalNodeLabels: 'centos7',
                 test                : ['openjdktest']
         ],
+
+        "LinuxXL"    : [
+                os                 : 'linux&&centos6',
+                arch               : 'x64',
+                test               : false,
+                configureArgs      : '--with-noncompressedrefs'
+        ],
 ]
 
 def javaToBuild = "jdk9u"

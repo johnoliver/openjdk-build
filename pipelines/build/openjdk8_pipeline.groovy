@@ -63,6 +63,13 @@ def buildConfigurations = [
                 arch               : 'arm',
                 test                : ['openjdktest']
         ],
+
+        "LinuxXL"    : [
+                os                 : 'linux&&centos6',
+                arch               : 'x64',
+                test               : false,
+                configureArgs      : '--with-noncompressedrefs'
+        ],
 ]
 
 def javaToBuild = "jdk8u"
