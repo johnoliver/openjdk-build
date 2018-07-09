@@ -77,7 +77,8 @@ def buildConfigurations = [
         ],
         */
         "LinuxXL"    : [
-                os                 : 'linux&&centos6',
+                os                 : 'linux',
+                additionalNodeLabels: 'centos6',
                 arch               : 'x64',
                 test               : false,
                 configureArgs      : '--with-noncompressedrefs'
