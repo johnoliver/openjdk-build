@@ -114,7 +114,7 @@ static def determineTestJobName(config, testType) {
 static def determineReleaseRepoVersion(javaToBuild) {
     def number = getJavaVersionNumber(javaToBuild)
 
-    return "jdk${number}-test"
+    return "jdk${number}"
 }
 
 
@@ -228,7 +228,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
         node("master") {
             stage("publish") {
                 build job: 'refactor_openjdk_release_tool',
-                        parameters: [string(name: 'REPO', value: 'nightly'),
+                        parameters: [string(name: 'RELEASE', value: "false"),
                                      string(name: 'TAG', value: javaToBuild),
                                      string(name: 'UPSTREAM_JOB_NAME', value: env.JOB_NAME),
                                      string(name: 'UPSTREAM_JOB_NUMBER', value: "${currentBuild.getNumber()}"),
