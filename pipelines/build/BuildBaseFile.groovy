@@ -46,6 +46,7 @@ def buildConfiguration(javaToBuild, variant, configuration) {
     if (configuration.containsKey('bootJDK')) buildParams += string(name: 'JDK_BOOT_VERSION', value: "${configuration.bootJDK}")
     if (configuration.containsKey('configureArgs')) buildParams += string(name: 'CONFIGURE_ARGS', value: "${configuration.configureArgs}")
     if (configuration.containsKey('buildArgs')) buildParams += string(name: 'BUILD_ARGS', value: "${configuration.buildArgs}")
+    if (configuration.containsKey('additionalFileNameTag')) buildParams += string(name: 'ADDITIONAL_FILE_NAME_TAG', value: "${configuration.additionalFileNameTag}")
 
     buildParams += string(name: 'VARIANT', value: "${variant}")
     buildParams += string(name: 'ARCHITECTURE', value: "${configuration.arch}")

@@ -64,11 +64,12 @@ def buildConfigurations = [
                 test                : ['openjdktest']
         ],
 
-        "LinuxXL"    : [
+        "linuxXL"    : [
                 os                  : 'linux',
                 additionalNodeLabels: 'centos6',
                 arch                : 'x64',
                 test                : false,
+                additionalFileNameTag: "linuxXL",
                 configureArgs       : '--with-noncompressedrefs'
         ],
 ]
