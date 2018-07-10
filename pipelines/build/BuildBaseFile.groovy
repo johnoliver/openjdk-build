@@ -58,8 +58,7 @@ def buildConfiguration(javaToBuild, variant, configuration) {
             os         : configuration.os,
             variant    : variant,
             parameters : buildParams,
-            test       : configuration.test,
-            publish    : true
+            test       : configuration.test
     ]
 }
 
@@ -224,7 +223,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
     parallel jobs
 
-    if (publish && config.publish) {
+    if (publish) {
         node("master") {
             stage("publish") {
                 build job: 'refactor_openjdk_release_tool',
