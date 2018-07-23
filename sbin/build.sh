@@ -334,6 +334,12 @@ removingUnnecessaryFiles()
   rm -rf "${JRE_TARGET_PATH}" || true
   mv "${BUILD_CONFIG[JRE_PATH]}" "${JRE_TARGET_PATH}"
 
+  JRE_TARGET_PATH="${OPENJDK_REPO_TAG/jdk/jre}"
+  [ "${JRE_TARGET_PATH}" == "${OPENJDK_REPO_TAG}" ] && JRE_TARGET_PATH="${OPENJDK_REPO_TAG}.jre"
+  echo "moving ${JRE_PATH} to ${JRE_TARGET_PATH}"
+  rm -rf "${JRE_TARGET_PATH}" || true
+  mv "$JRE_PATH" "${JRE_TARGET_PATH}"
+
   # Remove files we don't need
   rm -rf "${OPENJDK_REPO_TAG}"/demo/applets || true
   rm -rf "${OPENJDK_REPO_TAG}"/demo/jfc/Font2DTest || true
@@ -421,7 +427,9 @@ createArchive() {
 # Create a Tar ball
 createOpenJDKTarArchive()
 {
-  echo "Archiving the build OpenJDK image..."
+  COMPRESS=gzip
+  if which pigz >/dev/null 2>&1; then COMPRESS=pigz; fi
+  echo "Archiving the build OpenJDK image and compressing with $COMPRESS"
 
   if [ -z "$OPENJDK_REPO_TAG" ]; then
     OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
