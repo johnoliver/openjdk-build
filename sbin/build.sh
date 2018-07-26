@@ -202,8 +202,12 @@ buildingTheRestOfTheConfigParameters()
   fi
 
   if [[ "${BUILD_CONFIG[FREETYPE]}" == "true" ]] ; then
-    BUILD_CONFIG[FREETYPE_DIRECTORY]=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-"${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/installedfreetype"}
-    addConfigureArg "--with-freetype=" "${BUILD_CONFIG[FREETYPE_DIRECTORY]}"
+    local freetypeDir=BUILD_CONFIG[FREETYPE_DIRECTORY]
+    case $OPENJDK_CORE_VERSION in
+       jdk8*|jdk9*|jdk10*) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-"${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/installedfreetype"} ;;
+       *) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-bundled} ;;
+    esac
+    addConfigureArg "--with-freetype=" "${freetypeDir}"
   fi
 
   addConfigureArg "--with-x=" "/usr/include/X11"
