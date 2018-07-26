@@ -81,7 +81,7 @@ buildOpenJDKViaDocker()
   # shellcheck disable=SC1090
   source "${BUILD_CONFIG[DOCKER_FILE_PATH]}/dockerConfiguration.sh"
 
-  if [ -z "$(which docker)" ]; then
+  if [ -z "$(command -v docker)" ]; then
      # shellcheck disable=SC2154
     echo "Error, please install docker and ensure that it is in your path and running!"
     exit
