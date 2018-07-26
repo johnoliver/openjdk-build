@@ -203,7 +203,7 @@ buildingTheRestOfTheConfigParameters()
 
   if [[ "${BUILD_CONFIG[FREETYPE]}" == "true" ]] ; then
     local freetypeDir=BUILD_CONFIG[FREETYPE_DIRECTORY]
-    case $OPENJDK_CORE_VERSION in
+    case "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" in
        jdk8*|jdk9*|jdk10*) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-"${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/installedfreetype"} ;;
        *) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-bundled} ;;
     esac
