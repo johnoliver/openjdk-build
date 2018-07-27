@@ -72,6 +72,9 @@ def getJobConfigurations(javaToBuild, buildConfigurations, String osTarget) {
             def configuration = buildConfigurations.get(target.key)
             target.value.each { variant ->
                 GString name = "${configuration.os}-${configuration.arch}-${variant}"
+                if(configuration.containsKey('additionalFileNameTag')) {
+                    name += "-${configuration.additionalFileNameTag}"
+                }
                 jobConfigurations[name] = buildConfiguration(javaToBuild, variant, configuration)
             }
         }
