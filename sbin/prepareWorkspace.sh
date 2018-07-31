@@ -60,7 +60,7 @@ checkoutAndCloneOpenJDKGitRepo()
       sleep 10
       echo "Pulling latest changes from git openjdk source repository"
 
-      git fetch --all "${BUILD_CONFIG[SHALLOW_CLONE_OPTION]}"
+      git fetch --all ${BUILD_CONFIG[SHALLOW_CLONE_OPTION]}
       git reset --hard "origin/${BUILD_CONFIG[BRANCH]}"
       if [ ! -z "${BUILD_CONFIG[TAG]}" ]; then
         git checkout "${BUILD_CONFIG[TAG]}"
