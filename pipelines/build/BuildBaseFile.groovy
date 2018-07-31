@@ -241,7 +241,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
         node("master") {
             stage("publish") {
                 build job: 'refactor_openjdk_release_tool',
-                        parameters: [string(name: 'RELEASE', value: release),
+                        parameters: [string(name: 'RELEASE', value: "${release}"),
                                      string(name: 'TAG', value: tag),
                                      string(name: 'UPSTREAM_JOB_NAME', value: env.JOB_NAME),
                                      string(name: 'UPSTREAM_JOB_NUMBER', value: "${currentBuild.getNumber()}"),
