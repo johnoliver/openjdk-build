@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-def buildConfiguration(javaToBuild, variant, configuration) {
+def buildConfiguration(javaToBuild, variant, configuration, releaseTag) {
 
     String buildTag = "build"
 
@@ -48,6 +48,10 @@ def buildConfiguration(javaToBuild, variant, configuration) {
     if (configuration.containsKey('buildArgs')) buildParams += string(name: 'BUILD_ARGS', value: "${configuration.buildArgs}")
     if (configuration.containsKey('additionalFileNameTag')) buildParams += string(name: 'ADDITIONAL_FILE_NAME_TAG', value: "${configuration.additionalFileNameTag}")
 
+    if (releaseTag != null && releaseTag.length() > 0) {
+        buildParams += string(name: 'TAG', value: "${releaseTag}")
+    }
+
     buildParams += string(name: 'VARIANT', value: "${variant}")
     buildParams += string(name: 'ARCHITECTURE', value: "${configuration.arch}")
     buildParams += string(name: 'TARGET_OS', value: "${configuration.os}")
@@ -58,11 +62,11 @@ def buildConfiguration(javaToBuild, variant, configuration) {
             os         : configuration.os,
             variant    : variant,
             parameters : buildParams,
-            test       : configuration.test
+            test       : configuration.test,
     ]
 }
 
-def getJobConfigurations(javaToBuild, buildConfigurations, String osTarget) {
+def getJobConfigurations(javaToBuild, buildConfigurations, String osTarget, String releaseTag) {
     def jobConfigurations = [:]
 
     new JsonSlurper()
@@ -72,10 +76,10 @@ def getJobConfigurations(javaToBuild, buildConfigurations, String osTarget) {
             def configuration = buildConfigurations.get(target.key)
             target.value.each { variant ->
                 GString name = "${configuration.os}-${configuration.arch}-${variant}"
-                if(configuration.containsKey('additionalFileNameTag')) {
+                if (configuration.containsKey('additionalFileNameTag')) {
                     name += "-${configuration.additionalFileNameTag}"
                 }
-                jobConfigurations[name] = buildConfiguration(javaToBuild, variant, configuration)
+                jobConfigurations[name] = buildConfiguration(javaToBuild, variant, configuration, releaseTag)
             }
         }
     }
@@ -120,8 +124,8 @@ static def determineReleaseRepoVersion(javaToBuild) {
 }
 
 
-def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg) {
-    def jobConfigurations = getJobConfigurations(javaToBuild, buildConfigurations, osTarget)
+def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
+    def jobConfigurations = getJobConfigurations(javaToBuild, buildConfigurations, osTarget, releaseTag)
     def jobs = [:]
     def buildJobs = [:]
 
