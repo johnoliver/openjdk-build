@@ -125,6 +125,11 @@ static def determineReleaseRepoVersion(javaToBuild) {
 
 
 def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
+
+    if (releaseTag == "false") {
+        releaseTag = ""
+    }
+
     def jobConfigurations = getJobConfigurations(javaToBuild, buildConfigurations, osTarget, releaseTag)
     def jobs = [:]
     def buildJobs = [:]
@@ -132,10 +137,12 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
     def enableTests = enableTestsArg == "true"
     def publish = publishArg == "true"
 
+
     echo "Java: ${javaToBuild}"
     echo "OS: ${osTarget}"
     echo "Enable tests: ${enableTests}"
     echo "Publish: ${publish}"
+    echo "ReleaseTag: ${releaseTag}"
 
     def downstreamJob = "openjdk_build"
 
@@ -233,9 +240,6 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
     if (publish) {
         def release = false
         def tag = release
-        if (releaseTag == "false") {
-            releaseTag = ""
-        }
         if (releaseTag != null && releaseTag.length() > 0) {
             release = true
             tag = releaseTag;
