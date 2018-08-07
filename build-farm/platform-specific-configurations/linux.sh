@@ -36,7 +36,7 @@ then
   then
     export PATH="/usr/bin:$PATH"
 
-    if [ "${JAVA_TO_BUILD}" == "${JDK8_VERSION}" ]
+    if [ "${JAVA_TO_BUILD}" == "${JDK8_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDK9_VERSION}" ]
     then
       if which g++-4.8; then
         export CC=gcc-4.8

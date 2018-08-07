@@ -44,7 +44,7 @@ def buildConfigurations = [
         s390xLinux    : [
                 os                 : 'linux',
                 arch               : 's390x',
-                additionalNodeLabels: 'ubuntu',
+                additionalNodeLabels: 'rhel7',
                 test                : ['openjdktest', 'systemtest']
         ],
 
@@ -65,7 +65,8 @@ def buildConfigurations = [
                 os                 : 'linux',
                 arch               : 'aarch64',
                 additionalNodeLabels: 'centos7',
-                test                : ['openjdktest']
+                test                : ['openjdktest'],
+                configureArgs       : 'skip-freetype'
         ],
 
         "linuxXL"    : [
