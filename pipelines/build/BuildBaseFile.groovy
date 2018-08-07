@@ -233,6 +233,9 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
     if (publish) {
         def release = false
         def tag = release
+        if (releaseTag == "false") {
+            releaseTag = ""
+        }
         if (releaseTag != null && releaseTag.length() > 0) {
             release = true
             tag = releaseTag;
