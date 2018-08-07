@@ -126,7 +126,7 @@ static def determineReleaseRepoVersion(javaToBuild) {
 
 def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
 
-    if (releaseTag == "false") {
+    if (releaseTag == null || releaseTag == "false") {
         releaseTag = ""
     }
 
@@ -239,10 +239,10 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
     if (publish) {
         def release = false
-        def tag = release
+        def tag = javaToBuild
         if (releaseTag != null && releaseTag.length() > 0) {
             release = true
-            tag = releaseTag;
+            tag = releaseTag
         }
 
         node("master") {
