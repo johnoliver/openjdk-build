@@ -66,13 +66,11 @@ function updateMercurialClone() {
 
 function runDiff() {
 
-  local ignoreArgs="-x '.git' -x '.hg' -x '.hgtags' -x '.hgignore' -x 'get_source.sh' -x 'README.md'"
-
-  diffNum=$(diff -rq openjdk-git openjdk-hg $ignoreArgs | wc -l)
+  diffNum=$(diff -rq openjdk-git openjdk-hg -x '.git' -x '.hg' -x '.hgtags' -x '.hgignore' -x 'get_source.sh' -x 'README.md' | wc -l)
 
   if [ "$diffNum" -gt 0 ]; then
     echo "ERROR - THE DIFF HAS DETECTED UNKNOWN FILES"
-    diff -rq openjdk-git openjdk-hg $ignoreArgs | grep 'Only in' || exit 1
+    diff -rq openjdk-git openjdk-hg -x '.git' -x '.hg' -x '.hgtags' -x '.hgignore' -x 'get_source.sh' -x 'README.md' | grep 'Only in' || exit 1
     exit 1
   fi
 }
@@ -91,6 +89,8 @@ function checkTags() {
     echo "Tags are in sync"
   else
     echo "ERROR - THE TAGS ARE NOT IN SYNC"
+    echo "Git tag is: ${gitTag}"
+    echo "HG tag is: ${hgTag}"
     exit 1
   fi
 }
