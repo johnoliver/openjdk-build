@@ -129,12 +129,11 @@ def getJobName(displayName, config) {
 
 def createJob(jobName, config) {
     def createJobName = "create-${jobName}"
-    def folder=config.javaVersion
+    def folder = config.javaVersion
     config.parameters += string(name: 'JOB_NAME', value: "${folder}/${jobName}")
     create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
     return create
 }
-
 
 def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
 
@@ -156,22 +155,95 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
     echo "Publish: ${publish}"
     echo "ReleaseTag: ${releaseTag}"
 
-    def downstreamJob = "openjdk_build"
 
     jobConfigurations.each { configuration ->
         jobs[configuration.key] = {
+            def downstreamJob = getJobName(configuration.key, config)
             catchError {
                 def job
                 def config = configuration.value
 
-
                 stage(configuration.key) {
-                    def jobName = getJobName(configuration.key, config)
+                    createJob(downstreamJob, config);
 
-                    createJob(jobName, config);
+                    job = build job: downstreamJob, propagate: false, parameters: config.parameters
+                    buildJobs[configuration.key] = job
+                }
 
-                    //job = build job: jobName, displayName: configuration.key, propagate: false, parameters: config.parameters
-                    //buildJobs[configuration.key] = job
+                if (enableTests && config.test) {
+                    if (job.getResult() == 'SUCCESS') {
+                        stage("test ${configuration.key}") {
+                            def testStages = [:]
+                            config.test.each { testType ->
+                                testStages["${configuration.key}-${testType}"] = {
+                                    stage("test ${configuration.key} ${testType}") {
+                                        def jobName = determineTestJobName(config, testType)
+                                        catchError {
+                                            build job: jobName,
+                                                    propagate: false,
+                                                    parameters: [string(name: 'UPSTREAM_JOB_NUMBER', value: "${job.getNumber()}"),
+                                                                 string(name: 'UPSTREAM_JOB_NAME', value: jobName)]
+                                        }
+                                    }
+                                }
+                            }
+                            parallel testStages
+                        }
+                    }
+                }
+
+                node('master') {
+                    def downstreamJobName = downstreamJob
+                    def jobWithReleaseArtifact = job
+
+                    if (config.os == "windows" || config.os == "mac") {
+                        stage("sign ${configuration.key}") {
+                            filter = ""
+                            certificate = ""
+
+                            if (config.os == "windows") {
+                                filter = "**/OpenJDK*_windows_*.zip"
+                                certificate = "C:\\Users\\jenkins\\windows.p12"
+
+                            } else if (config.os == "mac") {
+                                filter = "**/OpenJDK*_mac_*.tar.gz"
+                                certificate = "\"Developer ID Application: London Jamocha Community CIC\""
+                            }
+
+                            signJob = build job: "sign_build",
+                                    propagate: false,
+                                    parameters: [string(name: 'UPSTREAM_JOB_NUMBER', value: "${job.getNumber()}"),
+                                                 string(name: 'UPSTREAM_JOB_NAME', value: downstreamJob),
+                                                 string(name: 'OPERATING_SYSTEM', value: "${config.os}"),
+                                                 string(name: 'FILTER', value: "${filter}"),
+                                                 string(name: 'CERTIFICATE', value: "${certificate}"),
+                                                 [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: "${config.os}&&build"],
+                                    ]
+                            downstreamJobName = "sign_build"
+                            jobWithReleaseArtifact = signJob
+                        }
+                    }
+
+
+                    stage("archive ${configuration.key}") {
+                        if (jobWithReleaseArtifact.getResult() == 'SUCCESS') {
+                            currentBuild.result = 'SUCCESS'
+                            sh "rm target/${config.os}/${config.arch}/${config.variant}/* || true"
+
+                            copyArtifacts(
+                                    projectName: downstreamJobName,
+                                    selector: specific("${jobWithReleaseArtifact.getNumber()}"),
+                                    filter: 'workspace/target/*',
+                                    fingerprintArtifacts: true,
+                                    target: "target/${config.os}/${config.arch}/${config.variant}/",
+                                    flatten: true)
+
+
+                            sh 'for file in $(ls target/*/*/*/*.tar.gz target/*/*/*/*.zip); do sha256sum "$file" > $file.sha256.txt ; done'
+                            archiveArtifacts artifacts: "target/${config.os}/${config.arch}/${config.variant}/*"
+                        }
+
+                    }
                 }
             }
         }
