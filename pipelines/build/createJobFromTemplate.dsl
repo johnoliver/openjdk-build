@@ -1,22 +1,11 @@
 
 String buildFolder="build-scripts/jobs"
-//String jobName="gradle-example-build"
-
-//String nodeLabel="a"
-//String javaToBuild="b"
-//String jdkBootVersion="c"
-//String configureArgs="d"
-//String buildArgs="e"
-//String architecture="f"
-//String variant="g"
-//String os="h"
-//String additionalFileNameTag="i"
 
 folder(buildFolder) {
     description 'Automatically generated build jobs.'
 }
 
-pipelineJob("$buildFolder/$jobName") {
+pipelineJob("$buildFolder/$JOB_NAME") {
     description('<h1>THIS IS AN AUTOMATICALLY GENERATED JOB DO NOT MODIFY, IT WILL BE OVERWRITTEN.</h1><p>This job is defined in createJobFromTemplate.dsl in the openjdk-build repo, if you wish to change it modify that</p>')
     definition {
         cpsScm {
@@ -46,10 +35,5 @@ pipelineJob("$buildFolder/$jobName") {
         stringParam('VARIANT',"$VARIANT")
         stringParam('TARGET_OS',"$TARGET_OS")
         stringParam('ADDITIONAL_FILE_NAME_TAG',"$ADDITIONAL_FILE_NAME_TAG")
-
-        stringParam 'host'
-    }
-    steps {
-        gradle 'assemble'
     }
 }
