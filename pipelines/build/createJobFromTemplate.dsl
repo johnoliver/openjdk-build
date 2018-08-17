@@ -1,5 +1,4 @@
-
-String buildFolder="build-scripts/jobs"
+String buildFolder="$JOB_FOLDER"
 
 folder(buildFolder) {
     description 'Automatically generated build jobs.'
@@ -10,7 +9,15 @@ pipelineJob("$buildFolder/$JOB_NAME") {
     definition {
         cpsScm {
             scm {
-                git('https://github.com/johnoliver/openjdk-build.git','*/overhaul-build-scripts-6')
+              git {
+                remote {
+                    url('https://github.com/johnoliver/openjdk-build.git')
+                }
+                branch('*/overhaul-build-scripts-6')
+                extensions {
+                  cleanBeforeCheckout()
+                }
+              }
             }
           	scriptPath('pipelines/build/openjdk_build_pipeline.groovy')
             lightweight(true)
@@ -18,7 +25,7 @@ pipelineJob("$buildFolder/$JOB_NAME") {
     }
     properties {
       copyArtifactPermissionProperty {
-        projectNames('sign_build,refactor_openjdk_release_tool')
+        projectNames('build-scripts/release/sign_build,build-scripts/release/refactor_openjdk_release_tool')
       }
     }
     logRotator {

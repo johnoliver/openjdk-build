@@ -218,7 +218,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
                                 certificate = "\"Developer ID Application: London Jamocha Community CIC\""
                             }
 
-                            signJob = build job: "sign_build",
+                            signJob = build job: "build-scripts/release/sign_build",
                                     propagate: false,
                                     parameters: [string(name: 'UPSTREAM_JOB_NUMBER', value: "${job.getNumber()}"),
                                                  string(name: 'UPSTREAM_JOB_NAME', value: downstreamJob),
@@ -227,7 +227,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
                                                  string(name: 'CERTIFICATE', value: "${certificate}"),
                                                  [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: "${config.os}&&build"],
                                     ]
-                            downstreamJobName = "sign_build"
+                            downstreamJobName = "build-scripts/release/sign_build"
                             jobWithReleaseArtifact = signJob
                         }
                     }
@@ -269,7 +269,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
         node("master") {
             stage("publish") {
-                build job: 'refactor_openjdk_release_tool',
+                build job: 'build-scripts/release/refactor_openjdk_release_tool',
                         parameters: [string(name: 'RELEASE', value: "${release}"),
                                      string(name: 'TAG', value: tag),
                                      string(name: 'UPSTREAM_JOB_NAME', value: env.JOB_NAME),
