@@ -126,7 +126,7 @@ static def determineReleaseRepoVersion(javaToBuild) {
 def createJob(displayName, config) {
     def createJobName="create-${displayName}"
     def jobName="new-build-${displayName}";
-    configuration.value.parameters += string(name: 'JOB_NAME', value: "${displayName}")
+    config.parameters += string(name: 'JOB_NAME', value: "${displayName}")
     create = build job: 'create-build-job', displayName: createJobName, parameters: config.parameters
     return create
 }
