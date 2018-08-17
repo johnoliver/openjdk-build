@@ -123,11 +123,15 @@ static def determineReleaseRepoVersion(javaToBuild) {
     return "jdk${number}"
 }
 
-def createJob(displayName, config) {
-    def createJobName="create-${displayName}"
-    def jobName="new-build-${displayName}";
-    config.parameters += string(name: 'JOB_NAME', value: "${displayName}")
-    create = build job: 'build-scripts/create-build-job', displayName: createJobName, parameters: config.parameters
+def getJobName(displayName, config) {
+    return "new-build-${config.javaVersion}-${displayName}"
+}
+
+def createJob(jobName, config) {
+    def createJobName = "create-${jobName}"
+    config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
+    def folder=config.javaVersion
+    create = build job: "build-scripts/create-build-job/${folder}", displayName: createJobName, parameters: config.parameters
     return create
 }
 
@@ -162,9 +166,11 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
 
                 stage(configuration.key) {
-                    createJob(configuration.key, config);
+                    def jobName = getJobName(displayName, config)
 
-                    //job = build job: "create-${displayName}", displayName: configuration.key, propagate: false, parameters: config.parameters
+                    createJob(jobName, config);
+
+                    //job = build job: jobName, displayName: configuration.key, propagate: false, parameters: config.parameters
                     //buildJobs[configuration.key] = job
                 }
             }
