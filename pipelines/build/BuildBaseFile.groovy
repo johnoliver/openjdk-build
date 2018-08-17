@@ -158,10 +158,10 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
     jobConfigurations.each { configuration ->
         jobs[configuration.key] = {
+            def job
+            def config = configuration.value
             def downstreamJob = getJobName(configuration.key, config)
             catchError {
-                def job
-                def config = configuration.value
 
                 stage(configuration.key) {
                     createJob(downstreamJob, config);
