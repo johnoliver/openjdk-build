@@ -127,10 +127,16 @@ def getJobName(displayName, config) {
     return "new-build-${config.javaVersion}-${displayName}"
 }
 
-def createJob(jobName, config) {
+def getJobFolder(config) {
+    return "build-scripts/jobs/${config.javaVersion}"
+}
+
+def createJob(jobName, jobFolder, config) {
     def createJobName = "create-${jobName}"
-    def folder = config.javaVersion
-    config.parameters += string(name: 'JOB_NAME', value: "${folder}/${jobName}")
+
+    config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
+    config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
+
     create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
     return create
 }
@@ -160,11 +166,13 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
         jobs[configuration.key] = {
             def job
             def config = configuration.value
-            def downstreamJob = getJobName(configuration.key, config)
-            catchError {
+            def jobTopName = getJobName(configuration.key, config)
+            def jobFolder = getJobFolder(config)
+            def downstreamJob = "${jobFolder}/${jobTopName}";
 
+            catchError {
                 stage(configuration.key) {
-                    createJob(downstreamJob, config);
+                    createJob(jobTopName, jobFolder, config);
 
                     job = build job: downstreamJob, propagate: false, parameters: config.parameters
                     buildJobs[configuration.key] = job
