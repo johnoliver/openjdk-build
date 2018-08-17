@@ -129,9 +129,9 @@ def getJobName(displayName, config) {
 
 def createJob(jobName, config) {
     def createJobName = "create-${jobName}"
-    config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
     def folder=config.javaVersion
-    create = build job: "build-scripts/create-build-job/${folder}", displayName: createJobName, parameters: config.parameters
+    config.parameters += string(name: 'JOB_NAME', value: "${folder}/${jobName}")
+    create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
     return create
 }
 
