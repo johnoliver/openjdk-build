@@ -127,7 +127,7 @@ def createJob(displayName, config) {
     def createJobName="create-${displayName}"
     def jobName="new-build-${displayName}";
     config.parameters += string(name: 'JOB_NAME', value: "${displayName}")
-    create = build job: 'create-build-job', displayName: createJobName, parameters: config.parameters
+    create = build job: 'build-scripts/create-build-job', displayName: createJobName, parameters: config.parameters
     return create
 }
 
