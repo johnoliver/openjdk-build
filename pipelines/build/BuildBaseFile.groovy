@@ -166,7 +166,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
 
                 stage(configuration.key) {
-                    def jobName = getJobName(displayName, config)
+                    def jobName = getJobName(configuration.key, config)
 
                     createJob(jobName, config);
 
