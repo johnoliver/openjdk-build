@@ -123,6 +123,10 @@ static def determineReleaseRepoVersion(javaToBuild) {
     return "jdk${number}"
 }
 
+def createJobs(config) {
+
+}
+
 
 def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
 
