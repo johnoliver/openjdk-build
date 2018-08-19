@@ -132,13 +132,19 @@ def getJobFolder(config) {
 }
 
 def createJob(jobName, jobFolder, config) {
+    dsl {
+        external('createJobFromTemplate.dsl')
+    }
+   /*
     def createJobName = "create-${jobName}"
 
     config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
     config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
 
     create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
+
     return create
+    */
 }
 
 def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
@@ -174,8 +180,8 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
                 stage(configuration.key) {
                     createJob(jobTopName, jobFolder, config);
 
-                    job = build job: downstreamJob, propagate: false, parameters: config.parameters
-                    buildJobs[configuration.key] = job
+                    //job = build job: downstreamJob, propagate: false, parameters: config.parameters
+                    //buildJobs[configuration.key] = job
                 }
 
                 if (enableTests && config.test) {
@@ -200,63 +206,10 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
                     }
                 }
 
-                node('master') {
-                    def downstreamJobName = downstreamJob
-                    def jobWithReleaseArtifact = job
-
-                    if (config.os == "windows" || config.os == "mac") {
-                        stage("sign ${configuration.key}") {
-                            filter = ""
-                            certificate = ""
-
-                            if (config.os == "windows") {
-                                filter = "**/OpenJDK*_windows_*.zip"
-                                certificate = "C:\\Users\\jenkins\\windows.p12"
-
-                            } else if (config.os == "mac") {
-                                filter = "**/OpenJDK*_mac_*.tar.gz"
-                                certificate = "\"Developer ID Application: London Jamocha Community CIC\""
-                            }
-
-                            signJob = build job: "build-scripts/release/sign_build",
-                                    propagate: false,
-                                    parameters: [string(name: 'UPSTREAM_JOB_NUMBER', value: "${job.getNumber()}"),
-                                                 string(name: 'UPSTREAM_JOB_NAME', value: downstreamJob),
-                                                 string(name: 'OPERATING_SYSTEM', value: "${config.os}"),
-                                                 string(name: 'FILTER', value: "${filter}"),
-                                                 string(name: 'CERTIFICATE', value: "${certificate}"),
-                                                 [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: "${config.os}&&build"],
-                                    ]
-                            downstreamJobName = "build-scripts/release/sign_build"
-                            jobWithReleaseArtifact = signJob
-                        }
-                    }
-
-
-                    stage("archive ${configuration.key}") {
-                        if (jobWithReleaseArtifact.getResult() == 'SUCCESS') {
-                            currentBuild.result = 'SUCCESS'
-                            sh "rm target/${config.os}/${config.arch}/${config.variant}/* || true"
-
-                            copyArtifacts(
-                                    projectName: downstreamJobName,
-                                    selector: specific("${jobWithReleaseArtifact.getNumber()}"),
-                                    filter: 'workspace/target/*',
-                                    fingerprintArtifacts: true,
-                                    target: "target/${config.os}/${config.arch}/${config.variant}/",
-                                    flatten: true)
-
-
-                            sh 'for file in $(ls target/*/*/*/*.tar.gz target/*/*/*/*.zip); do sha256sum "$file" > $file.sha256.txt ; done'
-                            archiveArtifacts artifacts: "target/${config.os}/${config.arch}/${config.variant}/*"
-                        }
-
-                    }
-                }
             }
         }
     }
-
+/*
     parallel jobs
 
     if (publish) {
@@ -278,6 +231,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
             }
         }
     }
+    */
 }
 
 return this
