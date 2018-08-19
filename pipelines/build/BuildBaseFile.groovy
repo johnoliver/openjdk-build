@@ -132,26 +132,15 @@ def getJobFolder(config) {
 }
 
 def createJob(jobName, jobFolder, config) {
-
-    stage("create") {
-        step {
-            dsl {
-                external('createJobFromTemplate.dsl')
-
-            }
-        }
-    }
-
-    /*
      def createJobName = "create-${jobName}"
 
      config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
      config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
 
-     create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
+     //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
+     create = jobDsl targets: "pipelines/build/createJobFromTemplate.dsl", additionalParameters: config.parameters
 
      return create
-     */
 }
 
 def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
@@ -185,7 +174,9 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
             catchError {
                 stage(configuration.key) {
-                    jobDsl targets: "pipelines/build/createJobFromTemplate.dsl"
+
+                    createJob(jobTopName, jobFolder, config);
+                    //jobDsl targets: "pipelines/build/createJobFromTemplate.dsl", additionalParameters:
 
                     //job = build job: downstreamJob, propagate: false, parameters: config.parameters
                     //buildJobs[configuration.key] = job
