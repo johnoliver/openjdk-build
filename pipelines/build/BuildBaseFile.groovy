@@ -14,6 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+def toBuildParams(params) {
+
+    List buildParams = []
+
+    buildParams += [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: params[NODE_LABEL]]
+
+    params
+            .findAll { it.key != 'NODE_LABEL' }
+            .each { name, value -> buildParams += string(name: name, value: value) }
+
+    return buildParams
+}
+
 def buildConfiguration(javaToBuild, variant, configuration, releaseTag) {
 
     String buildTag = "build"
@@ -38,23 +51,22 @@ def buildConfiguration(javaToBuild, variant, configuration, releaseTag) {
         additionalNodeLabels = buildTag
     }
 
-    List buildParams = [
-            string(name: 'JAVA_TO_BUILD', value: "${javaToBuild}"),
-            [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: "${additionalNodeLabels}&&${configuration.os}&&${configuration.arch}"]
+    def buildParams = [
+            JAVA_TO_BUILD: "${javaToBuild}",
+            NODE_LABEL   : "${additionalNodeLabels}&&${configuration.os}&&${configuration.arch}",
+            VARIANT      : "${variant}",
+            ARCHITECTURE : "${configuration.arch}",
+            TARGET_OS    : "${configuration.os}"
     ]
 
-    if (configuration.containsKey('bootJDK')) buildParams += string(name: 'JDK_BOOT_VERSION', value: "${configuration.bootJDK}")
-    if (configuration.containsKey('configureArgs')) buildParams += string(name: 'CONFIGURE_ARGS', value: "${configuration.configureArgs}")
-    if (configuration.containsKey('buildArgs')) buildParams += string(name: 'BUILD_ARGS', value: "${configuration.buildArgs}")
-    if (configuration.containsKey('additionalFileNameTag')) buildParams += string(name: 'ADDITIONAL_FILE_NAME_TAG', value: "${configuration.additionalFileNameTag}")
+    if (configuration.containsKey('bootJDK')) buildParams[JDK_BOOT_VERSION] = "${configuration.bootJDK}"
+    if (configuration.containsKey('configureArgs')) buildParams[CONFIGURE_ARGS] = "${configuration.configureArgs}"
+    if (configuration.containsKey('buildArgs')) buildParams[BUILD_ARGS] = "${configuration.buildArgs}"
+    if (configuration.containsKey('additionalFileNameTag')) buildParams[ADDITIONAL_FILE_NAME_TAG] = "${configuration.additionalFileNameTag}"
 
     if (releaseTag != null && releaseTag.length() > 0) {
-        buildParams += string(name: 'TAG', value: "${releaseTag}")
+        buildParams[TAG] = "${releaseTag}"
     }
-
-    buildParams += string(name: 'VARIANT', value: "${variant}")
-    buildParams += string(name: 'ARCHITECTURE', value: "${configuration.arch}")
-    buildParams += string(name: 'TARGET_OS', value: "${configuration.os}")
 
     return [
             javaVersion: javaToBuild,
@@ -132,23 +144,9 @@ def getJobFolder(config) {
 }
 
 def createJob(jobName, jobFolder, config) {
-    def createJobName = "create-${jobName}"
-
-    config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
-    config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
-    def params = [];
-
-    config.parameters.each {
-        println "PARAM: "
-        println "${it}"
-        def map = it.symbol;
-
-        println "${map}"
-        def name = it.symbol;
-        def value = it.arguments;
-        println "${name}: ${value}"
-        params.put(name, value)
-    }
+    def params = config.parameters.clone()
+    params[JOB_NAME] = "${jobName}"
+    params[JOB_FOLDER] = "${jobFolder}"
 
     //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
     create = jobDsl targets: "pipelines/build/createJobFromTemplate.dsl", additionalParameters: params
