@@ -140,7 +140,7 @@ def createJob(jobName, jobFolder, config) {
 
     config.parameters.each { param ->
         println "PARAM: "
-        println ${param}
+        println "${param}"
         params[param.collect { it.name }] = param.collect { it.value }
     }
 
