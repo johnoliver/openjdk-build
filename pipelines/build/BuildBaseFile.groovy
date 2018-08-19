@@ -134,7 +134,7 @@ def getJobFolder(config) {
 def createJob(jobName, jobFolder, config) {
 
     stage("create") {
-        steps {
+        step {
             dsl {
                 external('createJobFromTemplate.dsl')
 
@@ -185,7 +185,9 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
             catchError {
                 stage(configuration.key) {
-                    createJob(jobTopName, jobFolder, config);
+                    dsl {
+                        external('createJobFromTemplate.dsl')
+                    }
 
                     //job = build job: downstreamJob, propagate: false, parameters: config.parameters
                     //buildJobs[configuration.key] = job
