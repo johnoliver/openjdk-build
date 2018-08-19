@@ -146,7 +146,7 @@ def getJobFolder(config) {
 def createJob(jobName, jobFolder, config) {
     def params = config.parameters.clone()
     //params[JOB_NAME] = "${jobName}"
-    //params[JOB_FOLDER] = "${jobFolder}"
+    params[JOB_FOLDER] = "${jobFolder}"
 
     params = [jobFolder: "${jobFolder}"];
 
