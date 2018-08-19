@@ -132,24 +132,24 @@ def getJobFolder(config) {
 }
 
 def createJob(jobName, jobFolder, config) {
-    return  {
-        steps {
-            dsl {
-                external('createJobFromTemplate.dsl')
-            }
+
+    stage("create") {
+        dsl {
+            external('createJobFromTemplate.dsl')
+
         }
     }
 
-   /*
-    def createJobName = "create-${jobName}"
+    /*
+     def createJobName = "create-${jobName}"
 
-    config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
-    config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
+     config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
+     config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
 
-    create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
+     create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
 
-    return create
-    */
+     return create
+     */
 }
 
 def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
