@@ -132,15 +132,20 @@ def getJobFolder(config) {
 }
 
 def createJob(jobName, jobFolder, config) {
-     def createJobName = "create-${jobName}"
+    def createJobName = "create-${jobName}"
 
-     config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
-     config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
+    config.parameters += string(name: 'JOB_NAME', value: "${jobName}")
+    config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
+    def params = [];
 
-     //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
-     create = jobDsl targets: "pipelines/build/createJobFromTemplate.dsl", additionalParameters: config.parameters
+    config.parameters { param ->
+        params[param.name] = param.value
+    }
 
-     return create
+    //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
+    create = jobDsl targets: "pipelines/build/createJobFromTemplate.dsl", additionalParameters: params
+
+    return create
 }
 
 def doBuild(String javaToBuild, buildConfigurations, String osTarget, String enableTestsArg, String publishArg, String releaseTag) {
