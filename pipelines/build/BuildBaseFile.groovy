@@ -132,13 +132,15 @@ def getJobFolder(config) {
 }
 
 def createJob(jobName, jobFolder, config) {
-    job('create') {
+    jobs = {
         steps {
             dsl {
                 external('createJobFromTemplate.dsl')
             }
         }
     }
+
+    parallel jobs
 
    /*
     def createJobName = "create-${jobName}"
