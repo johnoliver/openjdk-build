@@ -18,7 +18,7 @@ def toBuildParams(params) {
 
     List buildParams = []
 
-    buildParams += [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: params[NODE_LABEL]]
+    buildParams += [$class: 'LabelParameterValue', name: 'NODE_LABEL', label: params.get("NODE_LABEL")]
 
     params
             .findAll { it.key != 'NODE_LABEL' }
