@@ -1,4 +1,9 @@
-String buildFolder="$JOB_FOLDER"
+String buildFolder=JOB_FOLDER
+
+if (!binding.hasVariable('JDK_BOOT_VERSION')) JDK_BOOT_VERSION=""
+if (!binding.hasVariable('CONFIGURE_ARGS')) CONFIGURE_ARGS=""
+if (!binding.hasVariable('BUILD_ARGS')) BUILD_ARGS=""
+if (!binding.hasVariable('ADDITIONAL_FILE_NAME_TAG')) ADDITIONAL_FILE_NAME_TAG=""
 
 folder(buildFolder) {
     description 'Automatically generated build jobs.'
@@ -35,7 +40,7 @@ pipelineJob("$buildFolder/$JOB_NAME") {
         stringParam('TAG', null, "git tag/branch/commit to bulid if not HEAD")
         stringParam('NODE_LABEL',"$NODE_LABEL")
         stringParam('JAVA_TO_BUILD',"$JAVA_TO_BUILD")
-        stringParam('JDK_BOOT_VERSION',"$JDK_BOOT_VERSION")
+        stringParam('JDK_BOOT_VERSION',"${JDK_BOOT_VERSION}")
         stringParam('CONFIGURE_ARGS',"$CONFIGURE_ARGS","Additional arguments to pass to ./configure")
         stringParam('BUILD_ARGS',"$BUILD_ARGS","additional args to call makejdk-any-platform.sh with")
         stringParam('ARCHITECTURE',"$ARCHITECTURE")
