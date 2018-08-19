@@ -149,7 +149,7 @@ def createJob(jobName, jobFolder, config) {
     params.put("JOB_NAME", "${jobName}")
     params.put("JOB_FOLDER", "${jobFolder}")
 
-    ['JDK_BOOT_VERSION',
+    [
      'CONFIGURE_ARGS',
      'BUILD_ARGS',
      'ADDITIONAL_FILE_NAME_TAG'].each { if (!params.containsKey(it)) params.put(it, "") }

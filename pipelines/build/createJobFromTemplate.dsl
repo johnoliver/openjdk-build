@@ -1,5 +1,7 @@
 String buildFolder=JOB_FOLDER
 
+if (!binding.hasVariable('JDK_BOOT_VERSION')) JDK_BOOT_VERSION=""
+
 folder(buildFolder) {
     description 'Automatically generated build jobs.'
 }
