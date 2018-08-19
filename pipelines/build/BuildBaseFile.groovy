@@ -138,16 +138,15 @@ def createJob(jobName, jobFolder, config) {
     config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
     def params = [];
 
-    config.parameters.each { param ->
+    config.parameters.each {
         println "PARAM: "
-        println "${param}"
-        def map = config.parameters[JOB_NAME];
+        println "${it}"
+        def map = it.name;
 
         println "${map}"
-        def name = param.getName();
-        def value = param.getValue();
+        def name = it.getName();
+        def value = it.getValue();
         println "${name}: ${value}"
-        params.put(name, value)
     }
 
     //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
