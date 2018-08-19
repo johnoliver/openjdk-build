@@ -35,7 +35,7 @@ pipelineJob("$buildFolder/$JOB_NAME") {
         stringParam('TAG', null, "git tag/branch/commit to bulid if not HEAD")
         stringParam('NODE_LABEL',"$NODE_LABEL")
         stringParam('JAVA_TO_BUILD',"$JAVA_TO_BUILD")
-        stringParam('JDK_BOOT_VERSION',"$JDK_BOOT_VERSION")
+        stringParam('JDK_BOOT_VERSION',"${JDK_BOOT_VERSION}")
         stringParam('CONFIGURE_ARGS',"$CONFIGURE_ARGS","Additional arguments to pass to ./configure")
         stringParam('BUILD_ARGS',"$BUILD_ARGS","additional args to call makejdk-any-platform.sh with")
         stringParam('ARCHITECTURE',"$ARCHITECTURE")
