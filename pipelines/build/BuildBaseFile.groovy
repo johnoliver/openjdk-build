@@ -185,7 +185,7 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
 
             catchError {
                 stage(configuration.key) {
-                    jobDsl targets: ['createJobFromTemplate.dsl']
+                    jobDsl targets: "createJobFromTemplate.dsl"
 
                     //job = build job: downstreamJob, propagate: false, parameters: config.parameters
                     //buildJobs[configuration.key] = job
