@@ -141,7 +141,7 @@ def createJob(jobName, jobFolder, config) {
     config.parameters.each { param ->
         println "PARAM: "
         println "${param}"
-        def map = param.getClass();
+        def map = config.parameters[JOB_NAME];
 
         println "${map}"
         def name = param.getName();
