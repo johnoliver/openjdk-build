@@ -1,4 +1,4 @@
-String buildFolder=jobFolder
+String buildFolder=JOB_FOLDER
 
 folder(buildFolder) {
     description 'Automatically generated build jobs.'

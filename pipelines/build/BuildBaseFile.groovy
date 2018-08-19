@@ -144,11 +144,12 @@ def getJobFolder(config) {
 }
 
 def createJob(jobName, jobFolder, config) {
-    def params = config.parameters.clone()
-    //params[JOB_NAME] = "${jobName}"
-    params[JOB_FOLDER] = "${jobFolder}"
 
-    params = [jobFolder: "${jobFolder}"];
+
+    List params = []
+    params.addAll(config.parameters.clone())
+    params[JOB_NAME] = "${jobName}"
+    params[JOB_FOLDER] = "${jobFolder}"
 
     //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
     create = jobDsl targets: "pipelines/build/createJobFromTemplate.dsl", additionalParameters: params
