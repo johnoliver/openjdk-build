@@ -138,7 +138,7 @@ def createJob(jobName, jobFolder, config) {
     config.parameters += string(name: 'JOB_FOLDER', value: "${jobFolder}")
     def params = [];
 
-    config.parameters { param ->
+    config.parameters.each { param ->
         params[param.name] = param.value
     }
 
