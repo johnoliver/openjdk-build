@@ -148,6 +148,8 @@ def createJob(jobName, jobFolder, config) {
     params[JOB_NAME] = "${jobName}"
     params[JOB_FOLDER] = "${jobFolder}"
 
+    params = [JOB_FOLDER: "${jobFolder}"];
+
     //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
     create = jobDsl targets: "pipelines/build/createJobFromTemplate.dsl", additionalParameters: params
 
