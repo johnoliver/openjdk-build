@@ -141,7 +141,7 @@ def createJob(jobName, jobFolder, config) {
     config.parameters.each { param ->
         println "PARAM: "
         println "${param}"
-        def map = param.toMap();
+        def map = param.instantiate();
 
         println "${map}"
         def name = param.getName();
