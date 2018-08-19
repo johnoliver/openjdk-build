@@ -139,7 +139,7 @@ def createJob(jobName, jobFolder, config) {
     def params = [];
 
     config.parameters.each { param ->
-        params[param.collect { it.name }.name] = param.collect { it.name }.value
+        params[param.collect { it.name }] = param.collect { it.value }
     }
 
     //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
