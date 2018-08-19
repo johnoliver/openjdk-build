@@ -1,4 +1,4 @@
-String buildFolder="$JOB_FOLDER"
+String buildFolder=jobFolder
 
 folder(buildFolder) {
     description 'Automatically generated build jobs.'
