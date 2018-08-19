@@ -134,9 +134,11 @@ def getJobFolder(config) {
 def createJob(jobName, jobFolder, config) {
 
     stage("create") {
-        dsl {
-            external('createJobFromTemplate.dsl')
+        steps {
+            dsl {
+                external('createJobFromTemplate.dsl')
 
+            }
         }
     }
 
