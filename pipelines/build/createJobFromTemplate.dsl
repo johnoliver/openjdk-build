@@ -1,6 +1,9 @@
 String buildFolder=JOB_FOLDER
 
 if (!binding.hasVariable('JDK_BOOT_VERSION')) JDK_BOOT_VERSION=""
+if (!binding.hasVariable('CONFIGURE_ARGS')) CONFIGURE_ARGS=""
+if (!binding.hasVariable('BUILD_ARGS')) BUILD_ARGS=""
+if (!binding.hasVariable('ADDITIONAL_FILE_NAME_TAG')) ADDITIONAL_FILE_NAME_TAG=""
 
 folder(buildFolder) {
     description 'Automatically generated build jobs.'
