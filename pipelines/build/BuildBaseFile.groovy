@@ -216,8 +216,8 @@ def doBuild(String javaToBuild, buildConfigurations, String osTarget, String ena
             }
         }
     }
-/*
     parallel jobs
+/*
 
     if (publish) {
         def release = false
