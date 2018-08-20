@@ -140,7 +140,11 @@ def getJobName(displayName, config) {
 }
 
 def getJobFolder(config) {
-    return "build-scripts/jobs/${config.javaVersion}"
+    def name = "build-scripts/jobs/${config.javaVersion}"
+    if (config.parameters[ADDITIONAL_FILE_NAME_TAG]) {
+        name = "${name}-${config.parameters[ADDITIONAL_FILE_NAME_TAG]}"
+    }
+    return name
 }
 
 def createJob(jobName, jobFolder, config) {
