@@ -136,7 +136,7 @@ static def determineReleaseRepoVersion(javaToBuild) {
 }
 
 def getJobName(displayName, config) {
-    return "new-build-${config.javaVersion}-${displayName}"
+    return "${config.javaVersion}-${displayName}"
 }
 
 def getJobFolder(config) {
