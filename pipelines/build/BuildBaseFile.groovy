@@ -59,13 +59,13 @@ def buildConfiguration(javaToBuild, variant, configuration, releaseTag) {
             TARGET_OS    : "${configuration.os}"
     ]
 
-    if (configuration.containsKey('bootJDK')) buildParams[JDK_BOOT_VERSION] = "${configuration.bootJDK}"
-    if (configuration.containsKey('configureArgs')) buildParams[CONFIGURE_ARGS] = "${configuration.configureArgs}"
-    if (configuration.containsKey('buildArgs')) buildParams[BUILD_ARGS] = "${configuration.buildArgs}"
-    if (configuration.containsKey('additionalFileNameTag')) buildParams[ADDITIONAL_FILE_NAME_TAG] = "${configuration.additionalFileNameTag}"
+    if (configuration.containsKey('bootJDK')) buildParams.put("JDK_BOOT_VERSION", "${configuration.bootJDK}")
+    if (configuration.containsKey('configureArgs')) buildParams.put("CONFIGURE_ARGS", "${configuration.configureArgs}")
+    if (configuration.containsKey('buildArgs')) buildParams.put("BUILD_ARGS", "${configuration.buildArgs}")
+    if (configuration.containsKey('additionalFileNameTag')) buildParams.put("ADDITIONAL_FILE_NAME_TAG", "${configuration.additionalFileNameTag}")
 
     if (releaseTag != null && releaseTag.length() > 0) {
-        buildParams[TAG] = "${releaseTag}"
+        buildParams.put("TAG", "${releaseTag}")
     }
 
     return [
