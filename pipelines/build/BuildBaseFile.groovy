@@ -52,20 +52,20 @@ def buildConfiguration(javaToBuild, variant, configuration, releaseTag) {
     }
 
     def buildParams = [
-            JAVA_TO_BUILD: "${javaToBuild}",
+            JAVA_TO_BUILD: javaToBuild,
             NODE_LABEL   : "${additionalNodeLabels}&&${configuration.os}&&${configuration.arch}",
-            VARIANT      : "${variant}",
-            ARCHITECTURE : "${configuration.arch}",
-            TARGET_OS    : "${configuration.os}"
+            VARIANT      : variant,
+            ARCHITECTURE : configuration.arch,
+            TARGET_OS    : configuration.os
     ]
 
-    if (configuration.containsKey('bootJDK')) buildParams.put("JDK_BOOT_VERSION", "${configuration.bootJDK}")
-    if (configuration.containsKey('configureArgs')) buildParams.put("CONFIGURE_ARGS", "${configuration.configureArgs}")
-    if (configuration.containsKey('buildArgs')) buildParams.put("BUILD_ARGS", "${configuration.buildArgs}")
-    if (configuration.containsKey('additionalFileNameTag')) buildParams.put("ADDITIONAL_FILE_NAME_TAG", "${configuration.additionalFileNameTag}")
+    if (configuration.containsKey('bootJDK')) buildParams.put("JDK_BOOT_VERSION", configuration.bootJDK)
+    if (configuration.containsKey('configureArgs')) buildParams.put("CONFIGURE_ARGS", configuration.configureArgs)
+    if (configuration.containsKey('buildArgs')) buildParams.put("BUILD_ARGS", configuration.buildArgs)
+    if (configuration.containsKey('additionalFileNameTag')) buildParams.put("ADDITIONAL_FILE_NAME_TAG", configuration.additionalFileNameTag)
 
     if (releaseTag != null && releaseTag.length() > 0) {
-        buildParams.put("TAG", "${releaseTag}")
+        buildParams.put("TAG", releaseTag)
     }
 
     return [
@@ -136,22 +136,22 @@ static def determineReleaseRepoVersion(javaToBuild) {
 }
 
 def getJobName(displayName, config) {
-    return "${config.javaVersion}-${displayName}"
-}
-
-def getJobFolder(config) {
-    def name = "build-scripts/jobs/${config.javaVersion}"
+    def name = "${config.javaVersion}-${displayName}"
     if (config.parameters.get("ADDITIONAL_FILE_NAME_TAG")) {
         name = "${name}-" + config.parameters.get("ADDITIONAL_FILE_NAME_TAG")
     }
     return name
 }
 
+def getJobFolder(config) {
+    return "build-scripts/jobs/${config.javaVersion}"
+}
+
 def createJob(jobName, jobFolder, config) {
 
     def params = config.parameters.clone()
-    params.put("JOB_NAME", "${jobName}")
-    params.put("JOB_FOLDER", "${jobFolder}")
+    params.put("JOB_NAME", jobName)
+    params.put("JOB_FOLDER", jobFolder)
 
     create = jobDsl targets: "pipelines/build/createJobFromTemplate.groovy", ignoreExisting: true, additionalParameters: params
 
