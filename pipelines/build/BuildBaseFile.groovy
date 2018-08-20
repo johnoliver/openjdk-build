@@ -149,8 +149,7 @@ def createJob(jobName, jobFolder, config) {
     params.put("JOB_NAME", "${jobName}")
     params.put("JOB_FOLDER", "${jobFolder}")
 
-    //create = build job: "build-scripts/create-build-job", displayName: createJobName, parameters: config.parameters
-    create = jobDsl targets: "pipelines/build/createJobFromTemplate.dsl", additionalParameters: params
+    create = jobDsl targets: "pipelines/build/createJobFromTemplate.groovy", ignoreExisting: true, additionalParameters: params
 
     return create
 }
