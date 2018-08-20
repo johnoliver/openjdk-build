@@ -141,8 +141,8 @@ def getJobName(displayName, config) {
 
 def getJobFolder(config) {
     def name = "build-scripts/jobs/${config.javaVersion}"
-    if (config.parameters[ADDITIONAL_FILE_NAME_TAG]) {
-        name = "${name}-${config.parameters[ADDITIONAL_FILE_NAME_TAG]}"
+    if (config.parameters.get("ADDITIONAL_FILE_NAME_TAG")) {
+        name = "${name}-" + config.parameters.get("ADDITIONAL_FILE_NAME_TAG")
     }
     return name
 }
