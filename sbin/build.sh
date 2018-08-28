@@ -185,7 +185,7 @@ configuringVersionStringParameter()
     echo "JAVA_VERSION:${javaVersion} JAVA_UPDATE:${javaUpdate} JAVA_BUILD:${javaBuild}";
 
     # Replace the default 'internal' with our own milestone string
-    #addConfigureArg "--with-milestone=" "adoptopenjdk"
+    addConfigureArg "--with-user-release-suffix=" "AdoptOpenJDK"
 
     # Set the update version (e.g. 131), this gets passed in from the calling script
     addConfigureArgIfValueIsNotEmpty "--with-update-version=" "${javaUpdate}"
