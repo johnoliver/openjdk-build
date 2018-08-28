@@ -178,9 +178,8 @@ configuringVersionStringParameter()
 
     if [[ $OPENJDK_REPO_TAG =~ $regexJdk8 ]];
     then
-      javaVersion="1.8.0";
-      javaUpdate=${BASH_REMATCH[2]};
-      javaBuild=${BASH_REMATCH[3]};
+      javaUpdate=${BASH_REMATCH[1]};
+      javaBuild=${BASH_REMATCH[2]};
     fi
 
     echo "JAVA_VERSION:${javaVersion} JAVA_UPDATE:${javaUpdate} JAVA_BUILD:${javaBuild}";
@@ -199,11 +198,11 @@ configuringVersionStringParameter()
     #version="jdk-10.0.2+13"
     local regexJdk="jdk\-([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+)\+([[:digit:]]+)";
 
-    local javaVersion="1.8.0";
+    local javaVersion="";
     local javaUpdate="${BUILD_CONFIG[OPENJDK_UPDATE_VERSION]}";
     local javaBuild="${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}";
 
-    if [[ $OPENJDK_REPO_TAG =~ $regexJdk8 ]];
+    if [[ $OPENJDK_REPO_TAG =~ $regexJdk ]];
     then
         javaVersion=${BASH_REMATCH[1]};
         javaUpdate="";
