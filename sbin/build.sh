@@ -186,7 +186,7 @@ configuringVersionStringParameter()
 
     # Replace the default 'internal' with our own milestone string
     #addConfigureArg "--with-user-release-suffix=" "AdoptOpenJDK"
-    addConfigureArg "--with-milestone=" "''"
+    addConfigureArg "--with-milestone=" "fcs"
 
     # Set the update version (e.g. 131), this gets passed in from the calling script
     addConfigureArgIfValueIsNotEmpty "--with-update-version=" "${javaUpdate}"
