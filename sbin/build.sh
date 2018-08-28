@@ -160,27 +160,60 @@ getOpenJDKUpdateAndBuildVersion()
 # OpenJDK 64-Bit Server VM (build 25.71-b00, mixed mode)
 configuringVersionStringParameter()
 {
+
+  if [ -z "$OPENJDK_REPO_TAG" ]; then
+    cd "${WORKING_DIR}/${OPENJDK_REPO_NAME}" || echo Cannot change to "${WORKING_DIR}/${OPENJDK_REPO_NAME}"
+    OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
+    echo "OpenJDK repo tag is ${OPENJDK_REPO_TAG}"
+  fi
+
+
   if [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "${JDK8_CORE_VERSION}" ]; then
+    local regexJdk8="jdk8u([[:digit:]]+)\-b([[:digit:]]+)";
+
+    #version="jdk8u181-b13"
+    local javaVersion="1.8.0";
+    local javaUpdate="${BUILD_CONFIG[OPENJDK_UPDATE_VERSION]}";
+    local javaBuild="${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}";
+
+    if [[ $OPENJDK_REPO_TAG =~ $regexJdk8 ]];
+    then
+      javaVersion="1.8.0";
+      javaUpdate=${BASH_REMATCH[2]};
+      javaBuild=${BASH_REMATCH[3]};
+    fi
+
+    echo "JAVA_VERSION:${javaVersion} JAVA_UPDATE:${javaUpdate} JAVA_BUILD:${javaBuild}";
+
     # Replace the default 'internal' with our own milestone string
-    addConfigureArg "--with-milestone=" "adoptopenjdk"
+    #addConfigureArg "--with-milestone=" "adoptopenjdk"
 
     # Set the update version (e.g. 131), this gets passed in from the calling script
-    addConfigureArgIfValueIsNotEmpty "--with-update-version=" "${BUILD_CONFIG[OPENJDK_UPDATE_VERSION]}"
+    addConfigureArgIfValueIsNotEmpty "--with-update-version=" "${javaUpdate}"
 
     # Set the build number (e.g. b04), this gets passed in from the calling script
-    addConfigureArgIfValueIsNotEmpty "--with-build-number=" "${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}"
+    addConfigureArgIfValueIsNotEmpty "--with-build-number=" "${javaBuild}"
   else
-    if [ -z "$OPENJDK_REPO_TAG" ]; then
-      cd "${WORKING_DIR}/${OPENJDK_REPO_NAME}" || echo Cannot change to "${WORKING_DIR}/${OPENJDK_REPO_NAME}"
-      OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
-      echo "OpenJDK repo tag is ${OPENJDK_REPO_TAG}"
-    fi
     # > JDK 8
+
+    #version="jdk-10.0.2+13"
+    local regexJdk="jdk\-([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+)\+([[:digit:]]+)";
+
+    local javaVersion="1.8.0";
+    local javaUpdate="${BUILD_CONFIG[OPENJDK_UPDATE_VERSION]}";
+    local javaBuild="${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}";
+
+    if [[ $OPENJDK_REPO_TAG =~ $regexJdk8 ]];
+    then
+        javaVersion=${BASH_REMATCH[1]};
+        javaUpdate="";
+        javaBuild=${BASH_REMATCH[2]};
+    fi
+
     addConfigureArg "--with-version-pre=" "adoptopenjdk"
 
     TRIMMED_TAG=$(echo "$OPENJDK_REPO_TAG" | cut -f2 -d"-" )
     addConfigureArg "--with-version-string=" "${TRIMMED_TAG}"
-
   fi
   echo "Completed configuring the version string parameter, config args are now: ${CONFIGURE_ARGS}"
 }
