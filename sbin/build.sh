@@ -193,6 +193,8 @@ configuringVersionStringParameter()
 
     # Set the build number (e.g. b04), this gets passed in from the calling script
     addConfigureArgIfValueIsNotEmpty "--with-build-number=" "${javaBuild}"
+
+    sed -i 's/Runtime Environment/Runtime Environment (AdoptOpenJDK)/g' build/linux-x86_64-normal-server-release/spec.gmk
   else
     # > JDK 8
 
