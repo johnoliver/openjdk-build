@@ -37,6 +37,8 @@ else
   if [ "${exitCode}" -ne 0 ]; then
     exit 2;
   fi
+
+  sed -i 's/Runtime Environment/Runtime Environment (AdoptOpenJDK)/g' build/linux-x86_64-normal-server-release/spec.gmk
 fi
 
 #Templated var that, gets replaced by build.sh
