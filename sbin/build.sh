@@ -216,9 +216,14 @@ configuringVersionStringParameter()
       addConfigureArg "--with-version-minor=" "${minorVersion}"
       addConfigureArg "--with-version-security=" "${securityVersion}"
       addConfigureArg "--with-version-build=" "${buildVersion}"
+      addConfigureArg "--with-version-opt=" "AdoptOpenJDK"
     else
       TRIMMED_TAG=$(echo "$OPENJDK_REPO_TAG" | cut -f2 -d"-" )
       addConfigureArg "--with-version-string=" "${TRIMMED_TAG}"
+    fi
+
+    if [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "${JDK10_CORE_VERSION}" ]; then
+      addConfigureArg "--with-vendor-name=" "AdoptOpenJDK"
     fi
   fi
   echo "Completed configuring the version string parameter, config args are now: ${CONFIGURE_ARGS}"
