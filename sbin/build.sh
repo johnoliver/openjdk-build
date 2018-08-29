@@ -203,7 +203,6 @@ configuringVersionStringParameter()
     local javaUpdate="${BUILD_CONFIG[OPENJDK_UPDATE_VERSION]}";
     local javaBuild="${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}";
 
-    addConfigureArg "--with-version-pre=" "fcs"
 
     if [[ $OPENJDK_REPO_TAG =~ $regexJdk ]];
     then
@@ -212,11 +211,12 @@ configuringVersionStringParameter()
       local securityVersion=${BASH_REMATCH[3]};
       local buildVersion=${BASH_REMATCH[4]};
 
+      addConfigureArg "--with-version-pre=" "''"
+      addConfigureArg "--with-version-opt=" "''"
       addConfigureArg "--with-version-major=" "${majorVersion}"
       addConfigureArg "--with-version-minor=" "${minorVersion}"
       addConfigureArg "--with-version-security=" "${securityVersion}"
       addConfigureArg "--with-version-build=" "${buildVersion}"
-      addConfigureArg "--with-version-opt=" "AdoptOpenJDK"
     else
       TRIMMED_TAG=$(echo "$OPENJDK_REPO_TAG" | cut -f2 -d"-" )
       addConfigureArg "--with-version-string=" "${TRIMMED_TAG}"
