@@ -197,23 +197,29 @@ configuringVersionStringParameter()
     # > JDK 8
 
     #version="jdk-10.0.2+13"
-    local regexJdk="jdk\-([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+)\+([[:digit:]]+)";
+    local regexJdk="jdk\-([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\+([[:digit:]]+)";
 
     local javaVersion="";
     local javaUpdate="${BUILD_CONFIG[OPENJDK_UPDATE_VERSION]}";
     local javaBuild="${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}";
 
+    addConfigureArg "--with-version-pre=" "fcs"
+
     if [[ $OPENJDK_REPO_TAG =~ $regexJdk ]];
     then
-        javaVersion=${BASH_REMATCH[1]};
-        javaUpdate="";
-        javaBuild=${BASH_REMATCH[2]};
+      local majorVersion=${BASH_REMATCH[1]};
+      local minorVersion=${BASH_REMATCH[2]};
+      local securityVersion=${BASH_REMATCH[3]};
+      local buildVersion=${BASH_REMATCH[4]};
+
+      addConfigureArg "--with-version-major=" "${majorVersion}"
+      addConfigureArg "--with-version-minor=" "${minorVersion}"
+      addConfigureArg "--with-version-security=" "${securityVersion}"
+      addConfigureArg "--with-version-build=" "${buildVersion}"
+    else
+      TRIMMED_TAG=$(echo "$OPENJDK_REPO_TAG" | cut -f2 -d"-" )
+      addConfigureArg "--with-version-string=" "${TRIMMED_TAG}"
     fi
-
-    addConfigureArg "--with-version-pre=" "adoptopenjdk"
-
-    TRIMMED_TAG=$(echo "$OPENJDK_REPO_TAG" | cut -f2 -d"-" )
-    addConfigureArg "--with-version-string=" "${TRIMMED_TAG}"
   fi
   echo "Completed configuring the version string parameter, config args are now: ${CONFIGURE_ARGS}"
 }
