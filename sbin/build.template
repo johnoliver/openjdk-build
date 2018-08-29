@@ -38,7 +38,7 @@ else
     exit 2;
   fi
 
-  sed -i 's/PRODUCT_NAME:=*/PRODUCT_NAME:=OpenJDK (AdoptOpenJDK)/g' build/linux-x86_64-normal-server-release/spec.gmk
+  sed -i 's/PRODUCT_NAME:=.*/PRODUCT_NAME:=OpenJDK (AdoptOpenJDK)/g' build/linux-x86_64-normal-server-release/spec.gmk
 fi
 
 #Templated var that, gets replaced by build.sh
