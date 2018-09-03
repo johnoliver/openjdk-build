@@ -60,7 +60,7 @@ then
     if [ "${JAVA_TO_BUILD}" == "${JDK10_VERSION}" ] && [ "${VARIANT}" == "openj9" ]
     then
       if [ -z "$JDK9_BOOT_DIR" ]; then
-        export JDK9_BOOT_DIR=$PWD/jdk-9+181
+        export JDK9_BOOT_DIR="$PWD/jdk-9+181"
         if [ ! -r "$JDK9_BOOT_DIR" ]; then
           wget -O -  https://github.com/AdoptOpenJDK/openjdk9-releases/releases/download/jdk-9%2B181/OpenJDK9_s390x_Linux_jdk-9.181.tar.gz | tar xpfz -
         fi
