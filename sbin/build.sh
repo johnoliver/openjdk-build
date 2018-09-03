@@ -128,6 +128,12 @@ getOpenJDKUpdateAndBuildVersion()
     # It does exist and it's a repo other than the AdoptOpenJDK one
     cd "${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}" || return
 
+    if [ -f ".git/shallow.lock" ]
+    then
+      echo "Detected lock file, assuming this is an error, removing"
+      rm ".git/shallow.lock"
+    fi
+
     # shellcheck disable=SC2154
     echo "Pulling latest tags and getting the latest update version using git fetch -q --tags ${BUILD_CONFIG[SHALLOW_CLONE_OPTION]}"
     # shellcheck disable=SC2154
