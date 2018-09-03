@@ -38,9 +38,10 @@ fi
 
 if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
 then
-    export JDK10_BOOT_DIR="$PWD/jdk-10.0.1+10"
+    export JDK10_BOOT_DIR="$PWD/jdk-10"
     if [ ! -d "$JDK10_BOOT_DIR" ]; then
-      wget -q -O - 'https://github.com/AdoptOpenJDK/openjdk10-releases/releases/download/201807101745/OpenJDK10_x64_Mac_201807101745.tar.gz' | tar xpfz -
+      mkdir -p "$JDK10_BOOT_DIR"
+      wget -q -O - 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk10?os=mac&release=latest' | tar xpzf - --strip-components=2 -C "$JDK10_BOOT_DIR"
     fi
     export JDK_BOOT_DIR=$JDK10_BOOT_DIR
 fi

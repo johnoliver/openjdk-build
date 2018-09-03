@@ -21,17 +21,14 @@ source "$SCRIPT_DIR/../../sbin/common/constants.sh"
 if [ "${ARCHITECTURE}" == "x64" ]
 then
   export PATH=/opt/rh/devtoolset-2/root/usr/bin:$PATH
-  if [ -r /opt/rh/devtoolset-2/root/usr/bin/g++-NO ]; then
-    export CC=/opt/rh/devtoolset-2/root/usr/bin/gcc
-    export CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
-    ls -l $CC $CXX
-    $CC --version
-    $CXX --version
-  fi
+  [ -r /opt/rh/devtoolset-2/root/usr/bin/gcc ] && export CC=/opt/rh/devtoolset-2/root/usr/bin/gcc
+  [ -r /opt/rh/devtoolset-2/root/usr/bin/g++ ] && export CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
 
-  if [ ]
+  if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
   then
-
+    export CC=/usr/local/gcc/bin/gcc-7.3
+    export CXX=/usr/local/gcc/bin/g++-7.3
+    export LD_LIBRARY_PATH=/usr/local/gcc/lib64:/usr/local/gcc/lib
   fi
 fi
 
