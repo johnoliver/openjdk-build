@@ -14,7 +14,6 @@
 # limitations under the License.
 ################################################################################
 
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # shellcheck source=sbin/common/constants.sh
 source "$SCRIPT_DIR/../../sbin/common/constants.sh"
 
@@ -38,7 +37,7 @@ fi
 
 if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
 then
-    if [ ! -r jdk-10.0.1+10 ]; then
+    if [ ! -d "jdk-10.0.1+10" ]; then
       wget -q -O - 'https://github.com/AdoptOpenJDK/openjdk10-releases/releases/download/201807101745/OpenJDK10_x64_Mac_201807101745.tar.gz' | tar xpfz -
       export JDK10_BOOT_DIR=$WORKSPACE/jdk-10.0.1+10
     fi
