@@ -30,7 +30,17 @@ fi
 sudo xcode-select --switch "${XCODE_SWITCH_PATH}"
 
 
-if [ "${JAVA_TO_BUILD}" == "${JDK9_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDK10_VERSION}" ]
+if [ "${JAVA_TO_BUILD}" == "${JDK9_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDK10_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
 then
     export PATH="/Users/jenkins/ccache-3.2.4:$PATH"
+fi
+
+
+if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
+then
+    if [ ! -r jdk-10.0.1+10 ]; then
+      wget -q -O - 'https://github.com/AdoptOpenJDK/openjdk10-releases/releases/download/201807101745/OpenJDK10_x64_Mac_201807101745.tar.gz' | tar xpfz -
+      export JDK10_BOOT_DIR=$WORKSPACE/jdk-10.0.1+10
+    fi
+    export JDK_BOOT_DIR=$JDK10_BOOT_DIR
 fi
