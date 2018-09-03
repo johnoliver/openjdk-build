@@ -27,8 +27,8 @@ then
 
   if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
   then
-    export CC=/usr/local/gcc/bin/gcc-7.3
-    export CXX=/usr/local/gcc/bin/g++-7.3
+    [ -r /usr/local/gcc/bin/gcc-7.3 ] && export CC=/usr/local/gcc/bin/gcc-7.3
+    [ -r /usr/local/gcc/bin/g++-7.3 ] && export CXX=/usr/local/gcc/bin/g++-7.3
     export LD_LIBRARY_PATH=/usr/local/gcc/lib64:/usr/local/gcc/lib
   fi
 fi
