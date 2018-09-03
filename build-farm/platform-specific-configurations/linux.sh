@@ -18,11 +18,12 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # shellcheck source=sbin/common/constants.sh
 source "$SCRIPT_DIR/../../sbin/common/constants.sh"
 
+[ -r /opt/rh/devtoolset-2/root/usr/bin/gcc ] && export CC=/opt/rh/devtoolset-2/root/usr/bin/gcc
+[ -r /opt/rh/devtoolset-2/root/usr/bin/g++ ] && export CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
+
 if [ "${ARCHITECTURE}" == "x64" ]
 then
   export PATH=/opt/rh/devtoolset-2/root/usr/bin:$PATH
-  [ -r /opt/rh/devtoolset-2/root/usr/bin/gcc ] && export CC=/opt/rh/devtoolset-2/root/usr/bin/gcc
-  [ -r /opt/rh/devtoolset-2/root/usr/bin/g++ ] && export CXX=/opt/rh/devtoolset-2/root/usr/bin/g++
 
   if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
   then
@@ -80,4 +81,16 @@ then
       export CC=gcc-4.8
       export CXX=g++-4.8
     fi
+fi
+
+
+if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
+then
+    export JDK10_BOOT_DIR="$PWD/jdk-10"
+    if [ ! -d "$JDK10_BOOT_DIR" ]; then
+      mkdir -p "$JDK10_BOOT_DIR"
+      wget -q -O - 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk10?os=linux&release=latest&arch=${ARCHITECTURE}' | tar xpzf - --strip-components=2 -C "$JDK10_BOOT_DIR"
+    fi
+    export JDK_BOOT_DIR=$JDK10_BOOT_DIR
+
 fi
