@@ -28,7 +28,14 @@ then
     $CC --version
     $CXX --version
   fi
-elif [ "${ARCHITECTURE}" == "s390x" ]
+
+  if [ ]
+  then
+
+  fi
+fi
+
+if [ "${ARCHITECTURE}" == "s390x" ]
 then
   export LANG=C
 
@@ -44,13 +51,19 @@ then
       fi
     fi
   fi
-elif [ "${ARCHITECTURE}" == "ppc64le" ]
+fi
+
+if [ "${ARCHITECTURE}" == "ppc64le" ]
 then
   export LANG=C
-elif [ "${ARCHITECTURE}" == "arm" ]
+fi
+
+if [ "${ARCHITECTURE}" == "arm" ]
 then
   export CONFIGURE_ARGS_FOR_ANY_PLATFORM="--with-jobs=4 --with-memory-size=2000"
-elif [ "${ARCHITECTURE}" == "aarch64" ]
+fi
+
+if [ "${ARCHITECTURE}" == "aarch64" ]
 then
   export BUILD_ARGS="${BUILD_ARGS} --skip-freetype"
 fi

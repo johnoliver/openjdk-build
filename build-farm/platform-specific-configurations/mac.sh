@@ -14,6 +14,7 @@
 # limitations under the License.
 ################################################################################
 
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # shellcheck source=sbin/common/constants.sh
 source "$SCRIPT_DIR/../../sbin/common/constants.sh"
 
