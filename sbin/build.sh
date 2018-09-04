@@ -338,28 +338,39 @@ removingUnnecessaryFiles()
   rm -rf "${OPENJDK_REPO_TAG}" || true
   mv "${BUILD_CONFIG[JDK_PATH]}" "${OPENJDK_REPO_TAG}"
 
-  JRE_TARGET_PATH="${OPENJDK_REPO_TAG}-jre"
-  [ "${JRE_TARGET_PATH}" == "${OPENJDK_REPO_TAG}" ] && JRE_TARGET_PATH="${OPENJDK_REPO_TAG}.jre"
-  echo "moving ${BUILD_CONFIG[JRE_PATH]} to ${JRE_TARGET_PATH}"
-  rm -rf "${JRE_TARGET_PATH}" || true
-  mv "${BUILD_CONFIG[JRE_PATH]}" "${JRE_TARGET_PATH}"
+  if [ -d "${BUILD_CONFIG[JRE_PATH]}" ]
+  then
+    JRE_TARGET_PATH="${OPENJDK_REPO_TAG}-jre"
+    [ "${JRE_TARGET_PATH}" == "${OPENJDK_REPO_TAG}" ] && JRE_TARGET_PATH="${OPENJDK_REPO_TAG}.jre"
+    echo "moving ${BUILD_CONFIG[JRE_PATH]} to ${JRE_TARGET_PATH}"
+    rm -rf "${JRE_TARGET_PATH}" || true
+    mv "${BUILD_CONFIG[JRE_PATH]}" "${JRE_TARGET_PATH}"
+
+    rm -rf "${JRE_TARGET_PATH}"/demo/applets || true
+    rm -rf "${JRE_TARGET_PATH}"/demo/jfc/Font2DTest || true
+    rm -rf "${JRE_TARGET_PATH}"/demo/jfc/SwingApplet || true
+  fi
+
 
   # Remove files we don't need
   rm -rf "${OPENJDK_REPO_TAG}"/demo/applets || true
   rm -rf "${OPENJDK_REPO_TAG}"/demo/jfc/Font2DTest || true
   rm -rf "${OPENJDK_REPO_TAG}"/demo/jfc/SwingApplet || true
-  rm -rf "${JRE_TARGET_PATH}"/demo/applets || true
-  rm -rf "${JRE_TARGET_PATH}"/demo/jfc/Font2DTest || true
-  rm -rf "${JRE_TARGET_PATH}"/demo/jfc/SwingApplet || true
+
   find . -name "*.diz" -type f -delete || true
 
-  echo "Finished removing unnecessary files from ${OPENJDK_REPO_TAG} and ${JRE_TARGET_PATH}"
+  echo "Finished removing unnecessary files from ${OPENJDK_REPO_TAG}"
 }
 
 # If on a Mac, mac a copy of the font lib as required
 makeACopyOfLibFreeFontForMacOSX() {
     IMAGE_DIRECTORY=$1
     PERFORM_COPYING=$2
+
+    if [ ! -d "${IMAGE_DIRECTORY}" ]; then
+      echo "Could not find dir: ${IMAGE_DIRECTORY}"
+      return
+    fi
 
     if [[ "${BUILD_CONFIG[OS_KERNEL_NAME]}" == "darwin" ]]; then
         echo "PERFORM_COPYING=${PERFORM_COPYING}"
@@ -435,10 +446,10 @@ createOpenJDKTarArchive()
   if which pigz >/dev/null 2>&1; then COMPRESS=pigz; fi
   echo "Archiving the build OpenJDK image and compressing with $COMPRESS"
 
-  if [ -z "$OPENJDK_REPO_TAG" ]; then
+  if [ -z "${OPENJDK_REPO_TAG+x}" ] || [ -z "${OPENJDK_REPO_TAG}" ]; then
     OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
   fi
-  if [ -z "$JRE_TARGET_PATH" ]; then
+  if [ -z "${JRE_TARGET_PATH+x}" ] || [ -z "${JRE_TARGET_PATH}" ]; then
     JRE_TARGET_PATH="${OPENJDK_REPO_TAG}-jre"
   fi
 
@@ -448,7 +459,9 @@ createOpenJDKTarArchive()
   rm -r "${BUILD_CONFIG[WORKSPACE_DIR]:?}/${BUILD_CONFIG[TARGET_DIR]}" || true
   mkdir -p "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[TARGET_DIR]}" || exit
 
-  createArchive "${JRE_TARGET_PATH}" "${BUILD_CONFIG[TARGET_FILE_NAME]/_/-jre_}"
+  if [ -d "${JRE_TARGET_PATH}" ]; then
+    createArchive "${JRE_TARGET_PATH}" "${BUILD_CONFIG[TARGET_FILE_NAME]/_/-jre_}"
+  fi
   createArchive "${OPENJDK_REPO_TAG}" "${BUILD_CONFIG[TARGET_FILE_NAME]}"
 }
 
