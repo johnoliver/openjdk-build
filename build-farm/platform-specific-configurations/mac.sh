@@ -38,6 +38,8 @@ fi
 
 if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ]
 then
+    export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-extra-cxxflags=-mmacosx-version-min=10.8"
+
     export JDK10_BOOT_DIR="$PWD/jdk-10"
     if [ ! -d "$JDK10_BOOT_DIR/bin" ]; then
       mkdir -p "$JDK10_BOOT_DIR"
