@@ -58,5 +58,4 @@ then
 
   export LANG=C
   export PATH=/opt/freeware/bin:$JAVA_HOME/bin:/usr/local/bin:/opt/IBM/xlC/13.1.3/bin:/opt/IBM/xlc/13.1.3/bin:$PATH
-  export CONFIGURE_ARGS_FOR_ANY_PLATFORM="--disable-warnings-as-errors ${CONFIGURE_ARGS_FOR_ANY_PLATFORM}"
 fi
