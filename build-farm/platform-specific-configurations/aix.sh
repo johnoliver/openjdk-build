@@ -47,15 +47,27 @@ then
   export JDK10_BOOT_DIR="$PWD/jdk-10"
   if [ ! -d "$JDK10_BOOT_DIR/bin" ]; then
     mkdir -p "$JDK10_BOOT_DIR"
-    wget -q -O - 'https://api.adoptopenjdk.net/v2/binary/releases/openjdk10?os=aix&release=latest' | tar xpzf - --strip-components=2 -C "$JDK10_BOOT_DIR"
+    wget -q -O - "https://api.adoptopenjdk.net/v2/binary/releases/openjdk10?os=aix&release=latest&arch=${ARCHITECTURE}" | tar xpzf - --strip-components=2 -C "$JDK10_BOOT_DIR"
   fi
+  export JDK_BOOT_DIR=$JDK10_BOOT_DIR
+
 
   if [ "${VARIANT}" == "hotspot" ]; then
     export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} DF=/usr/sysv/bin/df"
   fi
 
-  export JDK_BOOT_DIR=$JDK10_BOOT_DIR
+  if [ "${VARIANT}" == "openj9" ]; then
+    export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --disable-warnings-as-errors"
+    if [ -r /usr/local/gcc/bin/gcc-7.3 ]; then
+      # Following line ensures the latest ccache is picked up too
+      export PATH=/usr/local/gcc/bin:$PATH
+      export CC=gcc-7.3
+      export CXX=g++-7.3
+      export LD_LIBRARY_PATH=/usr/local/gcc/lib64:/usr/local/gcc/lib
+    fi
+  fi
 
   export LANG=C
   export PATH=/opt/freeware/bin:$JAVA_HOME/bin:/usr/local/bin:/opt/IBM/xlC/13.1.3/bin:/opt/IBM/xlc/13.1.3/bin:$PATH
+
 fi
