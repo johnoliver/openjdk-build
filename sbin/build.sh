@@ -290,7 +290,6 @@ configureCommandParameters()
 {
   configuringVersionStringParameter
   configuringBootJDKConfigureParameter
-  configureFreetypeLocation
 
   if [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] ; then
     echo "Windows or Windows-like environment detected, skipping configuring environment for custom Boot JDK and other 'configure' settings."
@@ -301,6 +300,8 @@ configureCommandParameters()
 
   # Now we add any configure arguments the user has specified on the command line.
   CONFIGURE_ARGS="${CONFIGURE_ARGS} ${BUILD_CONFIG[USER_SUPPLIED_CONFIGURE_ARGS]}"
+  
+  configureFreetypeLocation
 
   echo "Completed configuring the version string parameter, config args are now: ${CONFIGURE_ARGS}"
 }
