@@ -272,15 +272,20 @@ buildingTheRestOfTheConfigParameters()
 }
 
 configureFreetypeLocation() {
-  if [[ ! "${CONFIGURE_ARGS}" =~ "--with-freetype=" ]]; then
+  if [[ ! "${CONFIGURE_ARGS}" =~ "--with-freetype" ]]; then
     if [[ "${BUILD_CONFIG[FREETYPE]}" == "true" ]] ; then
-      local freetypeDir=BUILD_CONFIG[FREETYPE_DIRECTORY]
-      case "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" in
-         jdk8*|jdk9*|jdk10*) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-"${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/installedfreetype"} ;;
-         *) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-bundled} ;;
-      esac
-      echo "setting freetype dir to ${freetypeDir}"
-      addConfigureArg "--with-freetype=" "${freetypeDir}"
+      if [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] ; then
+        addConfigureArg "--with-freetype-src=" "${BUILD_CONFIG[WORKSPACE_DIR]}/libs/freetype"
+      else
+        local freetypeDir=BUILD_CONFIG[FREETYPE_DIRECTORY]
+        case "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" in
+           jdk8*|jdk9*|jdk10*) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-"${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/installedfreetype"} ;;
+           *) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-bundled} ;;
+        esac
+
+        echo "setting freetype dir to ${freetypeDir}"
+        addConfigureArg "--with-freetype=" "${freetypeDir}"
+      fi
     fi
   fi
 }
