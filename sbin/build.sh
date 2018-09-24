@@ -257,15 +257,6 @@ buildingTheRestOfTheConfigParameters()
     addConfigureArg "--with-freemarker-jar=" "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/freemarker-${FREEMARKER_LIB_VERSION}/freemarker.jar"
   fi
 
-  if [[ "${BUILD_CONFIG[FREETYPE]}" == "true" ]] ; then
-    local freetypeDir=BUILD_CONFIG[FREETYPE_DIRECTORY]
-    case "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" in
-       jdk8*|jdk9*|jdk10*) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-"${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/installedfreetype"} ;;
-       *) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-bundled} ;;
-    esac
-    addConfigureArg "--with-freetype=" "${freetypeDir}"
-  fi
-
   addConfigureArg "--with-x=" "/usr/include/X11"
 
   if [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "${JDK8_CORE_VERSION}" ] ; then
@@ -280,14 +271,29 @@ buildingTheRestOfTheConfigParameters()
   fi
 }
 
+configureFreetypeLocation() {
+  if [[ ! "${CONFIGURE_ARGS}" =~ "--with-freetype=" ]]; then
+    if [[ "${BUILD_CONFIG[FREETYPE]}" == "true" ]] ; then
+      local freetypeDir=BUILD_CONFIG[FREETYPE_DIRECTORY]
+      case "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" in
+         jdk8*|jdk9*|jdk10*) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-"${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/installedfreetype"} ;;
+         *) freetypeDir=${BUILD_CONFIG[FREETYPE_DIRECTORY]:-bundled} ;;
+      esac
+      echo "setting freetype dir to ${freetypeDir}"
+      addConfigureArg "--with-freetype=" "${freetypeDir}"
+    fi
+  fi
+}
+
 # Configure the command parameters
 configureCommandParameters()
 {
   configuringVersionStringParameter
   configuringBootJDKConfigureParameter
+  configureFreetypeLocation
+
   if [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] ; then
     echo "Windows or Windows-like environment detected, skipping configuring environment for custom Boot JDK and other 'configure' settings."
-
   else
     echo "Building up the configure command..."
     buildingTheRestOfTheConfigParameters
