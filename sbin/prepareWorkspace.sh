@@ -189,6 +189,9 @@ checkingAndDownloadingFreeType()
     echo "Skipping FreeType download"
   else
     curl -L -o "freetype.tar.gz" "https://download.savannah.gnu.org/releases/freetype/freetype-${BUILD_CONFIG[FREETYPE_FONT_VERSION]}.tar.gz"
+
+    rm -rf "./freetype" || true
+    mkdir -p "freetype" || true
     tar xpzf freetype.tar.gz --strip-components=2 -C "freetype"
     rm freetype.tar.gz
 
