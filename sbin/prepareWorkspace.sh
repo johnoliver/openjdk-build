@@ -192,7 +192,7 @@ checkingAndDownloadingFreeType()
 
     rm -rf "./freetype" || true
     mkdir -p "freetype" || true
-    tar xpzf freetype.tar.gz --strip-components=2 -C "freetype"
+    tar xpzf freetype.tar.gz --strip-components=1 -C "freetype"
     rm freetype.tar.gz
 
     cd freetype || exit
