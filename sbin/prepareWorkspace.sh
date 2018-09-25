@@ -200,7 +200,7 @@ checkingAndDownloadingFreeType()
 
     # We get the files we need at $WORKING_DIR/installedfreetype
     # shellcheck disable=SC2046
-    if ! (msbuild ./builds/windows/vc2010/freetype.sln && ${BUILD_CONFIG[MAKE_COMMAND_NAME]}); then
+    if ! (msbuild.exe ./builds/windows/vc2010/freetype.sln); then
       # shellcheck disable=SC2154
       echo "Failed to configure and build libfreetype, exiting"
       exit;
