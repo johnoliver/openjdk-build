@@ -65,9 +65,9 @@ if [ "${ARCHITECTURE}" == "x64" ]
 then
   if [ "${VARIANT}" == "hotspot" ]
   then
+    export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-toolchain-version=2013"
     if [ "${JAVA_TO_BUILD}" == "${JDK8_VERSION}" ]
     then
-    --freetype-version
       export PATH="/cygdrive/c/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin/amd64/:/cygdrive/c/openjdk/make-3.82/:$PATH"
       export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-freetype-include=/cygdrive/c/openjdk/freetype/include --with-freetype-lib=/cygdrive/c/openjdk/freetype/lib64 --disable-ccache"
     elif [ "${JAVA_TO_BUILD}" == "${JDK9_VERSION}" ]
@@ -87,7 +87,8 @@ then
 
   if [ "${VARIANT}" == "openj9" ]
   then
-    export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-toolchain-version=2017"
+    export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CO
+    NFIGURE_ARGS_FOR_ANY_PLATFORM} --with-toolchain-version=2017"
     export PATH="/cygdrive/c/mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0/mingw64/bin:/usr/bin:$PATH"
     export HAS_AUTOCONF=1
     export BUILD_ARGS="${BUILD_ARGS} --freetype-version 2.5.3"
@@ -107,7 +108,5 @@ then
     then
       export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-freemarker-jar=/cygdrive/c/openjdk/freemarker.jar"
     fi
-  else
-    export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-toolchain-version=2013"
   fi
 fi
