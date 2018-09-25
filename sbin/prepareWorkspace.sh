@@ -200,7 +200,7 @@ checkingAndDownloadingFreeType()
 
     # We get the files we need at $WORKING_DIR/installedfreetype
     # shellcheck disable=SC2046
-    if ! (bash ./configure --prefix="../../${BUILD_CONFIG[WORKING_DIR]}"/installedfreetype "${BUILD_CONFIG[FREETYPE_FONT_BUILD_TYPE_PARAM]}" && ${BUILD_CONFIG[MAKE_COMMAND_NAME]} all && ${BUILD_CONFIG[MAKE_COMMAND_NAME]} install); then
+    if ! (bash ./configure "${BUILD_CONFIG[FREETYPE_FONT_BUILD_TYPE_PARAM]}" && ${BUILD_CONFIG[MAKE_COMMAND_NAME]}); then
       # shellcheck disable=SC2154
       echo "Failed to configure and build libfreetype, exiting"
       exit;
@@ -279,18 +279,18 @@ downloadingRequiredDependencies()
      fi
   fi
 
-   if [[ "${BUILD_CONFIG[FREETYPE]}" == "true" ]] ; then
-     if [ -z "${BUILD_CONFIG[FREETYPE_DIRECTORY]}" ]; then
-          echo "Checking and download FreeType Font dependency"
-          checkingAndDownloadingFreeType
-     else
-         echo ""
-         echo "---> Skipping the process of checking and downloading the FreeType Font dependency, a pre-built version provided at ${BUILD_CONFIG[FREETYPE_DIRECTORY]} <---"
-         echo ""
-     fi
+  if [[ "${BUILD_CONFIG[FREETYPE]}" == "true" ]] ; then
+   if [ -z "${BUILD_CONFIG[FREETYPE_DIRECTORY]}" ]; then
+     echo "Checking and download FreeType Font dependency"
+     checkingAndDownloadingFreeType
    else
-      echo "Skipping Freetype"
+     echo ""
+     echo "---> Skipping the process of checking and downloading the FreeType Font dependency, a pre-built version provided at ${BUILD_CONFIG[FREETYPE_DIRECTORY]} <---"
+     echo ""
    fi
+  else
+    echo "Skipping Freetype"
+  fi
 
   echo "Checking and download CaCerts dependency"
   checkingAndDownloadCaCerts
@@ -344,8 +344,8 @@ relocateToTmpIfNeeded()
 
 function configureWorkspace() {
     createWorkspace
+    downloadingRequiredDependencies
     relocateToTmpIfNeeded
     checkoutAndCloneOpenJDKGitRepo
-    downloadingRequiredDependencies
 }
 
