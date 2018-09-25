@@ -195,6 +195,10 @@ checkingAndDownloadingFreeType()
     tar xpzf freetype.tar.gz --strip-components=1 -C "freetype"
     rm freetype.tar.gz
 
+    if [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] ; then
+       return;
+    fi
+
     cd freetype || exit
 
 
