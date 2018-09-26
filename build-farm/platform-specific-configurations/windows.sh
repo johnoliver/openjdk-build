@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
+#      https://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -87,20 +87,17 @@ then
 
   if [ "${VARIANT}" == "openj9" ]
   then
-
     export PATH="/cygdrive/c/mingw-w64\x86_64-8.1.0-win32-seh-rt_v6-rev0/mingw64/bin:/usr/bin:$PATH"
     export HAS_AUTOCONF=1
     export BUILD_ARGS="${BUILD_ARGS} --freetype-version 2.5.3"
 
     if [ "${JAVA_TO_BUILD}" == "${JDK8_VERSION}" ]
     then
-      #export BUILD_ARGS="${BUILD_ARGS} --freetype-build-param --host=x86_64-w64-mingw32"
       export INCLUDE="C:\Program Files\Debugging Tools for Windows (x64)\sdk\inc;$INCLUDE"
       export PATH="$PATH:/c/cygwin64/bin"
       export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-freetype-include=/cygdrive/c/openjdk/freetype-2.5.3/include --with-freetype-lib=/cygdrive/c/openjdk/freetype-2.5.3/lib64 --with-freemarker-jar=/cygdrive/c/openjdk/freemarker.jar --disable-ccache"
     elif [ "${JAVA_TO_BUILD}" == "${JDK9_VERSION}" ]
     then
-      export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-toolchain-version=2017"
       export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-freetype-src=/cygdrive/c/openjdk/freetype-2.5.3 --with-toolchain-version=2013 --with-freemarker-jar=/cygdrive/c/openjdk/freemarker.jar"
     elif [ "${JAVA_TO_BUILD}" == "${JDK10_VERSION}" ]
     then

@@ -30,7 +30,7 @@ At time of writing the new_build_scripts branch are building most jdk10 jobs
 [![Build Status](https://travis-ci.org/AdoptOpenJDK/openjdk-build.svg?branch=master)](https://travis-ci.org/AdoptOpenJDK/openjdk-build) [![Slack](https://slackin-jmnmplfpdu.now.sh/badge.svg)](https://slackin-jmnmplfpdu.now.sh/)
 
 AdoptOpenJDK makes use of these scripts to build binaries on the build farm at 
-http://ci.adoptopenjdk.net, which produces OpenJDK binaries for consumption via 
+https://ci.adoptopenjdk.net, which produces OpenJDK binaries for consumption via 
 https://www.adoptopenjdk.net and https://api.adoptopenjdk.net.
 
 ## TLDR I want to build a JDK NOW!
