@@ -23,6 +23,7 @@ export ALLOW_DOWNLOADS=true
 export LANG=C
 export JAVA_HOME=$JDK_BOOT_DIR
 export BUILD_ARGS="--tmp-space-build ${BUILD_ARGS}"
+export OPENJDK="true"
 
 if [ "${ARCHITECTURE}" == "x86-32" ]
 then
