@@ -261,8 +261,13 @@ configureCommandParameters()
   configuringVersionStringParameter
   configuringBootJDKConfigureParameter
 
-  if [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]] ; then
+  if [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]]; then
     echo "Windows or Windows-like environment detected, skipping configuring environment for custom Boot JDK and other 'configure' settings."
+
+    if [[ "${BUILD_CONFIG[BUILD_VARIANT]}" == "openj9" ]] ; then
+      echo "adding source route -with-add-source-root=${OPENJDK_DIR}/closed/adds"
+      CONFIGURE_ARGS="${CONFIGURE_ARGS} --with-add-source-root=${OPENJDK_DIR}/closed/adds"
+    fi
   else
     echo "Building up the configure command..."
     buildingTheRestOfTheConfigParameters
