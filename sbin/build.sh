@@ -52,7 +52,6 @@ export GIT_CLONE_ARGUMENTS=()
 # Parse the CL arguments, defers to the shared function in common-functions.sh
 function parseArguments() {
     parseConfigurationArguments "$@"
-
     OPENJDK_DIR="${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}"
 }
 
@@ -265,8 +264,9 @@ configureCommandParameters()
     echo "Windows or Windows-like environment detected, skipping configuring environment for custom Boot JDK and other 'configure' settings."
 
     if [[ "${BUILD_CONFIG[BUILD_VARIANT]}" == "openj9" ]] ; then
-      echo "adding source route -with-add-source-root=${OPENJDK_DIR}/closed/adds"
-      CONFIGURE_ARGS="${CONFIGURE_ARGS} --with-add-source-root=${OPENJDK_DIR}/closed/adds"
+      local addsDir="/cygdrive/c/cygwin64/${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}/closed/adds"
+      echo "adding source route -with-add-source-root=${addsDir}"
+      CONFIGURE_ARGS="${CONFIGURE_ARGS} --with-add-source-root=${addsDir}"
     fi
   else
     echo "Building up the configure command..."
