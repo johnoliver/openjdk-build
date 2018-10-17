@@ -297,10 +297,10 @@ function fetchRootTagIntoRepo() {
   git checkout master
   git fetch "$REWRITE_WORKSPACE/root"
 
-  set +x
+  set +e
   git merge --allow-unrelated-histories -m "Merge base $NEWTAG" FETCH_HEAD
   local result=$?
-  set -x
+  set -e
   fixGeneratedConfigure $result
 }
 
