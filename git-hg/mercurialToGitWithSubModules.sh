@@ -276,6 +276,7 @@ function fixGeneratedConfigure() {
       # we have a conflict, regenerate the file
       chmod +x ./common/autoconf/autogen.sh
       ./common/autoconf/autogen.sh
+      git add ./common/autoconf/autogen.sh || true
       git commit -a --no-edit
     else
       echo "Merge conflicts"
