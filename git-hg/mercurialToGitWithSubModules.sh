@@ -274,6 +274,7 @@ function fixGeneratedConfigure() {
     if [ $num_conflicts == 1 ] && [ $is_generated == 1 ]
     then
       # we have a conflict, regenerate the file
+      chmod +x ./common/autoconf/autogen.sh
       ./common/autoconf/autogen.sh
       git commit -a --no-edit
     else
