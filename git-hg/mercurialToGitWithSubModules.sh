@@ -135,7 +135,7 @@ function setMercurialRepoAndTagsToRetrieve() {
             # HEAD is interpreted by the script below to mean tip/latest commit.
             # Skipping jdk8u152-b16 as it seems to be problematic
             if [ -z "$TAGS" ] ; then
-                TAGS="jdk8u181-b13 jdk8u192-b12 HEAD"
+                TAGS="jdk8u181-b13 HEAD"
             fi;;
      jdk9*) if [ -z "$TAGS" ] ; then
                 TAGS="jdk-9+181 jdk-9.0.1+11 jdk-9.0.3+9 jdk-9.0.4+11 HEAD"
