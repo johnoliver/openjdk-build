@@ -295,15 +295,28 @@ function fetchRootTagIntoRepo() {
 
   echo "$(date +%T)": "Updating master branch for $NEWTAG"
   cd "$REPO_LOCATION" || exit 1
+  git reset --hard
   git branch --unset-upstream || true
-  git checkout master
-  git fetch "$REWRITE_WORKSPACE/root"
+  git fetch --tags
 
-  set +e
-  git merge --allow-unrelated-histories -m "Merge base $NEWTAG" FETCH_HEAD
-  local result=$?
-  set -e
-  fixGeneratedConfigure $result
+
+  if [ "$NEWTAG" == "HEAD" ]
+  then
+    git checkout master
+    git fetch "$REWRITE_WORKSPACE/root"
+    git merge --allow-unrelated-histories -m "Merge base $NEWTAG" FETCH_HEAD
+  else
+    git branch -D "branch-$NEWTAG" || true
+    git checkout -b "branch-$NEWTAG" "refs/tags/$NEWTAG"
+  fi
+
+#  git fetch "$REWRITE_WORKSPACE/root"
+
+#  set +e
+#  git merge --allow-unrelated-histories -m "Merge base $NEWTAG" FETCH_HEAD
+#  local result=$?
+#  set -e
+#  fixGeneratedConfigure $result
 }
 
 function fetchModuleTagIntoRepo() {
@@ -348,39 +361,41 @@ function pushTagToMaster() {
   NEWTAG=$1
 
   cd "$REPO_LOCATION" || exit 1
-  git reset --hard master
-  git push origin master
 
-  echo "Pulling in changes to $TARGET_REPO branch"
+  if [ "$NEWTAG" == "HEAD" ] ; then
+    git reset --hard master
+    git push origin master
 
-  # Grab anything that someone else may have pushed to the remote
-  git fetch origin master
-  if ! git merge --allow-unrelated-histories -m "Merge $NEWTAG into $TARGET_REPO" FETCH_HEAD; then
-    echo Conflict resolution needed in "$REPO_LOCATION"
-    if ! tty; then
-      echo "Aborting - not running on a real tty therefore cannot allow manual intervention"
-      exit 10
-    else
-      echo "Please resolve them in another window then press return to continue"
-      read -r _
+    echo "Pulling in changes to $TARGET_REPO branch"
+
+    # Grab anything that someone else may have pushed to the remote
+    git fetch origin master
+    if ! git merge --allow-unrelated-histories -m "Merge $NEWTAG into $TARGET_REPO" FETCH_HEAD; then
+      echo Conflict resolution needed in "$REPO_LOCATION"
+      if ! tty; then
+        echo "Aborting - not running on a real tty therefore cannot allow manual intervention"
+        exit 10
+      else
+        echo "Please resolve them in another window then press return to continue"
+        read -r _
+      fi
+    fi
+    if [ "$NEWTAG" != "HEAD" ] ; then
+      echo "Override existing tag on the tag from the server if it is present or push will fail"
+      git reset --hard
+      git tag -f -a "$NEWTAG" -m "Merge $NEWTAG into master"
+      git push origin :refs/tags/"$NEWTAG"
+      git push origin master
+      git push origin master --tags
     fi
   fi
 
   if [ "$NEWTAG" != "HEAD" ] ; then
     echo "Override existing tag on the tag from the server if it is present or push will fail"
+    git reset --hard
     git tag -f -a "$NEWTAG" -m "Merge $NEWTAG into master"
-  fi
-
-  if [ "$NEWTAG" != "HEAD" ] ; then
     git push origin :refs/tags/"$NEWTAG"
-  fi
-
-  if [ "$NEWTAG" == "HEAD" ] ; then
-    git push origin master
-  fi
-
-  if [ "$NEWTAG" != "HEAD" ] ; then
-    git push origin master --tags
+    git push origin --tags
   fi
 }
 
