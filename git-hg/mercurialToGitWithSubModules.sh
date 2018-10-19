@@ -67,18 +67,6 @@ MIRROR=$WORKSPACE/openjdk-clean-mirror
 REWRITE_WORKSPACE=$WORKSPACE/openjdk-rewritten-mirror/
 REPO_LOCATION=$WORKSPACE/adoptopenjdk-clone/
 
-# Setup workspace to work in.
-function setupWorkingDir() {
-  if [ -z ${DEBUG_SCRIPT+x} ]; then
-    rm -rf "$REWRITE_WORKSPACE"
-    mkdir -p "$REWRITE_WORKSPACE"
-  else
-    rm -rf "$REWRITE_WORKSPACE/root"
-    rm -rf "$REPO_LOCATION"
-  fi
-}
-
-setupWorkingDir
 
 echo "Import common functionality"
 # shellcheck disable=SC1091
@@ -135,7 +123,7 @@ function setMercurialRepoAndTagsToRetrieve() {
             # HEAD is interpreted by the script below to mean tip/latest commit.
             # Skipping jdk8u152-b16 as it seems to be problematic
             if [ -z "$TAGS" ] ; then
-                TAGS="HEAD"
+                TAGS="jdk8u144-b34 jdk8u162-b12 jdk8u172-b11 ${TAG_181} jdk8u192-b12 HEAD"
             fi;;
      jdk9*) if [ -z "$TAGS" ] ; then
                 TAGS="jdk-9+181 jdk-9.0.1+11 jdk-9.0.3+9 jdk-9.0.4+11 HEAD"
@@ -372,14 +360,9 @@ function doesModuleNeedUpdate() {
 
 function cloneMercurialOpenJDKRepo() {
 
-  if [ -z ${DEBUG_SCRIPT+x} ]; then
-    updateMirrors
-  fi
+  cd "$REWRITE_WORKSPACE" || exit 1
+  checkoutRoot
 
 }
 
-setMercurialRepoAndTagsToRetrieve
-checkGitVersion
-installGitRemoteHg
-cloneGitOpenJDKRepo
 cloneMercurialOpenJDKRepo
