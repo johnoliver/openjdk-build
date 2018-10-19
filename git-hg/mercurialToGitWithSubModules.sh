@@ -376,28 +376,6 @@ function cloneMercurialOpenJDKRepo() {
     updateMirrors
   fi
 
-  cd "$REWRITE_WORKSPACE" || exit 1
-  checkoutRoot
-
-  for NEWTAG in $TAGS ; do
-
-    cd "$REPO_LOCATION" || exit 1
-
-    if git tag | grep "^$NEWTAG$" ; then
-      echo "Skipping $NEWTAG as it already exists"
-    else
-      fetchRootTagIntoRepo "$NEWTAG"
-
-      # For each module
-      for module in "${MODULES[@]}" ; do
-        fetchModuleTagIntoRepo "$NEWTAG" "$module"
-      done
-      pushTagToMaster "$NEWTAG"
-    fi
-  done
-
-
-
 }
 
 setMercurialRepoAndTagsToRetrieve
@@ -405,4 +383,3 @@ checkGitVersion
 installGitRemoteHg
 cloneGitOpenJDKRepo
 cloneMercurialOpenJDKRepo
-performMergeIntoDevFromMaster
