@@ -70,8 +70,8 @@ index 03426c96ff..5d4ac3d2da 100644
 +++ b/hotspot/agent/src/os/linux/libproc.h
 @@ -68,7 +68,7 @@ combination of ptrace and /proc calls.
  *************************************************************************************/
-
-
+ 
+ 
 -#if defined(sparc) || defined(sparcv9) || defined(ppc64)
 +#if defined(sparc) || defined(sparcv9) || defined(ppc64) || defined(ppc64le)
  #include <asm/ptrace.h>
@@ -82,7 +82,7 @@ index b5a41239cc..e553575dd6 100644
 --- a/hotspot/make/defs.make
 +++ b/hotspot/make/defs.make
 @@ -285,7 +285,7 @@ ifneq ($(OSNAME),windows)
-
+ 
    # Use uname output for SRCARCH, but deal with platform differences. If ARCH
    # is not explicitly listed below, it is treated as x86.
 -  SRCARCH    ?= $(ARCH/$(filter sparc sparc64 ia64 amd64 x86_64 ppc ppc64 zero,$(ARCH)))
@@ -97,11 +97,11 @@ index b5a41239cc..e553575dd6 100644
 +  ARCH/ppc64le= ppc
    ARCH/ppc    = ppc
    ARCH/zero   = zero
-
+ 
 @@ -316,8 +317,13 @@ ifneq ($(OSNAME),windows)
      endif
    endif
-
+ 
 -  # LIBARCH is 1:1 mapping from BUILDARCH
 -  LIBARCH        ?= $(LIBARCH/$(BUILDARCH))
 +  # LIBARCH is 1:1 mapping from BUILDARCH, except for ARCH=ppc64le
@@ -144,8 +144,8 @@ index 3037a4b7b9..bf4499ae67 100644
 --- a/hotspot/src/share/tools/hsdis/hsdis-demo.c
 +++ b/hotspot/src/share/tools/hsdis/hsdis-demo.c
 @@ -142,7 +142,7 @@ static const char* load_decode_instructions() {
-
-
+ 
+ 
  static const char* lookup(void* addr) {
 -#if defined(__ia64) || defined(__powerpc__)
 +#if defined(__ia64) || (defined(__powerpc__) && !defined(ABI_ELFv2))
@@ -188,7 +188,7 @@ index 445f1b8465..c41d104d21 100644
 -#endif // ZERO
 +#endif
  #endif
-
+ 
  const char *Abstract_VM_Version::vm_platform_string() {
 diff --git a/jdk/make/lib/SoundLibraries.gmk b/jdk/make/lib/SoundLibraries.gmk
 index 14580959cc..f22c9825e4 100644
@@ -204,14 +204,14 @@ index 14580959cc..f22c9825e4 100644
 +  endif
 +
  endif
-
+ 
  LIBJSOUND_CFLAGS += -DEXTRA_SOUND_JNI_LIBS='"$(EXTRA_SOUND_JNI_LIBS)"'
 diff --git a/jdk/test/tools/launcher/Settings.java b/jdk/test/tools/launcher/Settings.java
 index 16fd29b0b1..8d45c8288b 100644
 --- a/jdk/test/tools/launcher/Settings.java
 +++ b/jdk/test/tools/launcher/Settings.java
 @@ -74,7 +74,7 @@ static void containsAllOptions(TestResult tr) {
-
+ 
      static void runTestOptionDefault() throws IOException {
          String stackSize = "256"; // in kb
 -        if (getArch().equals("ppc64")) {

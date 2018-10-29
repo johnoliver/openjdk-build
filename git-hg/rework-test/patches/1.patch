@@ -59,7 +59,7 @@ index c9992e4c8a..caf4963a93 100644
 @@ -1489,6 +1492,15 @@ do
    | -silent | --silent | --silen | --sile | --sil)
      silent=yes ;;
-
+ 
 +  -runstatedir | --runstatedir | --runstatedi | --runstated \
 +  | --runstate | --runstat | --runsta | --runst | --runs \
 +  | --run | --ru | --r)
@@ -99,17 +99,17 @@ index c9992e4c8a..caf4963a93 100644
    --with-boot-jdk-jvmargs specify JVM arguments to be passed to all
 @@ -4336,7 +4350,7 @@ VS_SDK_PLATFORM_NAME_2017=
  #CUSTOM_AUTOCONF_INCLUDE
-
+ 
  # Do not change or remove the following line, it is needed for consistency checks:
 -DATE_WHEN_GENERATED=1535545082
 +DATE_WHEN_GENERATED=1536947420
-
+ 
  ###############################################################################
  #
 @@ -19843,6 +19857,21 @@ fi
-
-
-
+ 
+ 
+ 
 +  # The company name, if any
 +
 +# Check whether --with-company-name was given.
@@ -125,8 +125,8 @@ index c9992e4c8a..caf4963a93 100644
 +    COMPANY_NAME="$with_company_name"
 +  fi
 +
-
-
+ 
+ 
  # Check whether --with-copyright-year was given.
 diff --git a/common/autoconf/jdk-options.m4 b/common/autoconf/jdk-options.m4
 index 6829d7af30..35e04f3342 100644
@@ -139,7 +139,7 @@ index 6829d7af30..35e04f3342 100644
 -  AC_SUBST(COMPANY_NAME)
    AC_SUBST(MACOSX_BUNDLE_NAME_BASE)
    AC_SUBST(MACOSX_BUNDLE_ID_BASE)
-
+ 
 +  # The company name, if any
 +  AC_ARG_WITH(company-name, [AS_HELP_STRING([--with-company-name],
 +      [Set company name.])])
@@ -165,7 +165,7 @@ index 9db5c9d6f7..0903ed642d 100644
 @@ -30,6 +30,11 @@ include ProfileNames.gmk
  # string and the runtime name into the Version.java file.
  # To be printed by java -version
-
+ 
 +company_name =
 +ifneq ($(COMPANY_NAME),N/A)
 +  company_name=($(COMPANY_NAME))
@@ -181,7 +181,7 @@ index 9db5c9d6f7..0903ed642d 100644
 +	    -e 's/@@company_name@@/$(company_name)/g' \
  	    $< > $@.tmp
  	$(MV) $@.tmp $@
-
+ 
 diff --git a/jdk/src/share/classes/sun/misc/Version.java.template b/jdk/src/share/classes/sun/misc/Version.java.template
 index 32e2586e79..b1642d3f0a 100644
 --- a/jdk/src/share/classes/sun/misc/Version.java.template
@@ -189,7 +189,7 @@ index 32e2586e79..b1642d3f0a 100644
 @@ -44,6 +44,9 @@ public class Version {
      private static final String java_runtime_version =
          "@@java_runtime_version@@";
-
+ 
 +    private static final String company_name =
 +        "@@company_name@@";
 +
@@ -197,12 +197,12 @@ index 32e2586e79..b1642d3f0a 100644
          init();
      }
 @@ -103,7 +106,7 @@ public class Version {
-
+ 
          /* Second line: runtime version (ie, libraries). */
-
+ 
 -        ps.print(java_runtime_name + " (build " + java_runtime_version);
 +        ps.print(java_runtime_name + " " + company_name + "(build " + java_runtime_version);
-
+ 
          if (java_profile_name.length() > 0) {
              // profile name
 @@ -120,7 +123,7 @@ public class Version {
@@ -213,3 +213,4 @@ index 32e2586e79..b1642d3f0a 100644
 +        ps.println(java_vm_name + " " + company_name + "(build " + java_vm_version + ", " +
                     java_vm_info + ")");
      }
+ 
