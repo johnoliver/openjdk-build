@@ -327,5 +327,11 @@ do
 done
 
 cd "$REPO"
+
+git tag | grep ".*\-root" | while read tag
+do
+  git tag -d $tag || true
+done
+
 git prune
 git gc
