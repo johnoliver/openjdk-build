@@ -17,10 +17,12 @@ mkdir -p "$REPO"
 
 cd "$REPO"
 
-git reset --hard
-git checkout master
-git merge --abort || true
-git am --abort || true
+if [ -d ".git" ];then
+  git reset --hard
+  git checkout master
+  git merge --abort || true
+  git am --abort || true
+fi
 
 cd "$SCRIPT_DIR"
 
