@@ -97,7 +97,8 @@ function inititialCheckin() {
   tag=$1
   cd "$REPO"
   if [ "$workingBranch" != "master" ]; then
-    git checkout --orphan release
+    git branch -D "$workingBranch" || true
+    git checkout --orphan "$workingBranch"
     git rm -rf .
   else
     git checkout master
