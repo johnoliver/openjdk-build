@@ -39,7 +39,7 @@ chmod +x merge.sh
 ### Build dev
 ### dev is HEAD track with our patches
 #
-#cd "$REPO"
+cd "$REPO"
 #git branch dev
 git am $PATCHES/1.patch
 cd $SCRIPT_DIR
