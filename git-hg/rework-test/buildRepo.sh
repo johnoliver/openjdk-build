@@ -27,8 +27,8 @@ cd "$SCRIPT_DIR"
 chmod +x merge.sh
 
 # Init new repo to head
-./merge.sh -u -s "HEAD"
-./merge.sh -r -s "HEAD"
+./merge.sh -u -s "jdk8u181-b13"
+./merge.sh -r -s "jdk8u181-b13"
 
 
 
@@ -43,6 +43,7 @@ git am $PATCHES/1.patch
 git am $PATCHES/2.patch
 git am $PATCHES/3.patch
 ################################################
+./merge.sh -s "jdk8u181-b13" -e "HEAD"
 
 
 
