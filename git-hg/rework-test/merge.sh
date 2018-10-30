@@ -25,12 +25,14 @@ mkdir -p "$MODULE_MIRROR"
 MODULES=(corba langtools jaxp jaxws nashorn jdk hotspot)
 MODULES_WITH_ROOT=(root corba langtools jaxp jaxws nashorn jdk hotspot)
 
+DO_TAGGING="false"
 
 REPO="$WORKSPACE/test-repo/"
 
 
 startTag="jdk8u172-b08"
 endTag="jdk8u181-b13"
+workingBranch="master"
 
 function initRepo() {
   rm -rf "$REPO"
@@ -95,15 +97,17 @@ function inititialCheckin() {
   tag=$1
   cd "$REPO"
   git fetch --tag root $tag
-  git checkout master
+  git checkout $workingBranch
   git merge $tag
-  git tag -d $tag
+  if [ "$DO_TAGGING" == "true" ]; then
+    git tag -d $tag
+  fi
 
   for module in "${MODULES[@]}" ; do
       cd "$MIRROR/$module/";
       commitId=$(git rev-list -n 1  $tag)
       cd "$REPO"
-      git checkout master
+      git checkout $workingBranch
       /usr/lib/git-core/git-subtree add --prefix=$module "$MIRROR/$module/" $tag
   done
 }
@@ -180,9 +184,16 @@ function fixAutoConfigure() {
 }
 
 doReset="false"
+doInit="false"
 
-while getopts "urs:e:" opt; do
+while getopts "iturs:e:" opt; do
     case "${opt}" in
+        i)
+            doInit="true"
+            ;;
+        i)
+            DO_TAGGING="true"
+            ;;
         u)
             updateMirrors
             exit
@@ -195,6 +206,9 @@ while getopts "urs:e:" opt; do
             ;;
         e)
             endTag=${OPTARG}
+            ;;
+        b)
+            workingBranch=${OPTARG}
             ;;
         *)
             usage
@@ -215,6 +229,8 @@ if [ "$doReset" == "true" ]; then
 
   git tag "$startTag"
   exit
+elif [ "$doInit" == "true" ]; then
+  inititialCheckin $startTag
 fi
 
 export lastSuccessfulTag="$startTag"
@@ -240,9 +256,11 @@ do
     commitId=$(git rev-list -n 1  $tag)
 
     cd "$REPO"
-    git checkout master
+    git checkout $workingBranch
 
-    git tag -d $tag || true
+    if [ "$DO_TAGGING" == "true" ]; then
+      git tag -d $tag || true
+    fi
     git fetch -q root $tag
 
     set +e
@@ -279,7 +297,7 @@ do
     echo "Success $tag" >> $WORKSPACE/mergedTags
 
     lastSuccessfulTag="$tag"
-    if [ "$tag" -ne "HEAD" ]; then
+    if [ "$DO_TAGGING" == "true" ]; then
       cd "$REPO"
       git tag  -d "$tag" || true
       git branch -D "$tag" || true
