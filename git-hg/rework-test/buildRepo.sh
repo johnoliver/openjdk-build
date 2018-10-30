@@ -33,17 +33,17 @@ chmod +x merge.sh
 ./merge.sh -r -s "jdk8u181-b13"
 
 
-
-
 ################################################
 ## Build dev
 ## dev is HEAD track with our patches
 
 cd "$REPO"
-git branch dev
+git checkout -b dev
 git am $PATCHES/company_name.patch
 cd $SCRIPT_DIR
-./merge.sh -s "jdk8u181-b13" -e "HEAD"
+./merge.sh -s "jdk8u181-b13" -e "HEAD" -b "dev"
+git checkout master
+./merge.sh -s "jdk8u181-b13" -e "HEAD" -b "master"
 ################################################
 
 
