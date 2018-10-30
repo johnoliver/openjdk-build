@@ -43,7 +43,7 @@ git tag
 
 cd "$REPO"
 git branch dev
-git am $PATCHES/1.patch
+git am $PATCHES/company_name.patch
 cd $SCRIPT_DIR
 git tag
 ./merge.sh -s "jdk8u181-b13" -e "HEAD"
@@ -64,9 +64,9 @@ cd "$SCRIPT_DIR"
 
 cd $REPO
 git checkout release
-git am $PATCHES/1.patch
-git am $PATCHES/2.patch
-git am $PATCHES/3.patch
+git am $PATCHES/company_name.patch
+git am $PATCHES/ppc64le_1.patch
+git am $PATCHES/ppc64le_2.patch
 
 
 git tag -d "jdk8u181-b13" || true
