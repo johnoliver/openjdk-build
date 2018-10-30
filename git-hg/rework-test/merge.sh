@@ -53,7 +53,7 @@ function initRepo() {
   cd "$REPO"
   git tag | while read tag
   do
-    git tag -d $tag;
+    git tag -d $tag || true
   done
 }
 
@@ -114,7 +114,7 @@ function inititialCheckin() {
   git merge "$tag-root"
 
   if [ "$DO_TAGGING" == "true" ]; then
-    git tag -d $tag
+    git tag -d $tag || true
   fi
 
   for module in "${MODULES[@]}" ; do
@@ -127,7 +127,7 @@ function inititialCheckin() {
   cd "$REPO"
   git tag | while read tag
   do
-    git tag -d $tag;
+    git tag -d $tag || true
   done
 }
 
@@ -156,7 +156,7 @@ function resetRepo() {
 
       git tag | while read tag
       do
-        git tag -d $tag;
+        git tag -d $tag || true
       done
 
       git tag -f "$startTag"
