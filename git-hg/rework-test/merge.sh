@@ -23,6 +23,7 @@ mkdir -p "$MODULE_MIRROR"
 
 # These the the modules in the mercurial forest that we'll have to iterate over
 MODULES=(corba langtools jaxp jaxws nashorn jdk hotspot)
+MODULES_WITH_ROOT=(root corba langtools jaxp jaxws nashorn jdk hotspot)
 
 
 REPO="$WORKSPACE/test-repo/"
@@ -30,12 +31,6 @@ REPO="$WORKSPACE/test-repo/"
 
 startTag="jdk8u172-b08"
 endTag="jdk8u181-b13"
-
-
-
-#startTag="jdk8u192-b02" #possibly jdk8u181-b13
-#endTag="jdk8u202-b01"
-
 
 function initRepo() {
   rm -rf "$REPO"
@@ -45,21 +40,15 @@ function initRepo() {
   git checkout master
   git reset --hard "$startTag"
   git remote add "root" "$MIRROR/root/"
-#  git fetch root $startTag
-  #git merge root $startTag
-  #git reset --hard FETCH_HEAD
 
   for module in "${MODULES[@]}" ; do
       cd "$MIRROR/$module/";
       git checkout master
       git reset --hard
       firstCommitId=$(git rev-list --max-parents=0 HEAD)
-
-      cd "$REPO"
-      #git remote add -f "$module-repo" "$MIRROR/$module/"
-      #git fetch "$MIRROR/$module/"
   done
 
+  cd "$REPO"
   git tag | while read tag
   do
     git tag -d $tag;
@@ -70,39 +59,31 @@ function canMergeTag() {
     tag=$1
     lastSuccessfulTag=$2
 
+    canMerge="true"
+
+
     cd "$REPO"
-
-    present="true"
-
-    cd "$MIRROR/root/";
     if [ ! $(git tag -l "$tag") ]; then
-        present="false"
-    else
-        tagCommitId=$(git rev-parse --verify $tag)
-        lastTagCommitId=$(git rev-parse --verify $lastSuccessfulTag)
-
-        git merge-base --is-ancestor $lastTagCommitId $tagCommitId
-        if [ $? != 0 ]; then
-            present="false"
-        fi
+        # tag already exists in repo
+        canMerge="false"
     fi
 
-    for module in "${MODULES[@]}" ; do
+    for module in "${MODULES_WITH_ROOT[@]}" ; do
         cd "$MIRROR/$module/";
         if [ ! $(git tag -l "$tag") ]; then
-            present="false"
+            canMerge="false"
         else
           tagCommitId=$(git rev-parse --verify $tag)
           lastTagCommitId=$(git rev-parse --verify $lastSuccessfulTag)
 
           git merge-base --is-ancestor $lastTagCommitId $tagCommitId
           if [ $? != 0 ]; then
-              present="false"
+              canMerge="false"
           fi
         fi
     done
 
-    echo "$present"
+    echo "$canMerge"
 }
 
 function inititialCheckin() {
@@ -119,7 +100,6 @@ function inititialCheckin() {
       cd "$REPO"
       git checkout master
       /usr/lib/git-core/git-subtree add --prefix=$module "$MIRROR/$module/" $tag
-      #/usr/lib/git-core/git-subtree split --prefix=$module --annotate="($module split)" --branch "$module-branch"
   done
 }
 
@@ -134,10 +114,6 @@ function resetRepo() {
     git remote add -f "upstream" "$MIRROR/root/"
     git merge $startTag
     git tag -f "$startTag"
-    #git fetch "$MIRROR/root/"
-    #lastCommit=$(git rev-list -n 1  HEAD)
-    #git rebase FETCH_HEAD
-
 
     for module in "${MODULES[@]}" ; do
       rm -rf "$MODULE_MIRROR/$module"
@@ -192,6 +168,12 @@ function updateMirrors() {
   done
 }
 
+function fixAutoConfigure() {
+    chmod +x ./common/autoconf/autogen.sh
+    ./common/autoconf/autogen.sh
+    git commit -a --no-edit
+}
+
 doReset="false"
 
 while getopts "urs:e:" opt; do
@@ -230,94 +212,77 @@ if [ "$doReset" == "true" ]; then
   exit
 fi
 
-
-count=1
-
-cd "$MIRROR/root"
 export lastSuccessfulTag="$startTag"
 
-#for tag in $(git log --topo-order --oneline --decorate --simplify-by-decoration --ancestry-path $startTag..$endTag | egrep -o "tag: [0-9A-Za-z-]+" | tac | cut -f2 -d' ');
 for tag in $startTag $endTag
 do
   cd "$MIRROR/root"
   failed="false"
 
     echo $tag
-    present=$(canMergeTag "$tag" "$lastSuccessfulTag")
+    canMerge=$(canMergeTag "$tag" "$lastSuccessfulTag")
 
-    if [ "$present" == "true" ]; then
+    if [ "$canMerge" != "true" ]; then
+      echo "Skipping $tag due to not being able to merge"
+      continue
+    fi
 
-        cd "$REPO"
+    cd "$REPO"
 
-        echo "$tag" >> /tmp/mergedTags
-        count=$(($count + 1));
-        if [ $(($count % 20)) == 0 ]; then
-                git prune
-                git gc
+    echo "$tag" >> $WORKSPACE/mergedTags
+
+    cd "$MIRROR/root/";
+    commitId=$(git rev-list -n 1  $tag)
+
+    cd "$REPO"
+    git checkout master
+
+    git tag -d $tag || true
+    git fetch -q root $tag
+
+    set +e
+    git merge -q -m "Merge root at $tag" $commitId
+
+    if [[ "$?" -ne "0" ]]; then
+      if [ "$(git diff --name-only --diff-filter=U | wc -l)" == "1" ] && [ "$(git diff --name-only --diff-filter=U)" == "common/autoconf/generated-configure.sh" ];
+      then
+        fixAutoConfigure
+      else
+          git reset --hard $lastSuccessfulTag
+          failed="true"
+          continue
+      fi
+    fi
+    set -e
+
+    for module in "${MODULES[@]}" ; do
+        if [ "$failed" == "true" ]; then
+          continue;
         fi
 
-        cd "$MIRROR/root/";
-        commitId=$(git rev-list -n 1  $tag)
         cd "$REPO"
-        git checkout master
-
-        git tag -d $tag || true
-        git fetch -q root $tag
-
 
         set +e
-        git merge -q -m "Merge root at $tag" $commitId
+        /usr/lib/git-core/git-subtree pull -q -m "Merge $module at $tag" --prefix=$module "$MIRROR/$module/" $tag
 
         if [[ "$?" -ne "0" ]]; then
-           if [ "$(git diff --name-only --diff-filter=U | wc -l)" == "1" ] && [ "$(git diff --name-only --diff-filter=U)" == "common/autoconf/generated-configure.sh" ];
-           then
-                chmod +x ./common/autoconf/autogen.sh
-                ./common/autoconf/autogen.sh
-                git commit -a --no-edit
-           else
-                git reset --hard $lastSuccessfulTag
-                failed="true"
-                continue
-           fi
+            git reset --hard $lastSuccessfulTag
+            failed="true"
         fi
         set -e
+    done
+    echo "Success $tag" >> $WORKSPACE/mergedTags
 
-        lastCommit=$(git rev-list -n 1  HEAD)
-        #git rebase -X theirs --onto master $lastCommit FETCH_HEAD
-
-        for module in "${MODULES[@]}" ; do
-            if [ "$failed" == "true" ]; then
-              continue;
-            fi
-            cd "$MIRROR/$module/";
-
-            commitId=$(git rev-list -n 1  $tag)
-
-            cd "$REPO"
-
-            #git fetch "$module-repo" $commitId
-
-            set +e
-            /usr/lib/git-core/git-subtree pull -q -m "Merge $module at $tag" --prefix=$module "$MIRROR/$module/" $tag
-
-            if [[ "$?" -ne "0" ]]; then
-                git reset --hard $lastSuccessfulTag
-                failed="true"
-            fi
-            set -e
-        done
-        echo "Success $tag" >> /tmp/mergedTags
-
-        cd "$REPO"
-        lastSuccessfulTag="$tag"
-        git tag  -d "$tag" || true
-        git tag  -f "$tag"
-    else
-        echo "Skipping $tag due to not being present"
-    fi
-
-    if [ "$endTag" == "$tag" ];
-    then
-      exit 0
+    lastSuccessfulTag="$tag"
+    if [ "$tag" -ne "HEAD" ]; then
+      cd "$REPO"
+      git tag  -d "$tag" || true
+      git branch -D "$tag" || true
+      git branch "$tag"
+      git tag  -f "$tag"
     fi
 done
+
+cd "$REPO"
+git prune
+git gc
