@@ -40,8 +40,6 @@ chmod +x merge.sh
 cd "$REPO"
 git branch dev
 git am $PATCHES/1.patch
-git am $PATCHES/2.patch
-git am $PATCHES/3.patch
 cd $SCRIPT_DIR
 ./merge.sh -s "jdk8u181-b13" -e "HEAD"
 ################################################
