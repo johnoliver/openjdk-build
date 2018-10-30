@@ -1,8 +1,5 @@
 #!/bin/bash
 
-##cd git-hg
-##bash -x ./mercurialToGitWithSubModules.sh http://hg.openjdk.java.net/jdk8u/jdk8u jdk8u git@github.com:AdoptOpenJDK openjdk-jdk8u-test
-
 set -eux
 
 # Set up the workspace to work from
@@ -28,19 +25,19 @@ cd "$SCRIPT_DIR"
 
 chmod +x merge.sh
 
-## Init new repo to head
-#./merge.sh -u -s "jdk8u181-b13"
-#./merge.sh -r -s "jdk8u181-b13"
-#
-#
-#
-#
-#################################################
-### Build dev
-### dev is HEAD track with our patches
-#
+# Init new repo to head
+./merge.sh -u -s "jdk8u181-b13"
+./merge.sh -r -s "jdk8u181-b13"
+
+
+
+
+################################################
+## Build dev
+## dev is HEAD track with our patches
+
 cd "$REPO"
-#git branch dev
+git branch dev
 git am $PATCHES/1.patch
 cd $SCRIPT_DIR
 ./merge.sh -s "jdk8u181-b13" -e "HEAD"
