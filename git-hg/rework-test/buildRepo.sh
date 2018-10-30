@@ -23,9 +23,9 @@ git merge --abort || true
 git am --abort || true
 
 cd "$SCRIPT_DIR"
-#
-#chmod +x merge.sh
-#
+
+chmod +x merge.sh
+
 ## Init new repo to head
 #./merge.sh -u -s "jdk8u181-b13"
 #./merge.sh -r -s "jdk8u181-b13"
