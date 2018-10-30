@@ -5,8 +5,6 @@
 
 set -eux
 
-cd "git-hg/rework-test"
-
 SCRIPT_DIR=$(pwd)
 WORKSPACE="$SCRIPT_DIR/workspace"
 MIRROR="$WORKSPACE/openjdk-clean-mirror"
