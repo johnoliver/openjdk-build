@@ -5,15 +5,16 @@
 
 set -eux
 
-SCRIPT_DIR=$(pwd)
+# Set up the workspace to work from
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+mkdir -p "$SCRIPT_DIR/workspace"
 WORKSPACE="$SCRIPT_DIR/workspace"
 MIRROR="$WORKSPACE/openjdk-clean-mirror"
 REWRITE_WORKSPACE="$WORKSPACE/openjdk-rewritten-mirror/"
 REPO_LOCATION="$WORKSPACE/adoptopenjdk-clone/"
-
-MODULE_MIRROR="$WORKSPACE/module-mirrors/"
 REPO="$WORKSPACE/test-repo/"
-PATCHES="$SCRIPT_DIR/patches/"
+
+
 
 cd "$REPO"
 
