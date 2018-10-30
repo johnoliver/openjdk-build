@@ -61,6 +61,11 @@ function canMergeTag() {
 
     canMerge="true"
 
+    if [ "$tag!" == "HEAD" ]; then
+      echo "true"
+      return
+    fi
+
 
     cd "$REPO"
     if [ ! $(git tag -l "$tag") ]; then
