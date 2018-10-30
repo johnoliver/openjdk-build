@@ -11,6 +11,7 @@ REWRITE_WORKSPACE="$WORKSPACE/openjdk-rewritten-mirror/"
 REPO_LOCATION="$WORKSPACE/adoptopenjdk-clone/"
 REPO="$WORKSPACE/test-repo/"
 PATCHES="$SCRIPT_DIR/patches/"
+mkdir -p "$REPO"
 
 
 
