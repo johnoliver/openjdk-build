@@ -63,9 +63,15 @@ cd "$SCRIPT_DIR"
 ./merge.sh -t -s "jdk8u172-b11" -e "jdk8u181-b13" -b "release"
 
 cd $REPO
+git checkout release
 git am $PATCHES/1.patch
 git am $PATCHES/2.patch
 git am $PATCHES/3.patch
+
+
+git tag -d "jdk8u181-b13" || true
+git tag -f "jdk8u181-b13"
+
 cd $SCRIPT_DIR
 ./merge.sh -s "jdk8u181-b13" -e "jdk8u192-b12" -b "release"
 ################################################
