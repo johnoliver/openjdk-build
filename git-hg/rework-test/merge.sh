@@ -115,6 +115,7 @@ function inititialCheckin() {
   for module in "${MODULES[@]}" ; do
       cd "$MIRROR/$module/";
       commitId=$(git rev-list -n 1  $tag)
+      cd "$REPO"
       /usr/lib/git-core/git-subtree add --prefix=$module "$MIRROR/$module/" $tag
   done
 
