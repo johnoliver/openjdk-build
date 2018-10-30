@@ -106,9 +106,9 @@ function inititialCheckin() {
   fi
 
   if [ "$tag" != "HEAD" ]; then
-    git fetch root +refs/tags/$tag:refs/tags/$tag-root
+    git fetch root --no-tags +refs/tags/$tag:refs/tags/$tag-root
   else
-    git fetch root HEAD
+    git fetch root --no-tags HEAD
   fi
   git branch
   git merge "$tag-root"
@@ -278,9 +278,9 @@ do
   fi
 
   if [ "$tag" != "HEAD" ]; then
-    git fetch root +refs/tags/$tag:refs/tags/$tag-root
+    git fetch --no-tags root +refs/tags/$tag:refs/tags/$tag-root
   else
-    git fetch root HEAD
+    git fetch --no-tags root HEAD
   fi
 
   set +e
