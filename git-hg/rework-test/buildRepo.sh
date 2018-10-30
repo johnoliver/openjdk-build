@@ -29,10 +29,8 @@ cd "$SCRIPT_DIR"
 chmod +x merge.sh
 
 # Init new repo to head
-./merge.sh -u -s "jdk8u181-b13"
-git tag
+./merge.sh -u
 ./merge.sh -r -s "jdk8u181-b13"
-git tag
 
 
 
@@ -45,9 +43,7 @@ cd "$REPO"
 git branch dev
 git am $PATCHES/company_name.patch
 cd $SCRIPT_DIR
-git tag
 ./merge.sh -s "jdk8u181-b13" -e "HEAD"
-git tag
 ################################################
 
 
@@ -71,6 +67,8 @@ git am $PATCHES/ppc64le_2.patch
 
 git tag -d "jdk8u181-b13" || true
 git tag -f "jdk8u181-b13"
+git branch -D "jdk8u181-b13"
+git branch "jdk8u181-b13"
 
 cd $SCRIPT_DIR
 ./merge.sh -s "jdk8u181-b13" -e "jdk8u192-b12" -b "release"
