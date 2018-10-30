@@ -61,7 +61,7 @@ function canMergeTag() {
 
     canMerge="true"
 
-    if [ "$tag!" == "HEAD" ]; then
+    if [ "$tag" == "HEAD" ]; then
       echo "true"
       return
     fi
