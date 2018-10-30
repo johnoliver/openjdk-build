@@ -27,33 +27,29 @@ cd "$SCRIPT_DIR"
 
 chmod +x merge.sh
 
-## Init new repo to head
-#./merge.sh -u -s "jdk8u181-b13"
-#./merge.sh -r -s "jdk8u181-b13"
-#
-#
-#
-#
-#################################################
-### Build dev
-### dev is HEAD track with our patches
-#
-#cd "$REPO"
-#git branch dev
-#git am $PATCHES/1.patch
-#cd $SCRIPT_DIR
-#./merge.sh -s "jdk8u181-b13" -e "HEAD"
-#################################################
+# Init new repo to head
+./merge.sh -u -s "jdk8u181-b13"
+./merge.sh -r -s "jdk8u181-b13"
+
+
+
+
+################################################
+## Build dev
+## dev is HEAD track with our patches
+
+cd "$REPO"
+git branch dev
+git am $PATCHES/1.patch
+cd $SCRIPT_DIR
+./merge.sh -s "jdk8u181-b13" -e "HEAD"
+################################################
 
 
 
 ################################################
 ## Build release
 ## release moves from tag to tag with our patches
-cd "$REPO"
-git checkout master
-git branch -D release || true
-git checkout --orphan release
 cd "$SCRIPT_DIR"
 
 ./merge.sh -t -i -s "jdk8u144-b34" -b "release"
