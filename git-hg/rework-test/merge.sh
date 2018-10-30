@@ -192,7 +192,7 @@ while getopts "iturs:e:b:" opt; do
         i)
             doInit="true"
             ;;
-        i)
+        t)
             DO_TAGGING="true"
             ;;
         u)
