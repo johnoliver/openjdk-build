@@ -104,9 +104,9 @@ function inititialCheckin() {
     git checkout master
   fi
 
-  git fetch --tag root $tag
+  git fetch root +refs/tags/$tag:refs/tags/$tag-root
   git branch
-  git merge "$tag"
+  git merge "$tag-root"
 
   if [ "$DO_TAGGING" == "true" ]; then
     git tag -d $tag
@@ -119,6 +119,7 @@ function inititialCheckin() {
       /usr/lib/git-core/git-subtree add --prefix=$module "$MIRROR/$module/" $tag
   done
 
+  cd "$REPO"
   git tag | while read tag
   do
     git tag -d $tag;
@@ -249,70 +250,70 @@ do
   cd "$MIRROR/root"
   failed="false"
 
-    echo $tag
-    canMerge=$(canMergeTag "$tag" "$lastSuccessfulTag")
+  echo $tag
+  canMerge=$(canMergeTag "$tag" "$lastSuccessfulTag")
 
-    if [ "$canMerge" != "true" ]; then
-      echo "Skipping $tag due to not being able to merge"
-      continue
+  if [ "$canMerge" != "true" ]; then
+    echo "Skipping $tag due to not being able to merge"
+    continue
+  fi
+
+  cd "$REPO"
+
+  echo "$tag" >> $WORKSPACE/mergedTags
+
+  cd "$MIRROR/root/";
+  commitId=$(git rev-list -n 1  $tag)
+
+  cd "$REPO"
+  git checkout $workingBranch
+
+  if [ "$DO_TAGGING" == "true" ]; then
+    git tag -d $tag || true
+  fi
+  git fetch root +refs/tags/$tag:refs/tags/$tag-root
+
+  set +e
+  git merge -q -m "Merge root at $tag" $commitId
+
+  if [[ "$?" -ne "0" ]]; then
+    if [ "$(git diff --name-only --diff-filter=U | wc -l)" == "1" ] && [ "$(git diff --name-only --diff-filter=U)" == "common/autoconf/generated-configure.sh" ];
+    then
+      fixAutoConfigure
+    else
+        git reset --hard $lastSuccessfulTag
+        failed="true"
+        continue
     fi
+  fi
+  set -e
 
-    cd "$REPO"
+  for module in "${MODULES[@]}" ; do
+      if [ "$failed" == "true" ]; then
+        continue;
+      fi
 
-    echo "$tag" >> $WORKSPACE/mergedTags
+      cd "$REPO"
 
-    cd "$MIRROR/root/";
-    commitId=$(git rev-list -n 1  $tag)
+      set +e
+      /usr/lib/git-core/git-subtree pull -q -m "Merge $module at $tag" --prefix=$module "$MIRROR/$module/" $tag
 
-    cd "$REPO"
-    git checkout $workingBranch
-
-    if [ "$DO_TAGGING" == "true" ]; then
-      git tag -d $tag || true
-    fi
-    git fetch -q root $tag
-
-    set +e
-    git merge -q -m "Merge root at $tag" $commitId
-
-    if [[ "$?" -ne "0" ]]; then
-      if [ "$(git diff --name-only --diff-filter=U | wc -l)" == "1" ] && [ "$(git diff --name-only --diff-filter=U)" == "common/autoconf/generated-configure.sh" ];
-      then
-        fixAutoConfigure
-      else
+      if [[ "$?" -ne "0" ]]; then
           git reset --hard $lastSuccessfulTag
           failed="true"
-          continue
       fi
-    fi
-    set -e
+      set -e
+  done
+  echo "Success $tag" >> $WORKSPACE/mergedTags
 
-    for module in "${MODULES[@]}" ; do
-        if [ "$failed" == "true" ]; then
-          continue;
-        fi
-
-        cd "$REPO"
-
-        set +e
-        /usr/lib/git-core/git-subtree pull -q -m "Merge $module at $tag" --prefix=$module "$MIRROR/$module/" $tag
-
-        if [[ "$?" -ne "0" ]]; then
-            git reset --hard $lastSuccessfulTag
-            failed="true"
-        fi
-        set -e
-    done
-    echo "Success $tag" >> $WORKSPACE/mergedTags
-
-    lastSuccessfulTag="$tag"
-    if [ "$DO_TAGGING" == "true" ]; then
-      cd "$REPO"
-      git tag  -d "$tag" || true
-      git branch -D "$tag" || true
-      git branch "$tag"
-      git tag  -f "$tag"
-    fi
+  lastSuccessfulTag="$tag"
+  if [ "$DO_TAGGING" == "true" ]; then
+    cd "$REPO"
+    git tag  -d "$tag" || true
+    git branch -D "$tag" || true
+    git branch "$tag"
+    git tag  -f "$tag"
+  fi
 done
 
 cd "$REPO"
