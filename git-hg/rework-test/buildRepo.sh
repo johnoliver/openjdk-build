@@ -53,7 +53,7 @@ cd "$REPO"
 git branch --orphan release
 cd "$SCRIPT_DIR"
 
-./merge.sh -i -s "jdk8u144-b34" -b "release"
+./merge.sh -t i -s "jdk8u144-b34" -b "release"
 ./merge.sh -t -s "jdk8u144-b34" -e "jdk8u162-b12" -b "release"
 ./merge.sh -t -s "jdk8u162-b12" -e "jdk8u172-b11" -b "release"
 ./merge.sh -t -s "jdk8u172-b11" -e "jdk8u181-b13" -b "release"

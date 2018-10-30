@@ -224,8 +224,6 @@ if [ "$doReset" == "true" ]; then
   do
     git tag -d $tag;
   done
-
-  git tag "$startTag"
   exit
 elif [ "$doInit" == "true" ]; then
   inititialCheckin $startTag
