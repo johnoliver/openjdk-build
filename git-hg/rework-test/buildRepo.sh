@@ -50,6 +50,8 @@ chmod +x merge.sh
 ## Build release
 ## release moves from tag to tag with our patches
 cd "$REPO"
+git checkout master
+git branch -D release
 git checkout --orphan release
 cd "$SCRIPT_DIR"
 

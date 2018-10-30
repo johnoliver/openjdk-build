@@ -111,6 +111,11 @@ function inititialCheckin() {
       git checkout $workingBranch
       /usr/lib/git-core/git-subtree add --prefix=$module "$MIRROR/$module/" $tag
   done
+
+  git tag | while read tag
+  do
+    git tag -d $tag;
+  done
 }
 
 function resetRepo() {
@@ -222,14 +227,10 @@ shift $((OPTIND-1))
 if [ "$doReset" == "true" ]; then
   initRepo
   inititialCheckin $startTag
-
-  git tag | while read tag
-  do
-    git tag -d $tag;
-  done
   exit
 elif [ "$doInit" == "true" ]; then
   inititialCheckin $startTag
+  exit
 fi
 
 export lastSuccessfulTag="$startTag"
