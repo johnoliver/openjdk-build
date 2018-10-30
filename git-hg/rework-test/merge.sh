@@ -96,9 +96,11 @@ function canMergeTag() {
 function inititialCheckin() {
   tag=$1
   cd "$REPO"
+  if [ "$workingBranch" != "HEAD" ]; then
+    git checkout --orphan release
+  fi
   git fetch --tag root $tag
   git branch
-  git checkout "$workingBranch"
   git merge $tag
 
   if [ "$DO_TAGGING" == "true" ]; then
