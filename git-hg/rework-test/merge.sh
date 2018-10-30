@@ -70,7 +70,7 @@ function canMergeTag() {
 
 
     cd "$REPO"
-    if [ ! $(git tag -l "$tag") ]; then
+    if [ "$DO_TAGGING" == "true" ] && [ ! $(git tag -l "$tag") ]; then
         # tag already exists in repo
         canMerge="false"
     fi
