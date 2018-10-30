@@ -206,6 +206,7 @@ while getopts "iturs:e:b:" opt; do
             ;;
         r)
             doReset="true"
+            doInit="true"
             ;;
         s)
             startTag=${OPTARG}
@@ -218,6 +219,7 @@ while getopts "iturs:e:b:" opt; do
             ;;
         *)
             usage
+            exit
             ;;
     esac
 done
@@ -226,9 +228,9 @@ shift $((OPTIND-1))
 
 if [ "$doReset" == "true" ]; then
   initRepo
-  inititialCheckin $startTag
-  exit
-elif [ "$doInit" == "true" ]; then
+fi
+
+if [ "$doInit" == "true" ]; then
   inititialCheckin $startTag
   exit
 fi
