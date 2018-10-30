@@ -99,7 +99,10 @@ function inititialCheckin() {
   git fetch --tag root $tag
   git checkout $workingBranch
   git merge $tag
-  git tag -d $tag
+
+  if [ "$DO_TAGGING" == "true" ]; then
+    git tag -d $tag
+  fi
 
   for module in "${MODULES[@]}" ; do
       cd "$MIRROR/$module/";
