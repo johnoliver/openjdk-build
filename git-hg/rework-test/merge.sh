@@ -96,12 +96,16 @@ function canMergeTag() {
 function inititialCheckin() {
   tag=$1
   cd "$REPO"
-  if [ "$workingBranch" != "HEAD" ]; then
+  if [ "$workingBranch" != "master" ]; then
     git checkout --orphan release
+    git rm -rf .
+  else
+    git checkout master
   fi
+
   git fetch --tag root $tag
   git branch
-  git merge $tag
+  git merge "$tag"
 
   if [ "$DO_TAGGING" == "true" ]; then
     git tag -d $tag
@@ -110,8 +114,6 @@ function inititialCheckin() {
   for module in "${MODULES[@]}" ; do
       cd "$MIRROR/$module/";
       commitId=$(git rev-list -n 1  $tag)
-      cd "$REPO"
-      git checkout $workingBranch
       /usr/lib/git-core/git-subtree add --prefix=$module "$MIRROR/$module/" $tag
   done
 
