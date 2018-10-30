@@ -187,7 +187,7 @@ function fixAutoConfigure() {
 doReset="false"
 doInit="false"
 
-while getopts "iturs:e:" opt; do
+while getopts "iturs:e:b:" opt; do
     case "${opt}" in
         i)
             doInit="true"
