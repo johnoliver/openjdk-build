@@ -104,7 +104,11 @@ function inititialCheckin() {
     git checkout master
   fi
 
-  git fetch root +refs/tags/$tag:refs/tags/$tag-root
+  if [ "$tag" != "HEAD" ]; then
+    git fetch root +refs/tags/$tag:refs/tags/$tag-root
+  else
+    git fetch root HEAD
+  fi
   git branch
   git merge "$tag-root"
 
@@ -271,7 +275,12 @@ do
   if [ "$DO_TAGGING" == "true" ]; then
     git tag -d $tag || true
   fi
-  git fetch root +refs/tags/$tag:refs/tags/$tag-root
+
+  if [ "$tag" != "HEAD" ]; then
+    git fetch root +refs/tags/$tag:refs/tags/$tag-root
+  else
+    git fetch root HEAD
+  fi
 
   set +e
   git merge -q -m "Merge root at $tag" $commitId
