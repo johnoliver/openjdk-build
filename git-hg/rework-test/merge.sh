@@ -70,10 +70,11 @@ function canMergeTag() {
 
 
     cd "$REPO"
-    #if [ "$DO_TAGGING" == "true" ] && [ ! $(git tag -l "$tag") ]; then
+    git tag
+    if [ "$DO_TAGGING" == "true" ] && [ ! $(git tag -l "$tag") ]; then
         # tag already exists in repo
-    #    canMerge="false"
-    #fi
+        canMerge="false"
+    fi
 
     for module in "${MODULES_WITH_ROOT[@]}" ; do
         cd "$MIRROR/$module/";

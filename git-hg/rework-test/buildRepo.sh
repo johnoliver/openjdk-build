@@ -30,7 +30,9 @@ chmod +x merge.sh
 
 # Init new repo to head
 ./merge.sh -u -s "jdk8u181-b13"
+git tag
 ./merge.sh -r -s "jdk8u181-b13"
+git tag
 
 
 
@@ -43,7 +45,9 @@ cd "$REPO"
 git branch dev
 git am $PATCHES/1.patch
 cd $SCRIPT_DIR
+git tag
 ./merge.sh -s "jdk8u181-b13" -e "HEAD"
+git tag
 ################################################
 
 
