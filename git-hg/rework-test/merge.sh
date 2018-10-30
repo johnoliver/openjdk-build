@@ -68,10 +68,8 @@ function canMergeTag() {
       return
     fi
 
-
     cd "$REPO"
-    git tag
-    if [ "$DO_TAGGING" == "true" ] && [ "$(git tag -l "$tag" | wc -l)" != "0" ]; then
+    if [ "$DO_TAGGING" == "true" ] && [ $(git tag -l "$tag") ]; then
         # tag already exists in repo
         canMerge="false"
     fi
