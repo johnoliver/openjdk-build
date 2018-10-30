@@ -50,7 +50,7 @@ cd $SCRIPT_DIR
 ## Build release
 ## release moves from tag to tag with our patches
 cd "$REPO"
-git checkout --orphan -b release
+git checkout --orphan release
 cd "$SCRIPT_DIR"
 
 ./merge.sh -t i -s "jdk8u144-b34" -b "release"
