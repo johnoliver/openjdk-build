@@ -97,7 +97,8 @@ function inititialCheckin() {
   tag=$1
   cd "$REPO"
   git fetch --tag root $tag
-  git checkout $workingBranch
+  git branch
+  git checkout "$workingBranch"
   git merge $tag
 
   if [ "$DO_TAGGING" == "true" ]; then
