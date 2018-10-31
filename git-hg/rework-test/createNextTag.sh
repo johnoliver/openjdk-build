@@ -26,8 +26,13 @@ git am --abort || true
 git checkout release
 git reset --hard
 
+TAG="jdk8u192-b12"
+if [ "$#" -gt 0 ]; then
+  TAG="$1"
+fi
+
 cd $SCRIPT_DIR
 # move from jdk8u181-b13 to jdk8u192-b12
-./merge.sh -s "jdk8u181-b13" -e "jdk8u192-b12" -b "release"
+./merge.sh -s "jdk8u181-b13" -e "$TAG" -b "release"
 
 
