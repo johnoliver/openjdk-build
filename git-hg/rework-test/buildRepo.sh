@@ -86,14 +86,13 @@ git am $PATCHES/company_name.patch
 git am $PATCHES/ppc64le_1.patch
 git am $PATCHES/ppc64le_2.patch
 
-
 git tag -d "jdk8u181-b13" || true
 git tag -f "jdk8u181-b13"
 git branch -D "jdk8u181-b13"
 git branch "jdk8u181-b13"
 
 cd $SCRIPT_DIR
-./merge.sh -T "jdk8u192-b12" -b "release"
+./merge.sh -t -T "jdk8u192-b12" -b "release"
 ################################################
 
 
