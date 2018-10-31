@@ -64,8 +64,6 @@ git checkout master
 
 cd $SCRIPT_DIR
 
-# init master to start tracking at jdk8u181-b13
-./merge.sh -i -T "jdk8u181-b13" -b "master"
 # Update dev to HEAD
 ./merge.sh -T "HEAD" -b "master"
 ################################################
