@@ -33,7 +33,7 @@ chmod +x merge.sh
 ################################################
 ## Build master
 ## Init master to be synced at jdk8u181-b13
-./merge.sh -r -s "jdk8u181-b13"
+./merge.sh -r -T "jdk8u181-b13"
 ################################################
 
 
@@ -42,14 +42,17 @@ chmod +x merge.sh
 ## Build dev
 ## dev branch is HEAD track with our patches
 cd "$REPO"
+
+# as repo has just been inited to jdk8u181-b13 dev will be at jdk8u181-b13
 git checkout -b dev
 
 # Apply our patches
 git am $PATCHES/company_name.patch
 
-# Update dev to HEAD
 cd $SCRIPT_DIR
-./merge.sh -s "jdk8u181-b13" -e "HEAD" -b "dev"
+
+# Update dev to HEAD
+./merge.sh -T "HEAD" -b "dev"
 ################################################
 
 
@@ -60,7 +63,11 @@ cd "$REPO"
 git checkout master
 
 cd $SCRIPT_DIR
-./merge.sh -s "jdk8u181-b13" -e "HEAD" -b "master"
+
+# init master to start tracking at jdk8u181-b13
+./merge.sh -i -T "jdk8u181-b13" -b "master"
+# Update dev to HEAD
+./merge.sh -T "HEAD" -b "master"
 ################################################
 
 
@@ -70,10 +77,10 @@ cd $SCRIPT_DIR
 ## release moves from tag to tag with our patches
 cd "$SCRIPT_DIR"
 
-./merge.sh -t -i -s "jdk8u144-b34" -b "release"
-./merge.sh -t -s "jdk8u144-b34" -e "jdk8u162-b12" -b "release"
-./merge.sh -t -s "jdk8u162-b12" -e "jdk8u172-b11" -b "release"
-./merge.sh -t -s "jdk8u172-b11" -e "jdk8u181-b13" -b "release"
+./merge.sh -t -i -T "jdk8u144-b34" -b "release"
+./merge.sh -t -T "jdk8u162-b12" -b "release"
+./merge.sh -t -T "jdk8u172-b11" -b "release"
+./merge.sh -t -T "jdk8u181-b13" -b "release"
 
 cd $REPO
 git checkout release
@@ -88,7 +95,7 @@ git branch -D "jdk8u181-b13"
 git branch "jdk8u181-b13"
 
 cd $SCRIPT_DIR
-./merge.sh -s "jdk8u181-b13" -e "jdk8u192-b12" -b "release"
+./merge.sh -T "jdk8u192-b12" -b "release"
 ################################################
 
 

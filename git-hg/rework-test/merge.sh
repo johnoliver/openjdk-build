@@ -25,14 +25,13 @@ mkdir -p "$MODULE_MIRROR"
 MODULES=(corba langtools jaxp jaxws nashorn jdk hotspot)
 MODULES_WITH_ROOT=(root corba langtools jaxp jaxws nashorn jdk hotspot)
 
-DO_TAGGING="false"
-
 REPO="$WORKSPACE/test-repo/"
 
-
-startTag="jdk8u172-b08"
-endTag="jdk8u181-b13"
+tag="jdk8u172-b08"
 workingBranch="master"
+doReset="false"
+doInit="false"
+doTagging="false"
 
 function initRepo() {
   rm -rf "$REPO"
@@ -40,7 +39,7 @@ function initRepo() {
   cd "$REPO"
   git clone $MIRROR/root/ .
   git checkout master
-  git reset --hard "$startTag"
+  git reset --hard "$tag"
   git remote add "root" "$MIRROR/root/"
 
   for module in "${MODULES[@]}" ; do
@@ -55,41 +54,6 @@ function initRepo() {
   do
     git tag -d $tag || true
   done
-}
-
-function canMergeTag() {
-    tag=$1
-    lastSuccessfulTag=$2
-
-    canMerge="true"
-
-    if [ "$tag" == "HEAD" ]; then
-      echo "true"
-      return
-    fi
-
-    cd "$REPO"
-    if [ "$DO_TAGGING" == "true" ] && [ "$(git tag -l $tag | wc -l)" != "0" ]; then
-        # tag already exists in repo
-        canMerge="false"
-    fi
-
-    for module in "${MODULES_WITH_ROOT[@]}" ; do
-        cd "$MIRROR/$module/";
-        if [ ! $(git tag -l "$tag") ]; then
-            canMerge="false"
-        else
-          tagCommitId=$(git rev-parse --verify $tag)
-          lastTagCommitId=$(git rev-parse --verify $lastSuccessfulTag)
-
-          git merge-base --is-ancestor $lastTagCommitId $tagCommitId
-          if [ $? != 0 ]; then
-              canMerge="false"
-          fi
-        fi
-    done
-
-    echo "$canMerge"
 }
 
 function inititialCheckin() {
@@ -111,7 +75,7 @@ function inititialCheckin() {
   git branch
   git merge "$tag-root"
 
-  if [ "$DO_TAGGING" == "true" ]; then
+  if [ "$doTagging" == "true" ]; then
     git tag -d $tag || true
   fi
 
@@ -138,8 +102,8 @@ function resetRepo() {
     git init
 
     git remote add -f "upstream" "$MIRROR/root/"
-    git merge $startTag
-    git tag -f "$startTag"
+    git merge $tag
+    git tag -f "$tag"
 
     for module in "${MODULES[@]}" ; do
       rm -rf "$MODULE_MIRROR/$module"
@@ -150,14 +114,14 @@ function resetRepo() {
       git init
 
       git remote add -f "upstream" "$MIRROR/$module/"
-      git merge $startTag
+      git merge $tag
 
       git tag | while read tag
       do
         git tag -d $tag || true
       done
 
-      git tag -f "$startTag"
+      git tag -f "$tag"
     done
 }
 
@@ -200,16 +164,14 @@ function fixAutoConfigure() {
     git commit -a --no-edit
 }
 
-doReset="false"
-doInit="false"
 
-while getopts "iturs:e:b:" opt; do
+while getopts "iturT:b:" opt; do
     case "${opt}" in
         i)
             doInit="true"
             ;;
         t)
-            DO_TAGGING="true"
+            doTagging="true"
             ;;
         u)
             updateMirrors
@@ -219,11 +181,8 @@ while getopts "iturs:e:b:" opt; do
             doReset="true"
             doInit="true"
             ;;
-        s)
-            startTag=${OPTARG}
-            ;;
-        e)
-            endTag=${OPTARG}
+        T)
+            tag=${OPTARG}
             ;;
         b)
             workingBranch=${OPTARG}
@@ -242,87 +201,57 @@ if [ "$doReset" == "true" ]; then
 fi
 
 if [ "$doInit" == "true" ]; then
-  inititialCheckin $startTag
+  inititialCheckin $tag
   exit
 fi
 
-export lastSuccessfulTag="$startTag"
+echo "$tag" >> $WORKSPACE/mergedTags
 
-for tag in $startTag $endTag
-do
-  cd "$MIRROR/root"
-  failed="false"
+cd "$MIRROR/root/";
+commitId=$(git rev-list -n 1  $tag)
 
-  echo $tag
-  canMerge=$(canMergeTag "$tag" "$lastSuccessfulTag")
+cd "$REPO"
+git checkout $workingBranch
 
-  if [ "$canMerge" != "true" ]; then
-    echo "Skipping $tag due to not being able to merge"
-    continue
-  fi
+if [ "$doTagging" == "true" ]; then
+  git tag -d $tag || true
+fi
 
-  cd "$REPO"
+if [ "$tag" != "HEAD" ]; then
+  git fetch --no-tags root +refs/tags/$tag:refs/tags/$tag-root
+else
+  git fetch --no-tags root HEAD
+fi
 
-  echo "$tag" >> $WORKSPACE/mergedTags
+set +e
+git merge -q -m "Merge root at $tag" $commitId
+returnCode=$?
+set -e
 
-  cd "$MIRROR/root/";
-  commitId=$(git rev-list -n 1  $tag)
-
-  cd "$REPO"
-  git checkout $workingBranch
-
-  if [ "$DO_TAGGING" == "true" ]; then
-    git tag -d $tag || true
-  fi
-
-  if [ "$tag" != "HEAD" ]; then
-    git fetch --no-tags root +refs/tags/$tag:refs/tags/$tag-root
+if [[ "$returnCode" -ne "0" ]]; then
+  if [ "$(git diff --name-only --diff-filter=U | wc -l)" == "1" ] && [ "$(git diff --name-only --diff-filter=U)" == "common/autoconf/generated-configure.sh" ];
+  then
+    fixAutoConfigure
   else
-    git fetch --no-tags root HEAD
+      echo "Conflicts"
+      exit 1
   fi
+fi
 
-  set +e
-  git merge -q -m "Merge root at $tag" $commitId
-
-  if [[ "$?" -ne "0" ]]; then
-    if [ "$(git diff --name-only --diff-filter=U | wc -l)" == "1" ] && [ "$(git diff --name-only --diff-filter=U)" == "common/autoconf/generated-configure.sh" ];
-    then
-      fixAutoConfigure
-    else
-        git reset --hard $lastSuccessfulTag
-        failed="true"
-        continue
-    fi
-  fi
-  set -e
-
-  for module in "${MODULES[@]}" ; do
-      if [ "$failed" == "true" ]; then
-        continue;
-      fi
-
-      cd "$REPO"
-
-      set +e
-      /usr/lib/git-core/git-subtree pull -q -m "Merge $module at $tag" --prefix=$module "$MIRROR/$module/" $tag
-
-      if [[ "$?" -ne "0" ]]; then
-          git reset --hard $lastSuccessfulTag
-          failed="true"
-      fi
-      set -e
-  done
-  echo "Success $tag" >> $WORKSPACE/mergedTags
-
-  lastSuccessfulTag="$tag"
-  if [ "$DO_TAGGING" == "true" ]; then
-    cd "$REPO"
-    git tag  -d "$tag" || true
-    git branch -D "$tag" || true
-    git branch "$tag"
-    git tag  -f "$tag"
-  fi
+cd "$REPO"
+for module in "${MODULES[@]}" ; do
+    /usr/lib/git-core/git-subtree pull -q -m "Merge $module at $tag" --prefix=$module "$MIRROR/$module/" $tag
 done
+
+echo "Success $tag" >> $WORKSPACE/mergedTags
+
+if [ "$doTagging" == "true" ]; then
+  cd "$REPO"
+  git tag  -d "$tag" || true
+  git branch -D "$tag" || true
+  git branch "$tag"
+  git tag  -f "$tag"
+fi
 
 cd "$REPO"
 
