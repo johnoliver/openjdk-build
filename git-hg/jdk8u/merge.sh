@@ -2,30 +2,7 @@
 
 set -exu
 
-# Set up the workspace to work from
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-mkdir -p $SCRIPT_DIR/workspace
-WORKSPACE=$SCRIPT_DIR/workspace
-
-# REPO_LOCATION     - workspace/adoptopenjdk-clone/      - copy of upstream github repo where new commits will end up
-# MIRROR            - workspace/openjdk-clean-mirror     - Unmodified clones of openjdk mercurial (basically a local cache)
-# REWRITE_WORKSPACE - workspace/openjdk-rewritten-mirror - Workspace where mercurial is manipulated before being written into the upstream
-#                   - workspace/bin                      - Helper third party programs
-
-
-MIRROR="$WORKSPACE/openjdk-clean-mirror"
-REWRITE_WORKSPACE="$WORKSPACE/openjdk-rewritten-mirror/"
-REPO_LOCATION="$WORKSPACE/adoptopenjdk-clone/"
-
-MODULE_MIRROR="$WORKSPACE/module-mirrors/"
-
-mkdir -p "$MODULE_MIRROR"
-
-# These the the modules in the mercurial forest that we'll have to iterate over
-MODULES=(corba langtools jaxp jaxws nashorn jdk hotspot)
-MODULES_WITH_ROOT=(root corba langtools jaxp jaxws nashorn jdk hotspot)
-
-REPO="$WORKSPACE/test-repo/"
+source constants.sh
 
 tag="jdk8u172-b08"
 workingBranch="master"
