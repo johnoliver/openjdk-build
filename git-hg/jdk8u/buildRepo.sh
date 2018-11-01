@@ -88,7 +88,9 @@ cd "$SCRIPT_DIR"
 #
 #cd $SCRIPT_DIR
 #./merge.sh -t -T "jdk8u192-b12" -b "release"
-#
+
+################################################
+## Fix jdk8u192-b12 for ppc64le
 cd $REPO
 git checkout release
 git reset --hard cdd004167302fa197ebf02dad0b6108986207e71
@@ -98,6 +100,7 @@ chmod +x ./common/autoconf/autogen.sh
 git commit -a -m "autogen"
 
 createTag "jdk8u192-b12"
+###############################################
 
 
 ################################################
