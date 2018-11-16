@@ -89,6 +89,47 @@ function performMergeFromMercurialIntoGit() {
   git push origin "$BRANCH" --tags || exit 1
 }
 
+function findLastCommitInCommon() {
+  local targetBranch=$1
+
+  git log --pretty=tformat:'%an %s' | while read commitMsg;
+  do
+    local commonCommitIdInMaster=$(git log --pretty=tformat:'%H %an %s' $targetBranch | grep -F "$commitMsg" | cut -d' ' -f1)
+    if [ "$commonCommitIdInMaster" != "" ]; then
+        echo $commonCommitIdInMaster;
+        break;
+    fi
+  done
+}
+
+function mergeInToDevUpToCommit() {
+    local newHead=$(git rev-parse "$1")
+
+    git checkout dev
+    local currentCommitIdOfDevBranch=$(git rev-parse dev)
+    local lastCommitInCommon=$(findLastCommitInCommon master)
+    git rebase --onto $currentCommitIdOfDevBranch $lastCommitInCommon $newHead
+    git checkout -B dev
+}
+
+function moveTagsFromMasterToDev() {
+  git tag --sort=creatordate | while read tag
+  do
+      if [ $(git branch --contains tags/$tag dev | wc -l) -eq 0 ];
+      then
+          echo "Moving tag $tag onto branch"
+          commit=$(git log -1 --pretty=tformat:'%an %s' "$tag")
+          echo "commit msg: $commit"
+          git log --pretty=tformat:'%H %an %s' dev | grep -F "$commit"
+          newCommitId=$(git log --pretty=tformat:'%H %an %s' | grep -F "$commit" | cut -d' ' -f1)
+          git tag -d "$tag"
+          echo "tagging at $newCommitId"
+          git tag "$tag" $newCommitId
+      fi
+  done
+}
+
+
 # Merge master into dev as we build off dev at the AdoptOpenJDK Build farm
 # dev contains patches that AdoptOpenJDK has beyond upstream OpenJDK
 function performMergeIntoDevFromMaster() {
@@ -103,7 +144,8 @@ function performMergeIntoDevFromMaster() {
     git reset --hard origin/dev || echo "Not resetting as no upstream exists"
   fi
 
-  git rebase -p master || exit 1
+  mergeInToDevUpToCommit master
+
   if "git rev-parse -q --verify origin/dev" ; then
     git log --oneline origin/dev..dev
   fi
@@ -117,3 +159,4 @@ cloneGitHubRepo
 addMercurialUpstream
 performMergeFromMercurialIntoGit
 performMergeIntoDevFromMaster
+moveTagsFromMasterToDev
