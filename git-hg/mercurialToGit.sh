@@ -122,9 +122,6 @@ function performMergeIntoDevFromMaster() {
     git log --oneline origin/dev..dev
   fi
 
-  if "git rev-parse -q --verify origin/dev" ; then
-    git log --oneline origin/dev..dev
-  fi
   git push origin dev || exit 1
 }
 
