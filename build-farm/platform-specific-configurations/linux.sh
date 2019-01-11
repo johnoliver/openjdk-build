@@ -41,12 +41,7 @@ fi
 
 if [ "${VARIANT}" == "openj9" ]
 then
-  if [ "${ARCHITECTURE}" == "s390x" ]
-  then
-    export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-openssl=/usr/local/openssl-1.1.1 --enable-openssl-bundling"
-  else
-    export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-openssl=fetched --enable-openssl-bundling"
-  fi
+  export CONFIGURE_ARGS_FOR_ANY_PLATFORM="${CONFIGURE_ARGS_FOR_ANY_PLATFORM} --with-openssl=fetched --enable-openssl-bundling"
 fi
 
 if [ "${ARCHITECTURE}" == "ppc64le" ]
@@ -82,7 +77,7 @@ then
         downloadArch="${ARCHITECTURE}"
         [ "$downloadArch" == "arm" ] && downloadArch="arm32"
         mkdir -p "$JDK10_BOOT_DIR"
-        wget -q -O - "https://api.adoptopenjdk.net/v2/binary/releases/openjdk10?os=linux&release=latest&arch=${downloadArch}" | tar xpzf - --strip-components=2 -C "$JDK10_BOOT_DIR"
+        wget -q -O - "https://api.adoptopenjdk.net/v2/binary/nightly/openjdk10?os=linux&release=latest&arch=${downloadArch}&type=jdk" | tar xpzf - --strip-components=1 -C "$JDK10_BOOT_DIR"
       fi
     fi
     export JDK_BOOT_DIR=$JDK10_BOOT_DIR
