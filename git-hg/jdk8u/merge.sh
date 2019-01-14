@@ -35,6 +35,7 @@ function initRepo() {
   do
     git tag -d $tag || true
   done
+  git fetch --all
 }
 
 function inititialCheckin() {
