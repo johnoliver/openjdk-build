@@ -13,9 +13,6 @@ if [ -d ".git" ];then
   git checkout master
   git merge --abort || true
   git am --abort || true
-else
-  cd "$SCRIPT_DIR"
-  ./merge.sh -r
 fi
 
 # Update dev branch
@@ -36,9 +33,3 @@ git checkout master
 cd $SCRIPT_DIR
 ./merge.sh -T "HEAD" -b "master"
 cd "$REPO"
-
-
-#git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/dev..dev
-#git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/master..master
-
-
