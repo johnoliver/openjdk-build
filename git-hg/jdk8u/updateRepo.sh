@@ -35,6 +35,7 @@ cd "$REPO"
 git checkout master
 cd $SCRIPT_DIR
 ./merge.sh -T "HEAD" -b "master"
+cd "$REPO"
 
 
 git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/dev..dev
