@@ -14,6 +14,7 @@ if [ -d ".git" ];then
   git merge --abort || true
   git am --abort || true
 else
+  cd "$SCRIPT_DIR"
   ./merge.sh -r
 fi
 
