@@ -21,6 +21,7 @@ function initRepo() {
   git clone $MIRROR/root/ .
   git checkout master
   git reset --hard "$tag"
+  git remote add "upstream" git@github.com:AdoptOpenJDK/openjdk-jdk8u.git
   git remote add "root" "$MIRROR/root/"
 
   for module in "${MODULES[@]}" ; do

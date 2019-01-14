@@ -14,13 +14,18 @@ if [ -d ".git" ];then
   git merge --abort || true
   git am --abort || true
 else
-  git clone git@github.com:AdoptOpenJDK/openjdk-jdk8u.git .
+  ./merge.sh -r
 fi
 
 # Update dev branch
 cd "$REPO"
 git fetch --all
-git checkout dev
+
+if git rev-parse -q --verify "dev" ; then
+  git checkout dev
+else
+  git checkout -b dev upstream/dev
+fi
 cd $SCRIPT_DIR
 ./merge.sh -T "HEAD" -b "dev"
 
