@@ -37,3 +37,7 @@ cd $SCRIPT_DIR
 ./merge.sh -T "HEAD" -b "master"
 
 
+git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/dev..dev
+git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/master..master
+
+
