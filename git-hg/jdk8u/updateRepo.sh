@@ -38,7 +38,7 @@ cd $SCRIPT_DIR
 cd "$REPO"
 
 
-git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/dev..dev
-git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/master..master
+#git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/dev..dev
+#git filter-branch --env-filter 'export GIT_COMMITTER_DATE=$GIT_AUTHOR_DATE' upstream/master..master
 
 
