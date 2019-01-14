@@ -29,13 +29,13 @@ function initRepo() {
       git checkout master
       git reset --hard
   done
+  git fetch --all
 
   cd "$REPO"
   git tag | while read tag
   do
     git tag -d $tag || true
   done
-  git fetch --all
 }
 
 function inititialCheckin() {
