@@ -24,6 +24,7 @@ if git rev-parse -q --verify "dev" ; then
 else
   git checkout -b dev upstream/dev
 fi
+
 cd $SCRIPT_DIR
 ./merge.sh -T "HEAD" -b "dev"
 
