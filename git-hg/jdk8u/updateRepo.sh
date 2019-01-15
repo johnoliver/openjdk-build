@@ -17,7 +17,7 @@ fi
 
 # Update dev branch
 cd "$REPO"
-git fetch --all
+git fetch --all --no-tags
 
 if git rev-parse -q --verify "dev" ; then
   git checkout dev

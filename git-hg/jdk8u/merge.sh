@@ -36,6 +36,8 @@ function initRepo() {
   do
     git tag -d $tag || true
   done
+
+  git fetch upstream --tags
 }
 
 function inititialCheckin() {
@@ -70,6 +72,7 @@ function inititialCheckin() {
   do
     git tag -d $tag || true
   done
+  git fetch upstream --tags
 }
 
 function updateRepo() {
