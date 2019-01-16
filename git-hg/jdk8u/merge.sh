@@ -4,6 +4,7 @@ set -exu
 
 source constants.sh
 
+acceptUpstream="false"
 doInit="false"
 doReset="false"
 doTagging="false"
@@ -116,8 +117,11 @@ function fixAutoConfigure() {
     git commit -a --no-edit
 }
 
-while getopts "b:irts:T:u" opt; do
+while getopts "ab:irts:T:u" opt; do
     case "${opt}" in
+        a)
+            acceptUpstream="true"
+            ;;
         b)
             workingBranch=${OPTARG}
             ;;
@@ -198,7 +202,19 @@ fi
 
 cd "$REPO"
 for module in "${MODULES[@]}" ; do
+    set +e
     /usr/lib/git-core/git-subtree pull -q -m "Merge $module at $tag" --prefix=$module "$MIRROR/$module/" $tag
+
+    if [ $? != 0 ]; then
+      if [ "$acceptUpstream" == "true" ]; then
+        git diff --name-only --diff-filter=U | xargs git checkout --theirs
+      else
+        echo "Failed to merge in module $module"
+        exit 1
+      fi
+    fi
+
+    set -e
 done
 
 echo "Success $tag" >> $WORKSPACE/mergedTags
