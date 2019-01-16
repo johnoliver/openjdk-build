@@ -27,9 +27,11 @@
 
 set -euo
 
+rootDir=$(pwd)
+
 function checkArgs() {
   if [ $# -lt 2 ]; then
-     echo Usage: "$0" '[AdoptOpenJDK Git Repo Version] [OpenJDK Mercurial Root Forest Version]'
+     echo Usage: "$0" '[AdoptOpenJDK Git Repo Version] [OpenJDK Mercurial Root Forest Version] [ hg repo version ] [  optional tag ]'
      echo ""
      echo "e.g. ./diff.sh jdk8u jdk8u jdk8u or ./diff.sh jdk9u jdk-updates jdk9u"
      echo ""
@@ -42,6 +44,7 @@ checkArgs $@
 git_repo_version=$1
 hg_root_forest=${2:-${1}}                  # for backwards compatibility
 hg_repo_version=${3:-${hg_root_forest}}    # for backwards compatibility
+tag=${4:-""}    # for backwards compatibility
 
 function cleanUp() {
   rm -rf openjdk-git openjdk-hg || true
@@ -76,30 +79,25 @@ function runDiff() {
 
 # This function only checks the latest tag, a future enhancement could be to
 # check all tags
-function checkLatestTag() {
-  # get latest git tag
-  cd openjdk-git || exit 1
-  gitTag=$(git describe --abbrev=0 --tags) || exit 1
-  cd - || exit 1
+function checkTag() {
+  local tag="$1";
 
-  cd openjdk-hg || exit 1
-  hgTag=$(hg log -r "." --template "{latesttag}\n") || exit 1
-  cd - || exit 1
+  cd "$rootDir/openjdk-hg" || exit 1
+  git fetch --tags
+  git checkout "$tag";
 
-  if [ "$gitTag" == "$hgTag" ]; then
-    echo "Latest Tags are in sync"
-  else
-     echo "ERROR - Git tag ${gitTag} is not equal to Hg tag ${hgTag}"
-    exit 1
-  fi
+  cd "$rootDir/openjdk-git" || exit 1
+  git fetch --tags
+  git checkout "$tag";
+
+  runDiff
 }
 
 cleanUp
 cloneRepos
 updateMercurialClone
 runDiff
-# No longer run the tag checking as we're only pulling in selective tags for
-# AdoptOpenJDK.  For others using this script (who are pulling in ALL of the
-# tags) you may wish to reenable this function and even enhance it to compare
-# all tags.
-#checkLatestTag
+
+if [[ "$tag" != "" ]]; then
+  checkTag "$tag"
+fi

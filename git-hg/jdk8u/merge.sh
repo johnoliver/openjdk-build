@@ -172,8 +172,8 @@ cd "$MIRROR/root/";
 commitId=$(git rev-list -n 1  $tag)
 
 cd "$REPO"
-git checkout merge --abort || true
-git checkout rebase --abort || true
+git merge --abort || true
+git rebase --abort || true
 git checkout $workingBranch
 
 # Get rid of existing tag that we are about to create
