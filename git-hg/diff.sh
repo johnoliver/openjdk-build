@@ -77,8 +77,6 @@ function runDiff() {
   fi
 }
 
-# This function only checks the latest tag, a future enhancement could be to
-# check all tags
 function checkTag() {
   local tag="$1";
 
@@ -90,7 +88,8 @@ function checkTag() {
   git fetch --tags
   git checkout "$tag";
 
-  runDiff
+  # Show changes added by adopt to tag
+  diff -r openjdk-git openjdk-hg -x '.git' -x '.hg' -x '.hgtags' -x '.hgignore' -x 'get_source.sh' -x 'README.md'
 }
 
 cleanUp
