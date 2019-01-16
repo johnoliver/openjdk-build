@@ -208,6 +208,7 @@ for module in "${MODULES[@]}" ; do
     if [ $? != 0 ]; then
       if [ "$acceptUpstream" == "true" ]; then
         git diff --name-only --diff-filter=U | xargs git checkout --theirs
+        git commit -a -m "Resolve conflicts on module $module when merging tag $tag"
       else
         echo "Failed to merge in module $module"
         exit 1
