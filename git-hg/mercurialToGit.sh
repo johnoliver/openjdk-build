@@ -121,11 +121,11 @@ function performMergeIntoDevFromMaster() {
   git checkout -b dev-tmp master
 
   # place master commits on the end of dev
-  git rebase -p dev || exit 1
+  git rebase -m -p dev || exit 1
 
   # copy commits into dev
   git checkout dev
-  git rebase -p dev-tmp || exit 1
+  git rebase -m -p dev-tmp || exit 1
 
   git branch -D dev-tmp || true
 
