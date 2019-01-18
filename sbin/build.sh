@@ -123,7 +123,7 @@ getOpenJdkVersion() {
     local updateRegex="UPDATE_VERSION=([0-9]+)";
     local buildRegex="BUILD_NUMBER=b([0-9]+)";
 
-    local versionData="$(cat ${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}/version.spec | tr -r '\n' ' ')"
+    local versionData="$(cat ${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}/version.spec | tr '\n' ' ')"
 
     local updateNum
     local buildNum
