@@ -127,10 +127,10 @@ getOpenJdkVersion() {
 
     local updateNum
     local buildNum
-    if [[ "${versionData}" ~= $updateRegex ]]; then
+    if [[ "${versionData}" =~ $updateRegex ]]; then
       updateNum="${BASH_REMATCH[1]}"
     fi
-    if [[ "${versionData}" ~= $buildRegex ]]; then
+    if [[ "${versionData}" =~ $buildRegex ]]; then
       buildNum="${BASH_REMATCH[1]}"
     fi
     version="8u${updateNum}-b${buildNum}"
