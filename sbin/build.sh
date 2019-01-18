@@ -347,14 +347,16 @@ executeTemplatedFile() {
 # Print the version string so we know what we've produced
 printJavaVersionString()
 {
+  stepIntoTheWorkingDirectory
+
   case "${BUILD_CONFIG[OS_KERNEL_NAME]}" in
   "darwin")
     # shellcheck disable=SC2086
-    PRODUCT_HOME=$(ls -d ${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}/build/*/images/${BUILD_CONFIG[JDK_PATH]}/Contents/Home)
+    PRODUCT_HOME=$(ls -d ${PWD}/build/*/images/${BUILD_CONFIG[JDK_PATH]}/Contents/Home)
   ;;
   *)
     # shellcheck disable=SC2086
-    PRODUCT_HOME=$(ls -d ${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}/build/*/images/${BUILD_CONFIG[JDK_PATH]})
+    PRODUCT_HOME=$(ls -d ${PWD}/build/*/images/${BUILD_CONFIG[JDK_PATH]})
   ;;
   esac
   if [[ -d "$PRODUCT_HOME" ]]; then
