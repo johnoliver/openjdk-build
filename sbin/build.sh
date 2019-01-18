@@ -140,7 +140,7 @@ configuringVersionStringParameter()
       addConfigureArg "--with-user-release-suffix=" "${dateSuffix}"
     fi
 
-    if [ "${BUILD_CONFIG[BUILD_VARIANT]}" == "hotspot" ]; then
+    if [ "${BUILD_CONFIG[BUILD_VARIANT]}" == "${BUILD_VARIANT_HOTSPOT}" ]; then
       addConfigureArg "--with-company-name=" "AdoptOpenJDK"
     fi
 
@@ -215,7 +215,7 @@ buildingTheRestOfTheConfigParameters()
   addConfigureArg "--with-alsa=" "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/installedalsa"
 
   # Point-in-time dependency for openj9 only
-  if [[ "${BUILD_CONFIG[BUILD_VARIANT]}" == "openj9" ]] ; then
+  if [[ "${BUILD_CONFIG[BUILD_VARIANT]}" == "${BUILD_VARIANT_OPENJ9}" ]] ; then
     addConfigureArg "--with-freemarker-jar=" "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/freemarker-${FREEMARKER_LIB_VERSION}/freemarker.jar"
   fi
 
@@ -264,7 +264,7 @@ configureCommandParameters()
   if [[ "$OSTYPE" == "cygwin" ]] || [[ "$OSTYPE" == "msys" ]]; then
     echo "Windows or Windows-like environment detected, skipping configuring environment for custom Boot JDK and other 'configure' settings."
 
-    if [[ "${BUILD_CONFIG[BUILD_VARIANT]}" == "openj9" ]] && [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "${JDK8_CORE_VERSION}" ]; then
+    if [[ "${BUILD_CONFIG[BUILD_VARIANT]}" == "${BUILD_VARIANT_OPENJ9}" ]] && [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "${JDK8_CORE_VERSION}" ]; then
       # This is unfortunatly required as if the path does not start with "/cygdrive" the make scripts are unable to find the "/closed/adds" dir
       local addsDir="/cygdrive/c/cygwin64/${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}/closed/adds"
       echo "adding source route -with-add-source-root=${addsDir}"
@@ -290,6 +290,12 @@ configureCommandParameters()
 # Make sure we're in the source directory for OpenJDK now
 stepIntoTheWorkingDirectory() {
   cd "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}"  || exit
+
+  # corretto nest their source under /src in their dir
+  if [ "${BUILD_CONFIG[BUILD_VARIANT]}" == "${BUILD_VARIANT_CORRETTO}" ]; then
+    cd "src";
+  fi
+
   echo "Should have the source, I'm at $PWD"
 }
 
@@ -381,7 +387,7 @@ removingUnnecessaryFiles()
     OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
   fi
 
-  cd "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}" || return
+  stepIntoTheWorkingDirectory
 
   cd build/*/images || return
 

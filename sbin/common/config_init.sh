@@ -271,7 +271,7 @@ function setBranch() {
 
   # Which repo branch to build, e.g. dev by default for hotspot, "openj9" for openj9
   local branch="dev"
-  if [ "${BUILD_CONFIG[BUILD_VARIANT]}" == "openj9" ]; then
+  if [ "${BUILD_CONFIG[BUILD_VARIANT]}" == "${BUILD_VARIANT_OPENJ9}" ]; then
     branch="openj9";
   fi
 
@@ -375,7 +375,7 @@ function configDefaults() {
   BUILD_CONFIG[OPENJDK_BUILD_NUMBER]=${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]:-""}
 
   # Build variant, e.g. openj9, defaults to "hotspot"
-  BUILD_CONFIG[BUILD_VARIANT]=${BUILD_CONFIG[BUILD_VARIANT]:-"hotspot"}
+  BUILD_CONFIG[BUILD_VARIANT]=${BUILD_CONFIG[BUILD_VARIANT]:-"${BUILD_VARIANT_HOTSPOT}"}
 
   # JVM variant, e.g. client or server, defaults to server
   BUILD_CONFIG[JVM_VARIANT]=${BUILD_CONFIG[JVM_VARIANT]:-""}

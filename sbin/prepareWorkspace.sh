@@ -78,7 +78,7 @@ checkoutAndCloneOpenJDKGitRepo()
   git reset --hard "origin/${BUILD_CONFIG[BRANCH]}"
 
   # Openj9 does not release from git tags
-  if [ ! -z "${BUILD_CONFIG[TAG]}" ] && [ "${BUILD_CONFIG[BUILD_VARIANT]}" != "openj9" ]; then
+  if [ ! -z "${BUILD_CONFIG[TAG]}" ] && [ "${BUILD_CONFIG[BUILD_VARIANT]}" != "${BUILD_VARIANT_OPENJ9}" ]; then
     git fetch origin "refs/tags/${BUILD_CONFIG[TAG]}:refs/tags/${BUILD_CONFIG[TAG]}"
     git checkout "${BUILD_CONFIG[TAG]}"
     git reset --hard
@@ -100,7 +100,7 @@ setGitCloneArguments() {
 
 updateOpenj9Sources() {
   # Building OpenJDK with OpenJ9 must run get_source.sh to clone openj9 and openj9-omr repositories
-  if [ "${BUILD_CONFIG[BUILD_VARIANT]}" == "openj9" ]; then
+  if [ "${BUILD_CONFIG[BUILD_VARIANT]}" == "${BUILD_VARIANT_OPENJ9}" ]; then
     cd "${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}" || return
     bash get_source.sh --openssl-version=1.1.1a
     cd "${BUILD_CONFIG[WORKSPACE_DIR]}"
@@ -289,7 +289,7 @@ downloadingRequiredDependencies()
         echo "Checking and download Alsa dependency"
         checkingAndDownloadingAlsa
 
-     if [[ "${BUILD_CONFIG[BUILD_VARIANT]}" == "openj9" ]]; then
+     if [[ "${BUILD_CONFIG[BUILD_VARIANT]}" == "${BUILD_VARIANT_OPENJ9}" ]]; then
            echo "Checking and download Freemarker dependency"
            checkingAndDownloadingFreemarker
      fi
