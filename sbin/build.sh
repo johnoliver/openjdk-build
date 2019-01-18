@@ -42,7 +42,6 @@ source "$SCRIPT_DIR/common/constants.sh"
 # shellcheck source=sbin/common/common.sh
 source "$SCRIPT_DIR/common/common.sh"
 
-export OPENJDK_REPO_TAG
 export JRE_TARGET_PATH
 export CONFIGURE_ARGS=""
 export MAKE_TEST_IMAGE=""
@@ -98,23 +97,48 @@ getOpenJDKUpdateAndBuildVersion()
     # shellcheck disable=SC2154
     echo "NOTE: This can take quite some time!  Please be patient"
     git fetch -q --tags ${BUILD_CONFIG[SHALLOW_CLONE_OPTION]}
-    OPENJDK_REPO_TAG=${BUILD_CONFIG[TAG]:-$(getFirstTagFromOpenJDKGitRepo)}
-    if [[ "${OPENJDK_REPO_TAG}" == "" ]] ; then
+    local openJdkVersion=$(getOpenJdkVersion)
+    if [[ "${openJdkVersion}" == "" ]] ; then
      # shellcheck disable=SC2154
      echo "Unable to detect git tag, exiting..."
      exit 1
     else
-     echo "OpenJDK repo tag is $OPENJDK_REPO_TAG"
+     echo "OpenJDK repo tag is $openJdkVersion"
     fi
 
     local openjdk_update_version;
-    openjdk_update_version=$(echo "${OPENJDK_REPO_TAG}" | cut -d'u' -f 2 | cut -d'-' -f 1)
+    openjdk_update_version=$(echo "${openJdkVersion}" | cut -d'u' -f 2 | cut -d'-' -f 1)
 
     # TODO dont modify config in build script
     echo "Version: ${openjdk_update_version} ${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}"
   fi
 
   cd "${BUILD_CONFIG[WORKSPACE_DIR]}"
+}
+
+getOpenJdkVersion() {
+  local version;
+
+  if [ "${BUILD_CONFIG[BUILD_VARIANT]}" == "${BUILD_VARIANT_CORRETTO}" ]; then
+    local updateRegex="UPDATE_VERSION=([0-9]+)";
+    local buildRegex="BUILD_NUMBER=([0-9]+)";
+
+    local versionData="$(cat ${BUILD_CONFIG[WORKSPACE_DIR]}/${BUILD_CONFIG[WORKING_DIR]}/${BUILD_CONFIG[OPENJDK_SOURCE_DIR]}/version.spec)"
+
+    local updateNum
+    local buildNum
+    if [[ "${versionData}" ~= $updateRegex ]]; then
+      updateNum="${BASH_REMATCH[1]}"
+    fi
+    if [[ "${versionData}" ~= $buildRegex ]]; then
+      buildNum="${BASH_REMATCH[1]}"
+    fi
+    version="8u${updateNum}-b${buildNum}"
+  else
+    version=${BUILD_CONFIG[TAG]:-$(getFirstTagFromOpenJDKGitRepo)}
+  fi
+
+  echo $version
 }
 
 # Ensure that we produce builds with versions strings something like:
@@ -126,10 +150,8 @@ configuringVersionStringParameter()
 {
   stepIntoTheWorkingDirectory
 
-  if [ -z "${BUILD_CONFIG[TAG]}" ]; then
-    OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
-    echo "OpenJDK repo tag is ${OPENJDK_REPO_TAG}"
-  fi
+  local openJdkVersion=$(getOpenJdkVersion)
+  echo "OpenJDK repo tag is ${openJdkVersion}"
 
   addConfigureArg "--with-milestone=" "fcs"
   local dateSuffix=$(date -u +%Y%m%d%H%M)
@@ -147,14 +169,14 @@ configuringVersionStringParameter()
     # Set the update version (e.g. 131), this gets passed in from the calling script
     local updateNumber=${BUILD_CONFIG[OPENJDK_UPDATE_VERSION]}
     if [ -z "${updateNumber}" ]; then
-      updateNumber=$(echo "${OPENJDK_REPO_TAG}" | cut -f1 -d"-" | cut -f2 -d"u")
+      updateNumber=$(echo "${openJdkVersion}" | cut -f1 -d"-" | cut -f2 -d"u")
     fi
     addConfigureArgIfValueIsNotEmpty "--with-update-version=" "${updateNumber}"
 
     # Set the build number (e.g. b04), this gets passed in from the calling script
     local buildNumber=${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}
     if [ -z "${buildNumber}" ]; then
-      buildNumber=$(echo "$OPENJDK_REPO_TAG" | cut -f2 -d"-")
+      buildNumber=$(echo "${openJdkVersion}" | cut -f2 -d"-")
     fi
 
     if [ "${buildNumber}" ] && [ "${buildNumber}" != "ga" ]; then
@@ -163,10 +185,10 @@ configuringVersionStringParameter()
   elif [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "${JDK9_CORE_VERSION}" ]; then
     local buildNumber=${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}
     if [ -z "${buildNumber}" ]; then
-      buildNumber=$(echo "${OPENJDK_REPO_TAG}" | cut -f2 -d"+")
+      buildNumber=$(echo "${openJdkVersion}" | cut -f2 -d"+")
     fi
 
-    TRIMMED_TAG=$(echo "${OPENJDK_REPO_TAG}" | cut -f2 -d"-" )
+    TRIMMED_TAG=$(echo "${openJdkVersion}" | cut -f2 -d"-" )
 
     if [ -z "${BUILD_CONFIG[TAG]}" ]; then
       addConfigureArg "--with-version-opt=" "${dateSuffix}"
@@ -182,7 +204,7 @@ configuringVersionStringParameter()
     # Set the build number (e.g. b04), this gets passed in from the calling script
     local buildNumber=${BUILD_CONFIG[OPENJDK_BUILD_NUMBER]}
     if [ -z "${buildNumber}" ]; then
-      buildNumber=$(echo "${OPENJDK_REPO_TAG}" | cut -f2 -d"+")
+      buildNumber=$(echo "${openJdkVersion}" | cut -f2 -d"+")
     fi
 
     if [ -z "${BUILD_CONFIG[TAG]}" ]; then
@@ -383,26 +405,21 @@ removingUnnecessaryFiles()
 {
   echo "Removing unnecessary files now..."
 
-  if [ -z "$OPENJDK_REPO_TAG" ]; then
-    echo "Fetching the first tag from the OpenJDK git repo..."
-    echo "Dir=${PWD}"
-    OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
-  fi
-
+  local openJdkVersion=$(getOpenJdkVersion)
   stepIntoTheWorkingDirectory
 
   cd build/*/images || return
 
   echo "Currently at '${PWD}'"
 
-  echo "moving "$(ls -d ${BUILD_CONFIG[JDK_PATH]})" to ${OPENJDK_REPO_TAG}"
-  rm -rf "${OPENJDK_REPO_TAG}" || true
-  mv "$(ls -d ${BUILD_CONFIG[JDK_PATH]})" "${OPENJDK_REPO_TAG}"
+  echo "moving "$(ls -d ${BUILD_CONFIG[JDK_PATH]})" to ${openJdkVersion}"
+  rm -rf "${openJdkVersion}" || true
+  mv "$(ls -d ${BUILD_CONFIG[JDK_PATH]})" "${openJdkVersion}"
 
   if [ -d "$(ls -d ${BUILD_CONFIG[JRE_PATH]})" ]
   then
-    JRE_TARGET_PATH="${OPENJDK_REPO_TAG}-jre"
-    [ "${JRE_TARGET_PATH}" == "${OPENJDK_REPO_TAG}" ] && JRE_TARGET_PATH="${OPENJDK_REPO_TAG}.jre"
+    JRE_TARGET_PATH="${openJdkVersion}-jre"
+    [ "${JRE_TARGET_PATH}" == "${openJdkVersion}" ] && JRE_TARGET_PATH="${openJdkVersion}.jre"
     echo "moving $(ls -d ${BUILD_CONFIG[JRE_PATH]}) to ${JRE_TARGET_PATH}"
     rm -rf "${JRE_TARGET_PATH}" || true
     mv "$(ls -d ${BUILD_CONFIG[JRE_PATH]})" "${JRE_TARGET_PATH}"
@@ -418,8 +435,8 @@ removingUnnecessaryFiles()
 
   # Remove files we don't need
   case "${BUILD_CONFIG[OS_KERNEL_NAME]}" in
-    "darwin") JDK_TARGET="${OPENJDK_REPO_TAG}/Contents/Home" ;;
-    *) JDK_TARGET="${OPENJDK_REPO_TAG}" ;;
+    "darwin") JDK_TARGET="${openJdkVersion}/Contents/Home" ;;
+    *) JDK_TARGET="${openJdkVersion}" ;;
   esac
   rm -rf "${JDK_TARGET}"/demo/applets || true
   rm -rf "${JDK_TARGET}"/demo/jfc/Font2DTest || true
@@ -429,7 +446,7 @@ removingUnnecessaryFiles()
   find . -name "*.pdb" -type f -delete || true
   find . -name "*.map" -type f -delete || true
 
-  echo "Finished removing unnecessary files from ${OPENJDK_REPO_TAG}"
+  echo "Finished removing unnecessary files from ${openJdkVersion}"
 }
 
 moveFreetypeLib() {
@@ -522,17 +539,20 @@ createArchive() {
 createOpenJDKTarArchive()
 {
   COMPRESS=gzip
+
+  local openJdkVersion=$(getOpenJdkVersion)
+
   if which pigz >/dev/null 2>&1; then COMPRESS=pigz; fi
   echo "Archiving the build OpenJDK image and compressing with $COMPRESS"
 
-  if [ -z "${OPENJDK_REPO_TAG+x}" ] || [ -z "${OPENJDK_REPO_TAG}" ]; then
-    OPENJDK_REPO_TAG=$(getFirstTagFromOpenJDKGitRepo)
+  if [ -z "${openJdkVersion+x}" ] || [ -z "${openJdkVersion}" ]; then
+    openJdkVersion=$(getFirstTagFromOpenJDKGitRepo)
   fi
   if [ -z "${JRE_TARGET_PATH+x}" ] || [ -z "${JRE_TARGET_PATH}" ]; then
-    JRE_TARGET_PATH="${OPENJDK_REPO_TAG}-jre"
+    JRE_TARGET_PATH="${openJdkVersion}-jre"
   fi
 
-  echo "OpenJDK repo tag is ${OPENJDK_REPO_TAG}. JRE path will be ${JRE_TARGET_PATH}"
+  echo "OpenJDK repo tag is ${openJdkVersion}. JRE path will be ${JRE_TARGET_PATH}"
 
   ## clean out old builds
   rm -r "${BUILD_CONFIG[WORKSPACE_DIR]:?}/${BUILD_CONFIG[TARGET_DIR]}" || true
@@ -542,13 +562,19 @@ createOpenJDKTarArchive()
     local jreName=$(echo "${BUILD_CONFIG[TARGET_FILE_NAME]}" | sed 's/-jdk/-jre/')
     createArchive "${JRE_TARGET_PATH}" "${jreName}"
   fi
-  createArchive "${OPENJDK_REPO_TAG}" "${BUILD_CONFIG[TARGET_FILE_NAME]}"
+  createArchive "${openJdkVersion}" "${BUILD_CONFIG[TARGET_FILE_NAME]}"
 }
 
 # Echo success
 showCompletionMessage()
 {
   echo "All done!"
+}
+
+copyFreeFontForMacOS() {
+  local openJdkVersion=$(getOpenJdkVersion)
+  makeACopyOfLibFreeFontForMacOSX "${openJdkVersion}" "${BUILD_CONFIG[COPY_MACOSX_FREE_FONT_LIB_FOR_JDK_FLAG]}"
+  makeACopyOfLibFreeFontForMacOSX "${openJdkVersion}-jre" "${BUILD_CONFIG[COPY_MACOSX_FREE_FONT_LIB_FOR_JRE_FLAG]}"
 }
 
 ################################################################################
@@ -566,8 +592,7 @@ executeTemplatedFile
 
 printJavaVersionString
 removingUnnecessaryFiles
-makeACopyOfLibFreeFontForMacOSX "${OPENJDK_REPO_TAG}" "${BUILD_CONFIG[COPY_MACOSX_FREE_FONT_LIB_FOR_JDK_FLAG]}"
-makeACopyOfLibFreeFontForMacOSX "${OPENJDK_REPO_TAG}-jre" "${BUILD_CONFIG[COPY_MACOSX_FREE_FONT_LIB_FOR_JRE_FLAG]}"
+copyFreeFontForMacOS
 createOpenJDKTarArchive
 showCompletionMessage
 
