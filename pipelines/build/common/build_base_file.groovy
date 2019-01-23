@@ -25,6 +25,9 @@ limitations under the License.
  * 3. Push generated artifacts to github
  */
 
+
+final Versions = load "${WORKSPACE}/pipelines/build/common/versions.groovy"
+
 def toBuildParams(enableTests, cleanWorkspace, params) {
 
     List buildParams = []
@@ -274,7 +277,6 @@ def doBuild(
         releaseTag = ""
     }
 
-    final Versions = load "${WORKSPACE}/pipelines/build/common/versions.groovy"
     def versionData = Versions.parseVersion(releaseTag)
     echo JsonOutput.prettyPrint(JsonOutput.toJson(versionData))
     return
