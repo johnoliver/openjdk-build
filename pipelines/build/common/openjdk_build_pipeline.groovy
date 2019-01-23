@@ -183,8 +183,13 @@ try {
     println "Build num: ${env.BUILD_NUMBER}"
 
     node("master") {
+
+        echo "loading"
+
         final Versions = load "pipelines/build/common/versions.groovy"
+        echo "calling"
         def versionData = Versions.parseVersion(config.parameters.TAG)
+        echo "printing"
         echo JsonOutput.prettyPrint(JsonOutput.toJson(versionData))
         return
     }
