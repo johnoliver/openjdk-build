@@ -70,7 +70,6 @@ def parseVersion(version) {
 
     echo "matching: " + version
     if (matched.matches()) {
-
         result = [:];
         result = addOr0(result, 'major', matched, 'major')
         result.put('minor', 0)
@@ -81,15 +80,28 @@ def parseVersion(version) {
 
         return result;
     } else {
-        /*
-        version223Regexs
-                .map { regex ->
-            final matched = version =~ /${pre223regex}/
-            if (matched.matches()) {
+        return version223Regexs
+                .stream()
+                .map({ regex ->
+            final matched223 = version =~ /${regex}/
+            if (matched223.matches()) {
+                result = [:];
+                result = addOr0(result, 'major', matched, 'major')
+                result = addOr0(result, 'minor', matched, 'minor')
+                result = addOr0(result, 'security', matched, 'security')
+                if (matched.group('pre') != null) result.put('pre', matched.group('pre'));
+                result = addOr0(result, 'build', matched, 'build')
+                if (matched.group('opt') != null) result.put('opt', matched.group('opt'));
+                result.put('version', matched.group('version'))
 
+                return result;
+            } else {
+                return null;
             }
-        }*/
-        return [];
+        })
+                .filter(Objects.nonNull(it))
+                .findFirst()
+                .get()
     }
 }
 
