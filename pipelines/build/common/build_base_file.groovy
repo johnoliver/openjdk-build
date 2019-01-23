@@ -276,12 +276,6 @@ def doBuild(
         releaseTag = ""
     }
 
-    final Versions = load "pipelines/build/common/versions.groovy"
-    def versionData = Versions.parseVersion(releaseTag)
-    echo JsonOutput.prettyPrint(JsonOutput.toJson(versionData))
-    return
-
-
     def jobConfigurations = getJobConfigurations(javaVersionToBuild, availableConfigurations, targetConfigurations, releaseTag, branch, additionalConfigureArgs, additionalBuildArgs, additionalFileNameTag, adoptBuildNumber)
     def jobs = [:]
 
