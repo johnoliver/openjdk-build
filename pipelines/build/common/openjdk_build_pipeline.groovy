@@ -83,7 +83,7 @@ def parseVersion(version) {
         return version223Regexs
                 .findResult({ regex ->
             echo "matching: " + version + " " + regex
-            final matched223 = version =~ /${regex}/
+            final matched223 = version =~ /(?:jdk\\-)${regex}/
             if (matched223.matches()) {
                 result = [:];
                 result = addOr0(result, 'major', matched, 'major')
