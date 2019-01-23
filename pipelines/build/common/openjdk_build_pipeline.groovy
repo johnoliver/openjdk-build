@@ -16,7 +16,6 @@ limitations under the License.
 import JobHelper
 @Library('openjdk-jenkins-helper@master')
 import JobHelper
-import NodeHelper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
@@ -35,11 +34,20 @@ import groovy.json.JsonSlurper
  */
 
 
-
 def getJavaVersionNumber(version) {
     // version should be something like "jdk8u"
     def matcher = (version =~ /(\d+)/)
     return Integer.parseInt(matcher[0][1])
+}
+
+def addOr0(map, name, matched, groupName) {
+    def number = matched.group(groupName);
+    if (number != null) {
+        map.put(name, number as Integer)
+    } else {
+        map.put(name, 0)
+    }
+    return map
 }
 
 def parseVersion(version) {
@@ -59,17 +67,19 @@ def parseVersion(version) {
     final pre223regex = "jdk(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)";
     final matched = version =~ /${pre223regex}/
 
+
     echo "matching: " + version
     if (matched.matches()) {
-        return [
-                major   : matched.group('major'),
-                minor   : 0,
-                security: matched.group('update'),
-                build   : matched.group('build'),
-                opt     : matched.group('opt'),
-                version : matched.group('version')
 
-        ]
+        result = [];
+        result = addOr0(result, 'major', matched, 'major')
+        result.put('minor', 0)
+        result = addOr0(result, 'security', matched, 'update')
+        result = addOr0(result, 'build', matched, 'build')
+        if (matched.group('opt') != null) result.put('opt', matched.group('opt'));
+        result.put('version', matched.group('version'))
+
+        return result;
     } else {
         /*
         version223Regexs
@@ -240,7 +250,8 @@ try {
         echo JsonOutput.prettyPrint(JsonOutput.toJson(versionData))
         return
     }
-
+    return
+/*
 
     def filesCreated = [];
 
@@ -288,7 +299,7 @@ try {
 
     // Sign and archive jobs if needed
     sign(config)
-
+*/
 } catch (Exception e) {
     currentBuild.result = 'FAILURE'
     println "Execution error: " + e.getMessage()
