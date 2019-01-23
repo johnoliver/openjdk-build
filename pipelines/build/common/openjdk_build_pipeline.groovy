@@ -14,8 +14,6 @@ limitations under the License.
 
 @Library('openjdk-jenkins-helper@master')
 import JobHelper
-@Library('openjdk-jenkins-helper@master')
-import JobHelper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
@@ -33,15 +31,8 @@ import groovy.json.JsonSlurper
  *
  */
 
-
-def getJavaVersionNumber(version) {
-    // version should be something like "jdk8u"
-    def matcher = (version =~ /(\d+)/)
-    return Integer.parseInt(matcher[0][1])
-}
-
 def addOr0(map, name, matched, groupName) {
-    def number = matched.group(groupName);
+    def number = matched.group(groupName)
     if (number != null) {
         map.put(name, number as Integer)
     } else {
@@ -50,55 +41,65 @@ def addOr0(map, name, matched, groupName) {
     return map
 }
 
-def parseVersion(version) {
+def matchPre223(version) {
+    final pre223regex = "jdk(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)"
+    final matched = version =~ /${pre223regex}/
+
+    if (matched.matches()) {
+        result = [:]
+        result = addOr0(result, 'major', matched, 'major')
+        result.put('minor', 0)
+        result = addOr0(result, 'security', matched, 'update')
+        result = addOr0(result, 'build', matched, 'build')
+        if (matched.group('opt') != null) result.put('opt', matched.group('opt'))
+        result.put('version', matched.group('version'))
+
+        return result
+    } else {
+        return null
+    }
+}
+
+def match223(version) {
     //Regexes based on those in http://openjdk.java.net/jeps/223
     // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
-    final vnumRegex = "(?<major>[0-9]+)(\\.(?<minor>[0-9]+))?(\\.(?<security>[0-9]+))?";
-    final pre = "(?<pre>[a-zA-Z0-9]+)";
-    final build = "(?<build>[0-9]+)";
-    final opt = "(?<opt>[-a-zA-Z0-9\\.]+)";
+    final vnumRegex = "(?<major>[0-9]+)(\\.(?<minor>[0-9]+))?(\\.(?<security>[0-9]+))?"
+    final pre = "(?<pre>[a-zA-Z0-9]+)"
+    final build = "(?<build>[0-9]+)"
+    final opt = "(?<opt>[-a-zA-Z0-9\\.]+)"
 
     final version223Regexs = [
             "(?:jdk\\-)(?<version>${vnumRegex}(\\-${pre})?\\+${build}(\\-${opt})?)",
             "(?:jdk\\-)(?<version>${vnumRegex}\\-${pre}(\\-${opt})?)",
             "(?:jdk\\-)(?<version>${vnumRegex}(\\+\\-${opt})?)"
-    ];
+    ]
 
-    final pre223regex = "jdk(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)";
-    final matched = version =~ /${pre223regex}/
+    return version223Regexs
+            .findResult({ regex ->
+        final matched223 = version =~ /${regex}/
+        if (matched223.matches()) {
+            result = [:]
+            result = addOr0(result, 'major', matched223, 'major')
+            result = addOr0(result, 'minor', matched223, 'minor')
+            result = addOr0(result, 'security', matched223, 'security')
+            if (matched223.group('pre') != null) result.put('pre', matched223.group('pre'))
+            result = addOr0(result, 'build', matched223, 'build')
+            if (matched223.group('opt') != null) result.put('opt', matched223.group('opt'))
+            result.put('version', matched223.group('version'))
 
+            return result
+        } else {
+            return null
+        }
+    })
+}
 
-    echo "matching: " + version
-    if (matched.matches()) {
-        result = [:];
-        result = addOr0(result, 'major', matched, 'major')
-        result.put('minor', 0)
-        result = addOr0(result, 'security', matched, 'update')
-        result = addOr0(result, 'build', matched, 'build')
-        if (matched.group('opt') != null) result.put('opt', matched.group('opt'));
-        result.put('version', matched.group('version'))
-
-        return result;
+def parseVersion(version) {
+    def pre223 = matchPre223(version)
+    if (pre223 != null) {
+        return pre223
     } else {
-        return version223Regexs
-                .findResult({ regex ->
-            echo "matching: " + version + " " + regex
-            final matched223 = version =~ /${regex}/
-            if (matched223.matches()) {
-                result = [:];
-                result = addOr0(result, 'major', matched223, 'major')
-                result = addOr0(result, 'minor', matched223, 'minor')
-                result = addOr0(result, 'security', matched223, 'security')
-                if (matched223.group('pre') != null) result.put('pre', matched223.group('pre'));
-                result = addOr0(result, 'build', matched223, 'build')
-                if (matched223.group('opt') != null) result.put('opt', matched223.group('opt'));
-                result.put('version', matched223.group('version'))
-
-                return result;
-            } else {
-                return null;
-            }
-        })
+        return match223(version)
     }
 }
 
@@ -232,9 +233,9 @@ def writeMetadata(config, filesCreated) {
     ]
 
     filesCreated.each({ file ->
-        def type = "jdk";
+        def type = "jdk"
         if (file.contains("-jre")) {
-            type = "jre";
+            type = "jre"
         }
 
         data = buildMetadata.clone()
