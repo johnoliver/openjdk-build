@@ -86,13 +86,13 @@ def parseVersion(version) {
             final matched223 = version =~ /${regex}/
             if (matched223.matches()) {
                 result = [:];
-                result = addOr0(result, 'major', matched, 'major')
-                result = addOr0(result, 'minor', matched, 'minor')
-                result = addOr0(result, 'security', matched, 'security')
-                if (matched.group('pre') != null) result.put('pre', matched.group('pre'));
-                result = addOr0(result, 'build', matched, 'build')
-                if (matched.group('opt') != null) result.put('opt', matched.group('opt'));
-                result.put('version', matched.group('version'))
+                result = addOr0(result, 'major', matched223, 'major')
+                result = addOr0(result, 'minor', matched223, 'minor')
+                result = addOr0(result, 'security', matched223, 'security')
+                if (matched223.group('pre') != null) result.put('pre', matched223.group('pre'));
+                result = addOr0(result, 'build', matched223, 'build')
+                if (matched223.group('opt') != null) result.put('opt', matched223.group('opt'));
+                result.put('version', matched223.group('version'))
 
                 return result;
             } else {
