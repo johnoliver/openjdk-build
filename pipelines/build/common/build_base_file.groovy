@@ -229,7 +229,7 @@ def createJob(jobName, jobFolder, config, enableTests, scmVars) {
     params.put("GIT_URI", scmVars["GIT_URL"])
     params.put("GIT_BRANCH", scmVars["GIT_BRANCH"])
 
-    create = jobDsl targets: "pipelines/build/create_job_from_template.groovy", ignoreExisting: false, additionalParameters: params
+    create = jobDsl targets: "pipelines/build/common/create_job_from_template.groovy", ignoreExisting: false, additionalParameters: params
 
     return create
 }
@@ -273,6 +273,12 @@ def doBuild(
     if (releaseTag == null || releaseTag == "false") {
         releaseTag = ""
     }
+
+    final Versions = load "${WORKSPACE}/pipelines/build/common/versions.groovy"
+    def versionData = Versions.parseVersion(releaseTag)
+    echo JsonOutput.prettyPrint(JsonOutput.toJson(versionData))
+    return
+
 
     def jobConfigurations = getJobConfigurations(javaVersionToBuild, availableConfigurations, targetConfigurations, releaseTag, branch, additionalConfigureArgs, additionalBuildArgs, additionalFileNameTag, adoptBuildNumber)
     def jobs = [:]
