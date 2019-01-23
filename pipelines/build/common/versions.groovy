@@ -36,6 +36,8 @@ def parseVersion(version) {
 
     final pre223regex = "jdk(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)";
     final matched = version =~ /${pre223regex}/
+
+    echo "matching: " + version
     if (matched.matches()) {
         return [
                 major   : matched.group('major'),
