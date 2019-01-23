@@ -14,6 +14,8 @@ limitations under the License.
 
 @Library('openjdk-jenkins-helper@master')
 import JobHelper
+@Library('openjdk-jenkins-helper@master')
+import JobHelper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
@@ -94,13 +96,23 @@ def match223(version) {
     })
 }
 
-def parseVersion(version) {
-    def pre223 = matchPre223(version)
-    if (pre223 != null) {
-        return pre223
-    } else {
-        return match223(version)
+def formVersionData(config) {
+
+    def data = [:]
+    if (config.parameters.TAG != null) {
+        def pre223 = matchPre223(config.parameters.TAG)
+        if (pre223 != null) {
+            data = pre223
+        } else {
+            data = match223(config.parameters.TAG)
+        }
     }
+
+    if (config.adoptBuildNumber != null) {
+        data.put('adopt_build_number', config.adoptBuildNumber)
+    }
+
+    return data
 }
 
 
@@ -223,13 +235,12 @@ def listArchives() {
 def writeMetadata(config, filesCreated) {
 
     def buildMetadata = [
-            os                : config.os,
-            arc               : config.arch,
-            variant           : config.variant,
-            version           : config.javaVersion,
-            tag               : config.parameters.TAG,
-            adopt_build_number: config.adoptBuildNumber,
-            version_data      : parseVersion(config.parameters.TAG)
+            os          : config.os,
+            arc         : config.arch,
+            variant     : config.variant,
+            version     : config.javaVersion,
+            tag         : config.parameters.TAG,
+            version_data: formVersionData(config)
     ]
 
     filesCreated.each({ file ->
