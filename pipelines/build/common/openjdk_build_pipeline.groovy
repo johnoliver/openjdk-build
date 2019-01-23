@@ -81,8 +81,7 @@ def parseVersion(version) {
         return result;
     } else {
         return version223Regexs
-                .stream()
-                .map({ regex ->
+                .findResult({ regex ->
             final matched223 = version =~ /${regex}/
             if (matched223.matches()) {
                 result = [:];
@@ -99,9 +98,6 @@ def parseVersion(version) {
                 return null;
             }
         })
-                .filter(Objects.nonNull(it))
-                .findFirst()
-                .get()
     }
 }
 
