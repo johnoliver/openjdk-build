@@ -64,8 +64,7 @@ def parseVersion(version) {
         return [
                 major   : matched.group('major'),
                 minor   : 0,
-                security: matched.group('security'),
-                pre     : matched.group('pre'),
+                security: matched.group('update'),
                 build   : matched.group('build'),
                 opt     : matched.group('opt'),
                 version : matched.group('version')
