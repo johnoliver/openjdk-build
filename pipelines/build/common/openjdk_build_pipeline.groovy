@@ -71,7 +71,7 @@ def parseVersion(version) {
     echo "matching: " + version
     if (matched.matches()) {
 
-        result = [];
+        result = [:];
         result = addOr0(result, 'major', matched, 'major')
         result.put('minor', 0)
         result = addOr0(result, 'security', matched, 'update')
