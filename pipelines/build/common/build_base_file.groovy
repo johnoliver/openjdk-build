@@ -25,6 +25,8 @@ limitations under the License.
  * 3. Push generated artifacts to github
  */
 
+
+
 def toBuildParams(enableTests, cleanWorkspace, params) {
 
     List buildParams = []
@@ -229,7 +231,7 @@ def createJob(jobName, jobFolder, config, enableTests, scmVars) {
     params.put("GIT_URI", scmVars["GIT_URL"])
     params.put("GIT_BRANCH", scmVars["GIT_BRANCH"])
 
-    create = jobDsl targets: "pipelines/build/create_job_from_template.groovy", ignoreExisting: false, additionalParameters: params
+    create = jobDsl targets: "pipelines/build/common/create_job_from_template.groovy", ignoreExisting: false, additionalParameters: params
 
     return create
 }

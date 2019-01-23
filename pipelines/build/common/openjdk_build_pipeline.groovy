@@ -16,7 +16,6 @@ limitations under the License.
 import JobHelper
 @Library('openjdk-jenkins-helper@master')
 import JobHelper
-import NodeHelper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
@@ -34,16 +33,79 @@ import groovy.json.JsonSlurper
  *
  */
 
+
 def getJavaVersionNumber(version) {
     // version should be something like "jdk8u"
     def matcher = (version =~ /(\d+)/)
     return Integer.parseInt(matcher[0][1])
 }
 
+def addOr0(map, name, matched, groupName) {
+    def number = matched.group(groupName);
+    if (number != null) {
+        map.put(name, number as Integer)
+    } else {
+        map.put(name, 0)
+    }
+    return map
+}
+
+def parseVersion(version) {
+    //Regexes based on those in http://openjdk.java.net/jeps/223
+    // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
+    final vnumRegex = "(?<major>[0-9]+)(\\.(?<minor>[0-9]+))?(\\.(?<security>[0-9]+))?";
+    final pre = "(?<pre>[a-zA-Z0-9]+)";
+    final build = "(?<build>[0-9]+)";
+    final opt = "(?<opt>[-a-zA-Z0-9\\.]+)";
+
+    final version223Regexs = [
+            "(?:jdk\\-)(?<version>${vnumRegex}(\\-${pre})?\\+${build}(\\-${opt})?)",
+            "(?:jdk\\-)(?<version>${vnumRegex}\\-${pre}(\\-${opt})?)",
+            "(?:jdk\\-)(?<version>${vnumRegex}(\\+\\-${opt})?)"
+    ];
+
+    final pre223regex = "jdk(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)";
+    final matched = version =~ /${pre223regex}/
+
+
+    echo "matching: " + version
+    if (matched.matches()) {
+        result = [:];
+        result = addOr0(result, 'major', matched, 'major')
+        result.put('minor', 0)
+        result = addOr0(result, 'security', matched, 'update')
+        result = addOr0(result, 'build', matched, 'build')
+        if (matched.group('opt') != null) result.put('opt', matched.group('opt'));
+        result.put('version', matched.group('version'))
+
+        return result;
+    } else {
+        return version223Regexs
+                .findResult({ regex ->
+            echo "matching: " + version + " " + regex
+            final matched223 = version =~ /${regex}/
+            if (matched223.matches()) {
+                result = [:];
+                result = addOr0(result, 'major', matched223, 'major')
+                result = addOr0(result, 'minor', matched223, 'minor')
+                result = addOr0(result, 'security', matched223, 'security')
+                if (matched223.group('pre') != null) result.put('pre', matched223.group('pre'));
+                result = addOr0(result, 'build', matched223, 'build')
+                if (matched223.group('opt') != null) result.put('opt', matched223.group('opt'));
+                result.put('version', matched223.group('version'))
+
+                return result;
+            } else {
+                return null;
+            }
+        })
+    }
+}
+
+
 def determineTestJobName(config, testType) {
 
     def variant
-    def number = getJavaVersionNumber(config.javaVersion)
 
     if (config.variant == "openj9") {
         variant = "j9"
@@ -158,13 +220,15 @@ def listArchives() {
 }
 
 def writeMetadata(config, filesCreated) {
+
     def buildMetadata = [
-            os              : config.os,
-            arc             : config.arch,
-            variant         : config.variant,
-            version         : config.javaVersion,
-            tag             : config.parameters.TAG,
-            adoptBuildNumber: config.adoptBuildNumber
+            os                : config.os,
+            arc               : config.arch,
+            variant           : config.variant,
+            version           : config.javaVersion,
+            tag               : config.parameters.TAG,
+            adopt_build_number: config.adoptBuildNumber,
+            version_data      : parseVersion(config.parameters.TAG)
     ]
 
     filesCreated.each({ file ->
@@ -231,7 +295,6 @@ try {
 
     // Sign and archive jobs if needed
     sign(config)
-
 } catch (Exception e) {
     currentBuild.result = 'FAILURE'
     println "Execution error: " + e.getMessage()
