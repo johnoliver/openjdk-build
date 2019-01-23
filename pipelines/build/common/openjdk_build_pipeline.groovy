@@ -182,11 +182,12 @@ try {
     println "Executing tests: ${config}"
     println "Build num: ${env.BUILD_NUMBER}"
 
-
-    final Versions = load "pipelines/build/common/versions.groovy"
-    def versionData = Versions.parseVersion(config.parameters.TAG)
-    echo JsonOutput.prettyPrint(JsonOutput.toJson(versionData))
-    return
+    node("master") {
+        final Versions = load "pipelines/build/common/versions.groovy"
+        def versionData = Versions.parseVersion(config.parameters.TAG)
+        echo JsonOutput.prettyPrint(JsonOutput.toJson(versionData))
+        return
+    }
 
 
     def filesCreated = [];
