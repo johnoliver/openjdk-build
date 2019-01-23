@@ -20,7 +20,7 @@ def getJavaVersionNumber(version) {
 }
 
 def parseVersion(version) {
-
+/*
     //Regexes based on those in http://openjdk.java.net/jeps/223
     // Technically the standard supports an arbitrary number of numbers, we will support 3 for now
     final vnumRegex = "(?<major>[0-9]+)(\\.(?<minor>[0-9]+))?(\\.(?<security>[0-9]+))?";
@@ -50,17 +50,16 @@ def parseVersion(version) {
 
         ]
     } else {
-        /*
         version223Regexs
                 .map { regex ->
             final matched = version =~ /${pre223regex}/
             if (matched.matches()) {
 
             }
-        }*/
+        }
         return [];
     }
-
+*/
 }
 
 return this
