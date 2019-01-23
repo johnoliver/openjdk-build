@@ -59,9 +59,9 @@ def parseVersion(version) {
     final opt = "(?<opt>[-a-zA-Z0-9\\.]+)";
 
     final version223Regexs = [
-            "(?<version>${vnumRegex}(\\-${pre})?\\+${build}(\\-${opt})?)",
-            "(?<version>${vnumRegex}\\-${pre}(\\-${opt})?)",
-            "(?<version>${vnumRegex}(\\+\\-${opt})?)"
+            "(?:jdk\\-)(?<version>${vnumRegex}(\\-${pre})?\\+${build}(\\-${opt})?)",
+            "(?:jdk\\-)(?<version>${vnumRegex}\\-${pre}(\\-${opt})?)",
+            "(?:jdk\\-)(?<version>${vnumRegex}(\\+\\-${opt})?)"
     ];
 
     final pre223regex = "jdk(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)";
@@ -83,7 +83,7 @@ def parseVersion(version) {
         return version223Regexs
                 .findResult({ regex ->
             echo "matching: " + version + " " + regex
-            final matched223 = version =~ /(?:jdk\\-)${regex}/
+            final matched223 = version =~ /${regex}/
             if (matched223.matches()) {
                 result = [:];
                 result = addOr0(result, 'major', matched, 'major')
