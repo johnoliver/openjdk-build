@@ -26,7 +26,7 @@ limitations under the License.
  */
 
 
-final Versions = load "${WORKSPACE}/pipelines/build/common/versions.groovy"
+final Versions = load "pipelines/build/common/versions.groovy"
 
 def toBuildParams(enableTests, cleanWorkspace, params) {
 
