@@ -20,9 +20,6 @@ import NodeHelper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
-
-final Versions = load "pipelines/build/common/versions.groovy"
-
 /**
  * This file is a template for running a build for a given configuration
  * A configuration is for example jdk10u-mac-x64-hotspot.
@@ -40,6 +37,9 @@ final Versions = load "pipelines/build/common/versions.groovy"
 def determineTestJobName(config, testType) {
 
     def variant
+
+    final Versions = load "pipelines/build/common/versions.groovy"
+
     def number = Versions.getJavaVersionNumber(config.javaVersion)
 
     if (config.variant == "openj9") {

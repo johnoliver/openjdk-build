@@ -26,7 +26,6 @@ limitations under the License.
  */
 
 
-final Versions = load "pipelines/build/common/versions.groovy"
 
 def toBuildParams(enableTests, cleanWorkspace, params) {
 
@@ -277,6 +276,7 @@ def doBuild(
         releaseTag = ""
     }
 
+    final Versions = load "pipelines/build/common/versions.groovy"
     def versionData = Versions.parseVersion(releaseTag)
     echo JsonOutput.prettyPrint(JsonOutput.toJson(versionData))
     return
