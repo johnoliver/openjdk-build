@@ -21,7 +21,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 
 
-final Versions = load "${WORKSPACE}/pipelines/build/common/versions.groovy"
+final Versions = load "pipelines/build/common/versions.groovy"
 
 /**
  * This file is a template for running a build for a given configuration
