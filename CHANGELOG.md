@@ -104,7 +104,7 @@ jenkins pipeline to code sign Adopt OpenJDK binaries (Mac and Windows for now).
  pipeline builds.
 1._pipelines/build/common/create\_job\_from\_template.groovy_ added. This dynamically 
 creates jenkins jobs for a particular pipeline run (e.g. All jdk8u jobs).
-1. _pipelines/build/openjdk\_build\_pipeline.groovy_ added. This forms the base 
+1. _pipelines/build/common/openjdk\_build\_pipeline.groovy_ added. This forms the base 
 pipeline code for each build.
 1. _pipelines/build/openjdk\<version\>\_\<variant\>\_\<nightly\|release\>\_pipeline.groovy_ 
 files added.  These will eventually replace the existing individual jobs with a 
