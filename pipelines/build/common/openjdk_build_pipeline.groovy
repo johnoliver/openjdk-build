@@ -236,24 +236,47 @@ def writeMetadata(config, filesCreated) {
 
     def buildMetadata = [
             os          : config.os,
-            arc         : config.arch,
+            arch        : config.arch,
             variant     : config.variant,
             version     : config.javaVersion,
             tag         : config.parameters.TAG,
             version_data: formVersionData(config)
     ]
 
-    filesCreated.each({ file ->
-        def type = "jdk"
-        if (file.contains("-jre")) {
-            type = "jre"
-        }
+    def type = "jdk";
+    if (file.contains("-jre")) {
+        type = "jre";
+    }
 
-        data = buildMetadata.clone()
-        data.put("binary_type", type)
+    /*
+    example data:
+    {
+        "os": "linux",
+        "arch": "x64",
+        "variant": "hotspot",
+        "version": "jdk8u",
+        "tag": "jdk8u202-b08",
+        "adopt_build_number": 2,
+        "version_data": {
+            "major": 8,
+            "minor": 0,
+            "security": 202,
+            "build": 8,
+            "version": "8u202-b08"
+        },
+        "binary_type": "jdk"
+    }
+    */
+    node("master") {
+        filesCreated.each({ file ->
 
-        writeFile file: "${file}.json", text: JsonOutput.prettyPrint(JsonOutput.toJson(data))
-    })
+            data = buildMetadata.clone()
+            data.put("binary_type", type)
+
+            writeFile file: "${file}.json", text: JsonOutput.prettyPrint(JsonOutput.toJson(data))
+        })
+        archiveArtifacts artifacts: "workspace/target/**/*.json"
+    }
 }
 
 try {
@@ -266,22 +289,23 @@ try {
     def enableTests = Boolean.valueOf(ENABLE_TESTS)
     def cleanWorkspace = Boolean.valueOf(CLEAN_WORKSPACE)
 
-    stage("build") {
+    stage("queue") {
         if (NodeHelper.nodeIsOnline(NODE_LABEL)) {
             node(NODE_LABEL) {
-                if (cleanWorkspace) {
-                    cleanWs notFailBuild: true
-                }
-
-                checkout scm
-                try {
-
-                    sh "./build-farm/make-adopt-build-farm.sh"
-                    archiveArtifacts artifacts: "workspace/target/*"
-                    filesCreated = listArchives()
-                } finally {
-                    if (config.os == "aix") {
+                stage("build") {
+                    if (cleanWorkspace) {
                         cleanWs notFailBuild: true
+                    }
+
+                    checkout scm
+                    try {
+                        sh "./build-farm/make-adopt-build-farm.sh"
+                        archiveArtifacts artifacts: "workspace/target/*"
+                        filesCreated = listArchives()
+                    } finally {
+                        if (config.os == "aix") {
+                            cleanWs notFailBuild: true
+                        }
                     }
                 }
             }
@@ -300,10 +324,7 @@ try {
         }
     }
 
-    node("master") {
-        writeMetadata(config, filesCreated)
-        archiveArtifacts artifacts: "workspace/target/*"
-    }
+    writeMetadata(config, filesCreated)
 
     // Sign and archive jobs if needed
     sign(config)
