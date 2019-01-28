@@ -59,18 +59,18 @@ def buildConfiguration(javaToBuild, variant, configuration, releaseTag, branch, 
 
     def buildArgs = getBuildArgs(configuration, variant)
 
-    if (additionalBuildArgs != null && additionalBuildArgs.length() > 0) {
+    if (additionalBuildArgs) {
         buildArgs += " " + additionalBuildArgs
     }
     buildParams.put("BUILD_ARGS", buildArgs)
 
 
-    if (branch != null && branch.length() > 0) {
+    if (branch) {
         buildParams.put("BRANCH", branch)
     }
 
     def isRelease = false
-    if (releaseTag != null && releaseTag.length() > 0) {
+    if (releaseTag) {
         isRelease = true
         buildParams.put("TAG", releaseTag)
     }
@@ -153,7 +153,7 @@ static def getConfigureArgs(configuration, additionalConfigureArgs) {
     def configureArgs = ""
 
     if (configuration.containsKey('configureArgs')) configureArgs += configuration.configureArgs
-    if (additionalConfigureArgs != null && additionalConfigureArgs.length() > 0) {
+    if (additionalConfigureArgs) {
         configureArgs += " " + additionalConfigureArgs
     }
 
@@ -181,7 +181,7 @@ def getJobConfigurations(javaVersionToBuild, availableConfigurations, String tar
                     name += "-${configuration.additionalFileNameTag}"
                 }
 
-                if (additionalFileNameTag != null && additionalFileNameTag.length() > 0) {
+                if (additionalFileNameTag) {
                     if (configuration.containsKey('additionalFileNameTag')) {
                         configuration.additionalFileNameTag = "${configuration.additionalFileNameTag}-${additionalFileNameTag}"
                     } else {
@@ -234,11 +234,29 @@ def createJob(jobName, jobFolder, config, enableTests, scmVars) {
     return create
 }
 
+def checkSaneConfig(releaseTag, jobConfigurations) {
+
+    if (releaseTag) {
+        // Doing a release
+        def variants = jobConfigurations
+                .values()
+                .collect({ it.variant })
+                .unique()
+
+        if (variants.size() > 1) {
+            error('Trying to release multiple variants at the same time, this is unusual')
+            return false
+        }
+    }
+
+    return true
+}
+
 // Call job to push artifacts to github
 def publishRelease(javaToBuild, releaseTag) {
     def release = false
     def tag = javaToBuild
-    if (releaseTag != null && releaseTag.length() > 0) {
+    if (releaseTag) {
         release = true
         tag = releaseTag
     }
@@ -275,6 +293,10 @@ def doBuild(
     }
 
     def jobConfigurations = getJobConfigurations(javaVersionToBuild, availableConfigurations, targetConfigurations, releaseTag, branch, additionalConfigureArgs, additionalBuildArgs, additionalFileNameTag, adoptBuildNumber)
+
+    if (!checkSaneConfig(releaseTag, jobConfigurations)) {
+        return
+    }
     def jobs = [:]
 
     def enableTests = Boolean.valueOf(enableTestsArg)
@@ -313,7 +335,6 @@ def doBuild(
                             catchError {
                                 sh "rm target/${config.os}/${config.arch}/${config.variant}/* || true"
 
-
                                 copyArtifacts(
                                         projectName: downstreamJobName,
                                         selector: specific("${downstreamJob.getNumber()}"),
@@ -322,14 +343,11 @@ def doBuild(
                                         target: "target/${config.os}/${config.arch}/${config.variant}/",
                                         flatten: true)
 
-
                                 // Checksum
                                 sh 'for file in $(ls target/*/*/*/*.tar.gz target/*/*/*/*.zip); do sha256sum "$file" > $file.sha256.txt ; done'
 
-
                                 // Archive in Jenkins
                                 archiveArtifacts artifacts: "target/${config.os}/${config.arch}/${config.variant}/*"
-
                             }
                         }
                     }
