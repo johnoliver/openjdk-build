@@ -363,7 +363,7 @@ try {
                     checkout scm
                     try {
                         //sh "./build-farm/make-adopt-build-farm.sh"
-                        archiveArtifacts artifacts: "workspace/target/*"
+                        //archiveArtifacts artifacts: "workspace/target/*"
                         filesCreated = listArchives()
                     } finally {
                         if (config.os == "aix") {
