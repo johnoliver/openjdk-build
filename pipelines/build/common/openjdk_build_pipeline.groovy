@@ -96,9 +96,28 @@ def match223(version) {
     })
 }
 
+private void formSemver(data, config) {
+    def semver = data.major + "." + data.minor + "." + data.security
+
+    if (data.pre) {
+        semver += "-" + data.pre
+    }
+
+    def joiner = new java.util.StringJoiner('.')
+    joiner.add(data.build ?: "0")
+    joiner.add(config.adoptBuildNumber ?: "0")
+    semver += "+" + joiner.toString()
+    return semver
+}
+
 def formVersionData(config) {
 
     def data = [:]
+
+    if (config.adoptBuildNumber) {
+        data.put('adopt_build_number', config.adoptBuildNumber)
+    }
+
     if (config.parameters.TAG != null) {
         def pre223 = matchPre223(config.parameters.TAG)
         if (pre223 != null) {
@@ -108,9 +127,8 @@ def formVersionData(config) {
         }
     }
 
-    if (config.adoptBuildNumber != null) {
-        data.put('adopt_build_number', config.adoptBuildNumber)
-    }
+    data.put('semver', formSemver(data, config))
+
 
     return data
 }
@@ -256,8 +274,8 @@ def writeMetadata(config, filesCreated) {
         "variant": "hotspot",
         "version": "jdk8u",
         "tag": "jdk8u202-b08",
-        "adopt_build_number": 2,
         "version_data": {
+            "adopt_build_number": 2,
             "major": 8,
             "minor": 0,
             "security": 202,
