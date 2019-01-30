@@ -143,5 +143,6 @@ node("master") {
             additionalBuildArgs,
             additionalFileNameTag,
             cleanWorkspaceBeforeBuild,
-            adoptBuildNumber)
+            adoptBuildNumber,
+            currentBuild)
 }
