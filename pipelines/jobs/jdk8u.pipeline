@@ -41,6 +41,7 @@ targetConfigurations = [
 ]
 
 folder("${buildFolder}")
+folder("${buildFolder}/jobs")
 
 pipelineJob("$buildFolder/$job") {
     definition {
