@@ -129,7 +129,7 @@ def javaToBuild = "jdk8u"
 
 node("master") {
 
-    echo currentJob.getName()
+    echo currentBuild.getName()
         return;
 
     def scmVars = checkout scm
