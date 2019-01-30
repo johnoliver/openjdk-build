@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 /*
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -127,7 +129,7 @@ def javaToBuild = "jdk8u"
 
 node("master") {
 
-    echo env.jobName
+    echo JsonOutput.prettyPrint(JsonOutput.toJson(env));
         return;
 
     def scmVars = checkout scm
