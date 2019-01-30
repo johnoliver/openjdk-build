@@ -62,14 +62,14 @@ pipelineJob("$buildFolder/$job") {
     }
     parameters {
         textParam('targetConfigurations', "$targetConfigurations")
-        booleanParam('enableTests', "false")
-        booleanParam('publish', "false")
+        booleanParam('enableTests', false)
+        booleanParam('publish', false)
         stringParam('releaseTag', "")
         stringParam('branch', "")
         stringParam('additionalConfigureArgs', "")
         stringParam('additionalBuildArgs', "")
         stringParam('additionalFileNameTag', "")
-        booleanParam('cleanWorkspaceBeforeBuild', "false")
+        booleanParam('cleanWorkspaceBeforeBuild', false)
         stringParam('adoptBuildNumber', "")
     }
 }
