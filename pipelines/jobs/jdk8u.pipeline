@@ -51,7 +51,7 @@ pipelineJob("$buildFolder/$job") {
                     remote {
                         url("${GIT_URL}")
                     }
-                    branch("${GIT_BRANCH}")
+                    branch("${BRANCH}")
                 }
             }
             scriptPath(script)
