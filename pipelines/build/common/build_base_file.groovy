@@ -361,8 +361,8 @@ def doBuild(
             }*/
         }
     }
-/*
     parallel jobs
+/*
 
     // publish to github if needed
     if (publish) {
