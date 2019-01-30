@@ -333,7 +333,6 @@ def doBuild(
                     createJob(jobTopName, jobFolder, config, enableTests, scmVars)
 
                     echo "Created job " + downstreamJobName
-                    /*
                     // execute build
                     def downstreamJob = build job: downstreamJobName, propagate: false, parameters: toBuildParams(enableTests, cleanWorkspace, config.parameters)
 
@@ -353,24 +352,23 @@ def doBuild(
                                         flatten: true)
 
                                 // Checksum
-
+                                sh 'for file in $(ls target/*/*/*/*.tar.gz target/*/*/*/*.zip); do sha256sum "$file" > $file.sha256.txt ; done'
 
                                 // Archive in Jenkins
                                 archiveArtifacts artifacts: "target/${config.os}/${config.arch}/${config.variant}/*"
                             }
                         }
-                    }*/
+                    }
                 }
             }
         }
     }
     parallel jobs
-/*
 
     // publish to github if needed
     if (publish) {
         publishRelease(javaVersionToBuild, releaseTag)
-    }*/
+    }
 }
 
 return this
