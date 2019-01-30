@@ -325,13 +325,15 @@ def doBuild(
             def downstreamJobName = "${jobFolder}/${jobTopName}"
 
             echo "build name " + downstreamJobName
-/*
+
             catchError {
                 // Execute build job for configuration i.e jdk10u/job/jdk10u-linux-x64-hotspot
                 stage(configuration.key) {
                     // generate job
                     createJob(jobTopName, jobFolder, config, enableTests, scmVars)
 
+                    echo "Created job " + downstreamJobName
+                    /*
                     // execute build
                     def downstreamJob = build job: downstreamJobName, propagate: false, parameters: toBuildParams(enableTests, cleanWorkspace, config.parameters)
 
@@ -339,6 +341,7 @@ def doBuild(
                         // copy artifacts from build
                         node("master") {
                             catchError {
+
                                 sh "rm target/${config.os}/${config.arch}/${config.variant}/* || true"
 
                                 copyArtifacts(
@@ -356,9 +359,9 @@ def doBuild(
                                 archiveArtifacts artifacts: "target/${config.os}/${config.arch}/${config.variant}/*"
                             }
                         }
-                    }
+                    }*/
                 }
-            }*/
+            }
         }
     }
     parallel jobs
