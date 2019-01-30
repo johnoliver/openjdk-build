@@ -223,7 +223,7 @@ static def getJobName(displayName, config) {
     return "${config.javaVersion}-${displayName}"
 }
 
-static def getJobFolder(config) {
+static def getJobFolder(currentBuild, config) {
     def parentDir = currentBuild.fullProjectName.substring(0, currentBuild.fullProjectName.lastIndexOf("/"))
     return parentDir + "/jobs/${config.javaVersion}"
 }
@@ -296,7 +296,8 @@ def doBuild(
         String additionalBuildArgs,
         String additionalFileNameTag,
         String cleanWorkspaceBeforeBuild,
-        String adoptBuildNumber
+        String adoptBuildNumber,
+        currentBuild
 ) {
     echo "Doing job"
     return;
@@ -328,7 +329,7 @@ def doBuild(
 
             // jdk10u-linux-x64-hotspot
             def jobTopName = getJobName(configuration.key, config)
-            def jobFolder = getJobFolder(config)
+            def jobFolder = getJobFolder(currentBuild, config)
 
             // i.e jdk10u/job/jdk10u-linux-x64-hotspot
             def downstreamJobName = "${jobFolder}/${jobTopName}"
