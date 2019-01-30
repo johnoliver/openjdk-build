@@ -21,7 +21,7 @@ pipelineJob("$buildFolder/$job") {
         numToKeep(5)
     }
     parameters {
-        textParam('targetConfigurations', JsonOutput.prettyPrint(JsonOutput.toJson("${targetConfigurations}")))
+        textParam('targetConfigurations', JsonOutput.prettyPrint(JsonOutput.toJson(targetConfigurations)))
         booleanParam('enableTests', false)
         booleanParam('publish', false)
         stringParam('releaseTag', "")
