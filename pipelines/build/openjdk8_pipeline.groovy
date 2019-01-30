@@ -126,6 +126,10 @@ def buildConfigurations = [
 def javaToBuild = "jdk8u"
 
 node("master") {
+
+    echo env.jobName
+        return;
+
     def scmVars = checkout scm
     def buildFile = load "${WORKSPACE}/pipelines/build/common/build_base_file.groovy"
     buildFile.doBuild(

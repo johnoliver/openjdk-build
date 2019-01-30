@@ -1,6 +1,6 @@
+import groovy.json.JsonOutput
 
-
-targetConfigurations = """{
+targetConfigurations = [
     "x64Mac": [
         "hotspot",
         "openj9"
@@ -38,9 +38,7 @@ targetConfigurations = """{
     "linuxXL": [
         "openj9"
     ]
-}
-"""
-
+]
 
 folder("${buildFolder}")
 
@@ -62,7 +60,7 @@ pipelineJob("$buildFolder/$job") {
         numToKeep(5)
     }
     parameters {
-        textParam('targetConfigurations', "$targetConfigurations")
+        textParam('targetConfigurations', JsonOutput.prettyPrint(JsonOutput.toJson(targetConfigurations)))
         booleanParam('enableTests', false)
         booleanParam('publish', false)
         stringParam('releaseTag', "")
