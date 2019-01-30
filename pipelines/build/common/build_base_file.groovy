@@ -359,7 +359,7 @@ def doBuild(
                                         flatten: true)
 
                                 // Checksum
-                                
+
 
                                 // Archive in Jenkins
                                 archiveArtifacts artifacts: "target/${config.os}/${config.arch}/${config.variant}/*"
