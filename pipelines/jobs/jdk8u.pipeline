@@ -1,3 +1,5 @@
+
+
 targetConfigurations = """{
     "x64Mac": [
         "hotspot",
@@ -39,10 +41,6 @@ targetConfigurations = """{
 }
 """
 
-buildFolder = "john/build-test/"
-javaVersion = "8"
-job = "openjdk${javaVersion}"
-script = "pipelines/build/openjdk${javaVersion}_pipeline.groovy"
 
 
 pipelineJob("$buildFolder/$job") {
@@ -51,7 +49,7 @@ pipelineJob("$buildFolder/$job") {
             scm {
                 git {
                     remote {
-                        url("${GIT_URI}")
+                        url("${GIT_URL}")
                     }
                     branch("${GIT_BRANCH}")
                 }
