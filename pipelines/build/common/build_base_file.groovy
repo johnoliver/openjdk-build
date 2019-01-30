@@ -225,7 +225,7 @@ static def getJobName(displayName, config) {
 
 static def getJobFolder(currentBuild, config) {
     def parentDir = currentBuild.fullProjectName.substring(0, currentBuild.fullProjectName.lastIndexOf("/"))
-    return parentDir + "/jobs/${config.javaVersion}"
+    return parentDir + "/jobs/" + config.javaVersion
 }
 
 // Generate a job from template at `create_job_from_template.groovy`
