@@ -41,14 +41,6 @@ def toBuildParams(enableTests, cleanWorkspace, params) {
     return buildParams
 }
 
-config = [
-        GIT_URL    : "https://github.com/johnoliver/openjdk-build.git",
-        BRANCH     : "test-pipeline",
-        buildFolder: "john/build-test/",
-        job        : "openjdk${javaVersion}",
-        script     : "pipelines/build/openjdk${javaVersion}_pipeline.groovy",
-];
-
 def buildConfiguration(javaToBuild, variant, configuration, releaseTag, branch, additionalConfigureArgs, additionalBuildArgs, adoptBuildNumber) {
 
     def additionalNodeLabels = formAdditionalNodeLabels(configuration, variant)
