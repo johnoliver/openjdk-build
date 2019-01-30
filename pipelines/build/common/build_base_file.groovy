@@ -291,8 +291,6 @@ def doBuild(
         String adoptBuildNumber,
         currentBuild
 ) {
-    echo "Doing job"
-    return;
 
     if (releaseTag == null || releaseTag == "false") {
         releaseTag = ""
