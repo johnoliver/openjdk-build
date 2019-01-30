@@ -40,6 +40,7 @@ def toBuildParams(enableTests, cleanWorkspace, params) {
 
     return buildParams
 }
+
 config = [
         GIT_URL    : "https://github.com/johnoliver/openjdk-build.git",
         BRANCH     : "test-pipeline",
@@ -47,6 +48,7 @@ config = [
         job        : "openjdk${javaVersion}",
         script     : "pipelines/build/openjdk${javaVersion}_pipeline.groovy",
 ];
+
 def buildConfiguration(javaToBuild, variant, configuration, releaseTag, branch, additionalConfigureArgs, additionalBuildArgs, adoptBuildNumber) {
 
     def additionalNodeLabels = formAdditionalNodeLabels(configuration, variant)
@@ -221,8 +223,9 @@ static def getJobName(displayName, config) {
     return "${config.javaVersion}-${displayName}"
 }
 
-static def getJobFolder(jobRoot, config) {
-    return jobRoot + "build-scripts/jobs/${config.javaVersion}"
+static def getJobFolder(config) {
+    def parentDir = currentBuild.fullProjectName.substring(0, currentBuild.fullProjectName.lastIndexOf("/"))
+    return parentDir + "/jobs/${config.javaVersion}"
 }
 
 // Generate a job from template at `create_job_from_template.groovy`
@@ -294,7 +297,7 @@ def doBuild(
         String additionalFileNameTag,
         String cleanWorkspaceBeforeBuild,
         String adoptBuildNumber
-    ) {
+) {
     echo "Doing job"
     return;
 
@@ -330,6 +333,8 @@ def doBuild(
             // i.e jdk10u/job/jdk10u-linux-x64-hotspot
             def downstreamJobName = "${jobFolder}/${jobTopName}"
 
+            echo "build name " + downstreamJobName
+/*
             catchError {
                 // Execute build job for configuration i.e jdk10u/job/jdk10u-linux-x64-hotspot
                 stage(configuration.key) {
@@ -354,7 +359,7 @@ def doBuild(
                                         flatten: true)
 
                                 // Checksum
-                                sh 'for file in $(ls target/*/*/*/*.tar.gz target/*/*/*/*.zip); do sha256sum "$file" > $file.sha256.txt ; done'
+                                
 
                                 // Archive in Jenkins
                                 archiveArtifacts artifacts: "target/${config.os}/${config.arch}/${config.variant}/*"
@@ -362,16 +367,16 @@ def doBuild(
                         }
                     }
                 }
-            }
+            }*/
         }
     }
-
+/*
     parallel jobs
 
     // publish to github if needed
     if (publish) {
         publishRelease(javaVersionToBuild, releaseTag)
-    }
+    }*/
 }
 
 return this
