@@ -1,21 +1,77 @@
-pipeline {
-    agent any
+targetConfigurations = """{
+    "x64Mac": [
+        "hotspot",
+        "openj9"
+    ],
+    "x64Linux": [
+        "hotspot",
+        "openj9"
+    ],
+        "aarch64Linux": [
+        "hotspot"
+    ],
+        "x32Windows": [
+        "hotspot",
+        "openj9"
+    ],
+    "x64Windows": [
+        "hotspot",
+        "openj9"
+    ],
+    "ppc64Aix": [
+        "hotspot",
+        "openj9"
+    ],
+    "ppc64leLinux": [
+        "hotspot",
+        "openj9"
+    ],
+    "s390xLinux": [
+        "hotspot",
+        "openj9"
+    ],
+    "sparcv9Solaris": [
+        "hotspot"
+    ],
+    "linuxXL": [
+        "openj9"
+    ]
+}
+"""
 
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Building..'
+buildFolder = "john/build-test/"
+javaVersion = "8"
+job = "openjdk${javaVersion}"
+script = "pipelines/build/openjdk${javaVersion}_pipeline.groovy"
+
+
+pipelineJob("$buildFolder/$job") {
+    definition {
+        cpsScm {
+            scm {
+                git {
+                    remote {
+                        url("${GIT_URI}")
+                    }
+                    branch("${GIT_BRANCH}")
+                }
             }
+            scriptPath(script)
         }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
-        }
-        stage('Deploy') {
-            steps {
-                echo 'Deploying....'
-            }
-        }
+    }
+    logRotator {
+        numToKeep(5)
+    }
+    parameters {
+        textParam('targetConfigurations', "$targetConfigurations")
+        booleanParam('enableTests', "false")
+        booleanParam('publish', "false")
+        stringParam('releaseTag', "")
+        stringParam('branch', "")
+        stringParam('additionalConfigureArgs', "")
+        stringParam('additionalBuildArgs', "")
+        stringParam('additionalFileNameTag', "")
+        booleanParam('cleanWorkspaceBeforeBuild', "false")
+        stringParam('adoptBuildNumber', "")
     }
 }

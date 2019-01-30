@@ -26,7 +26,6 @@ limitations under the License.
  */
 
 
-
 def toBuildParams(enableTests, cleanWorkspace, params) {
 
     List buildParams = []
@@ -216,8 +215,8 @@ static def getJobName(displayName, config) {
     return "${config.javaVersion}-${displayName}"
 }
 
-static def getJobFolder(config) {
-    return "build-scripts/jobs/${config.javaVersion}"
+static def getJobFolder(jobRoot, config) {
+    return jobRoot + "build-scripts/jobs/${config.javaVersion}"
 }
 
 // Generate a job from template at `create_job_from_template.groovy`
@@ -288,7 +287,10 @@ def doBuild(
         String additionalBuildArgs,
         String additionalFileNameTag,
         String cleanWorkspaceBeforeBuild,
-        String adoptBuildNumber) {
+        String adoptBuildNumber
+    ) {
+    echo "Doing job"
+    return;
 
     if (releaseTag == null || releaseTag == "false") {
         releaseTag = ""
