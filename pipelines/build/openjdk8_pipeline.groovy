@@ -129,7 +129,7 @@ def javaToBuild = "jdk8u"
 
 node("master") {
 
-    echo JsonOutput.prettyPrint(JsonOutput.toJson(env));
+    echo System.getenv('JOB_NAME')
         return;
 
     def scmVars = checkout scm
