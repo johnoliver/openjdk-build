@@ -76,6 +76,34 @@ class VersionInfo {
         }
     }
 
+    private boolean matchAltPre223(versionString) {
+        //1.8.0_202-internal-201903130451-b08
+        final pre223regex = "(?<version>1\\.(?<major>[0-8])\\.0(_(?<update>[0-9]+))?(-(?<additional>.*))?)"
+        final matched = versionString =~ /${pre223regex}/
+
+        if (matched.matches()) {
+            major = or0(matched, 'major')
+            minor = 0
+            security = or0(matched, 'update')
+            if (matched.group('additional') != null) {
+                String additional = matched.group('additional')
+                additional.split("-")
+                        .each { val ->
+                    switch (val) {
+                        case ~/b(?<build>[0-9]+)/:
+                            build = Integer.parseInt(Matcher.lastMatcher.group("build")); break
+                        case ~/^(?<opt>[0-9]{12})$/:
+                            opt = Matcher.lastMatcher.group("opt"); break
+                    }
+                }
+            }
+            version = matched.group('version')
+            return true
+        }
+
+        return false
+    }
+
     private boolean matchPre223(versionString) {
         final pre223regex = "jdk\\-?(?<version>(?<major>[0-8]+)(u(?<update>[0-9]+))?(-b(?<build>[0-9]+))(_(?<opt>[-a-zA-Z0-9\\.]+))?)"
         final matched = versionString =~ /${pre223regex}/
@@ -87,10 +115,10 @@ class VersionInfo {
             build = or0(matched, 'build')
             if (matched.group('opt') != null) opt = matched.group('opt')
             version = matched.group('version')
-
             return true
+        } else {
+            return matchAltPre223(versionString)
         }
-        return false
     }
 
     private boolean match223(versionString) {
@@ -102,9 +130,9 @@ class VersionInfo {
         final optRegex = "(?<opt>[-a-zA-Z0-9\\.]+)"
 
         List<String> version223Regexs = [
-                "(?:jdk\\-)(?<version>${vnumRegex}(\\-${preRegex})?\\+${buildRegex}(\\-${optRegex})?)".toString(),
-                "(?:jdk\\-)(?<version>${vnumRegex}\\-${preRegex}(\\-${optRegex})?)".toString(),
-                "(?:jdk\\-)(?<version>${vnumRegex}(\\+\\-${optRegex})?)".toString()
+                "(?:jdk\\-)?(?<version>${vnumRegex}(\\-${preRegex})?\\+${buildRegex}(\\-${optRegex})?)".toString(),
+                "(?:jdk\\-)?(?<version>${vnumRegex}\\-${preRegex}(\\-${optRegex})?)".toString(),
+                "(?:jdk\\-)?(?<version>${vnumRegex}(\\+\\-${optRegex})?)".toString()
         ]
 
         for (String regex : version223Regexs) {
@@ -238,6 +266,16 @@ class Build {
             }
         }
         return testStages
+    }
+
+    VersionInfo parseVersionOutput(String consoleOut) {
+        Matcher matcher = (consoleOut =~ /(?ms)^.*=JAVA VERSION OUTPUT=.*OpenJDK Runtime Environment[^\n]*\(build (?<version>[^)]*)\).*=\/JAVA VERSION OUTPUT=.*$/)
+        if (matcher.matches()) {
+            String versionOutput = matcher.group('version')
+
+            return new VersionInfo().parse(versionOutput, ADOPT_BUILD_NUMBER)
+        }
+        return null
     }
 
     def sign() {
@@ -389,6 +427,10 @@ class Build {
     }
 
     def formMetadata() {
+        return formMetadata(PUBLISH_NAME)
+    }
+
+    def formMetadata(String versionString) {
         return [
                 WARNING     : "THIS METADATA FILE IS STILL IN ALPHA DO NOT USE ME",
                 os          : TARGET_OS,
@@ -396,11 +438,11 @@ class Build {
                 variant     : VARIANT,
                 version     : JAVA_TO_BUILD,
                 scmRef      : SCM_REF,
-                version_data: new VersionInfo().parse(PUBLISH_NAME, ADOPT_BUILD_NUMBER)
+                version_data: new VersionInfo().parse(versionString, ADOPT_BUILD_NUMBER)
         ]
     }
 
-    def writeMetadata(List<String> filesCreated) {
+    def writeMetadata(String versionString) {
         /*
     example data:
     {
@@ -422,22 +464,18 @@ class Build {
         "binary_type": "jdk"
     }
     */
-        context.node("master") {
-            //Clean workspace on parent
-            context.sh 'find . -regex ".*/OpenJDK.*\\.json" -exec rm ./{} \\; || true'
-            filesCreated.each({ file ->
-                def type = "jdk"
-                if (file.contains("-jre")) {
-                    type = "jre"
-                }
 
-                Map<String, ?> data = formMetadata().clone() as Map
-                data.put("binary_type", type)
+        listArchives().each({ file ->
+            def type = "jdk"
+            if (file.contains("-jre")) {
+                type = "jre"
+            }
 
-                context.writeFile file: "${file}.json", text: JsonOutput.prettyPrint(JsonOutput.toJson(data))
-            })
-            context.archiveArtifacts artifacts: "workspace/target/**/*.json"
-        }
+            Map<String, ?> data = formMetadata(versionString).clone() as Map
+            data.put("binary_type", type)
+
+            context.writeFile file: "${file}.json", text: JsonOutput.prettyPrint(JsonOutput.toJson(data))
+        })
     }
 
     def determineFileName() {
@@ -500,6 +538,9 @@ class Build {
             def cleanWorkspace = Boolean.valueOf(CLEAN_WORKSPACE)
 
 
+            //Clean metadata workspace on parent
+            context.sh 'find . -regex ".*/OpenJDK.*\\.json" -exec rm ./{} \\; || true'
+
             context.stage("queue") {
                 if (NodeHelper.nodeIsOnline(NODE_LABEL)) {
                     context.node(NODE_LABEL) {
@@ -513,11 +554,14 @@ class Build {
                             }
                             context.checkout context.scm
                             try {
+                                String version = null
                                 context.withEnv(["FILENAME=${filename}"]) {
-                                    context.sh "./build-farm/make-adopt-build-farm.sh"
+                                    String consoleOut = context.sh(script: "./build-farm/make-adopt-build-farm.sh", returnStdout: true)
+                                    version = parseVersionOutput(consoleOut)
                                 }
+
+                                writeMetadata(version)
                                 context.archiveArtifacts artifacts: "workspace/target/*"
-                                filesCreated = listArchives()
                             } finally {
                                 if (TARGET_OS == "aix") {
                                     context.cleanWs notFailBuild: true
@@ -539,8 +583,6 @@ class Build {
                     context.println "Failed test: ${e}"
                 }
             }
-
-            writeMetadata(filesCreated)
 
             // Sign and archive jobs if needed
             sign()
