@@ -31,7 +31,9 @@ class PullRequestTestPipeline implements Serializable {
 
         def jobs = [:]
 
-        def repoPath = "pipelines/library/src/main/groovy"
+        def path = "pipelines/library/src/main/groovy"
+        context.sh("cd ${path} && git init && git add --all . && git commit -m init &> /dev/null")
+        def repoPath = context.sh(returnStdout: true, script: "pwd").trim() + "/" + path
         context.library identifier: 'local-lib@master', retriever: context.modernSCM([$class: 'GitSCMSource', remote: repoPath])
 
 
