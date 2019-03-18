@@ -31,6 +31,10 @@ class PullRequestTestPipeline implements Serializable {
 
         def jobs = [:]
 
+        def repoPath = "pipelines/library/src/main/groovy"
+        context.library identifier: 'local-lib@master', retriever: modernSCM([$class: 'GitSCMSource', remote: repoPath])
+
+
         javaVersions.each({ javaVersion ->
             def target = context.load "pipelines/jobs/configurations/jdk${javaVersion}u.groovy"
 

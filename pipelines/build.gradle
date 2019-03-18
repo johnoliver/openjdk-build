@@ -11,7 +11,7 @@ targetCompatibility = 1.8
 sourceSets {
     main {
         groovy {
-            srcDirs = ['build', 'src/main/groovy']
+            srcDirs = ['build', 'src/main/groovy', 'library/src/main/groovy']
             buildDir = 'target'
         }
     }
