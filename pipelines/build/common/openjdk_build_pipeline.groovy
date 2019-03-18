@@ -1,5 +1,5 @@
-import NodeHelper
-@Library('openjdk-jenkins-helper@master')
+@Library('local-lib@master')
+import common.*
 import groovy.json.JsonOutput
 
 import java.util.regex.Matcher
@@ -37,7 +37,6 @@ limitations under the License.
     If it is not present add `0`
  */
 
-//@TypeChecked(extensions = "JenkinsTypeCheckHelperExtension")
 class Build {
     String SCM_REF
     String NODE_LABEL
@@ -215,7 +214,7 @@ class Build {
                         context.string(name: 'UPSTREAM_JOB_NUMBER', value: "${env.BUILD_NUMBER}"),
                         context.string(name: 'UPSTREAM_JOB_NAME', value: "${env.JOB_NAME}"),
                         context.string(name: 'FILTER', value: "${filter}"),
-                        context.string(name: 'FULL_VERSION', value: "${versionData.semver}"),
+                        context.string(name: 'FULL_VERSION', value: "${versionData.version}"),
                         context.string(name: 'MAJOR_VERSION', value: "${versionData.major}"),
                         context.string(name: 'CERTIFICATE', value: "${certificate}"),
                         ['$class': 'LabelParameterValue', name: 'NODE_LABEL', label: "${nodeFilter}"]
@@ -243,7 +242,7 @@ class Build {
                         context.string(name: 'PRODUCT_MAJOR_VERSION', value: "${versionData.major}"),
                         context.string(name: 'PRODUCT_MINOR_VERSION', value: "${versionData.minor}"),
                         context.string(name: 'PRODUCT_MAINTENANCE_VERSION', value: "${versionData.security}"),
-                        context.string(name: 'PRODUCT_PATCH_VERSION', value: "${versionData.build}"),
+                        context.string(name: 'PRODUCT_PATCH_VERSION', value: "${String.format("%02d", versionData.build)}"),
                         context.string(name: 'JVM', value: "${VARIANT}"),
                         context.string(name: 'SIGNING_CERTIFICATE', value: "${certificate}"),
                         context.string(name: 'ARCH', value: "${ARCHITECTURE}"),
@@ -294,16 +293,8 @@ class Build {
                 .toList()
     }
 
-    def formMetadata(VersionInfo version) {
-        return [
-                WARNING     : "THIS METADATA FILE IS STILL IN ALPHA DO NOT USE ME",
-                os          : TARGET_OS,
-                arch        : ARCHITECTURE,
-                variant     : VARIANT,
-                version     : JAVA_TO_BUILD,
-                scmRef      : SCM_REF,
-                version_data: version
-        ]
+    MetaData formMetadata(VersionInfo version) {
+        return new MetaData(TARGET_OS, SCM_REF, version, JAVA_TO_BUILD, VARIANT, ARCHITECTURE)
     }
 
     def writeMetadata(VersionInfo version) {
@@ -328,6 +319,7 @@ class Build {
         "binary_type": "jdk"
     }
     */
+        MetaData data = formMetadata(version)
 
         listArchives().each({ file ->
             def type = "jdk"
@@ -335,10 +327,9 @@ class Build {
                 type = "jre"
             }
 
-            Map<String, ?> data = formMetadata(version).clone() as Map
-            data.put("binary_type", type)
+            data.binary_type = type
 
-            context.writeFile file: "${file}.json", text: JsonOutput.prettyPrint(JsonOutput.toJson(data))
+            context.writeFile file: "${file}.json", text: JsonOutput.prettyPrint(JsonOutput.toJson(data.asMap()))
         })
     }
 
@@ -397,9 +388,11 @@ class Build {
             def enableTests = Boolean.valueOf(ENABLE_TESTS)
             def cleanWorkspace = Boolean.valueOf(CLEAN_WORKSPACE)
 
-            VersionInfo versionInfo = null;
+            VersionInfo versionInfo = null
 
             context.stage("queue") {
+                def NodeHelper = context.library(identifier: 'openjdk-jenkins-helper@master').NodeHelper
+
                 if (NodeHelper.nodeIsOnline(NODE_LABEL)) {
                     context.node(NODE_LABEL) {
                         context.stage("build") {
@@ -469,7 +462,7 @@ if (String.class.isInstance(RELEASE)) {
     RELEASE = Boolean.parseBoolean(RELEASE as String)
 }
 
-new Build(SCM_REF: SCM_REF,
+return new Build(SCM_REF: SCM_REF,
         NODE_LABEL: NODE_LABEL,
         JAVA_TO_BUILD: JAVA_TO_BUILD,
         JDK_BOOT_VERSION: JDK_BOOT_VERSION,
@@ -489,4 +482,4 @@ new Build(SCM_REF: SCM_REF,
 
         context: context,
         env: env,
-        currentBuild: currentBuild).build()
+        currentBuild: currentBuild)

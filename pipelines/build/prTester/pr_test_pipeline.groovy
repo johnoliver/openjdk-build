@@ -1,3 +1,4 @@
+@Library('local-lib@master')
 import groovy.json.JsonSlurper
 
 import static groovy.json.JsonOutput.prettyPrint
@@ -24,6 +25,7 @@ class PullRequestTestPipeline implements Serializable {
     def currentBuild
 
     String branch
+    String gitRepo
     Map<String, ?> testConfigurations
     List<Integer> javaVersions
 
@@ -31,18 +33,12 @@ class PullRequestTestPipeline implements Serializable {
 
         def jobs = [:]
 
-        def path = "pipelines/library/src/main/groovy"
-        context.sh("cd ${path} && git init && git add --all . && git commit -m init &> /dev/null")
-        def repoPath = context.sh(returnStdout: true, script: "pwd").trim() + "/" + path
-        context.library identifier: 'local-lib@master', retriever: context.modernSCM([$class: 'GitSCMSource', remote: repoPath])
-
-
         javaVersions.each({ javaVersion ->
             def target = context.load "pipelines/jobs/configurations/jdk${javaVersion}u.groovy"
 
             def config = [
                     PR_BUILDER          : true,
-                    GIT_URL             : "https://github.com/AdoptOpenJDK/openjdk-build",
+                    GIT_URL             : gitRepo,
                     BRANCH              : "${branch}",
                     BUILD_FOLDER        : "build-scripts-pr-tester/build-test",
                     JOB_NAME            : "openjdk${javaVersion}",
@@ -77,18 +73,20 @@ Map<String, ?> defaultTestConfigurations = [
 
 List<Integer> defaultJavaVersions = [8, 11, 12]
 
+defaultGitRepo = "https://github.com/AdoptOpenJDK/openjdk-build"
+
 return {
     String branch,
     def currentBuild,
     def context,
     def env,
     String testConfigurations = null,
-    String versions = null
+    String versions = null,
+    String gitRepo = defaultGitRepo
         ->
 
         Map<String, ?> testConfig = defaultTestConfigurations
         List<Integer> javaVersions = defaultJavaVersions
-
 
         if (testConfigurations != null) {
             testConfig = new JsonSlurper().parseText(testConfigurations) as Map
@@ -99,6 +97,7 @@ return {
         }
 
         return new PullRequestTestPipeline(
+                gitRepo: gitRepo,
                 branch: branch,
                 testConfigurations: testConfig,
                 javaVersions: javaVersions,
