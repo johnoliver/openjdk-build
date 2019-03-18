@@ -37,7 +37,6 @@ limitations under the License.
     If it is not present add `0`
  */
 
-
 //@TypeChecked(extensions = "JenkinsTypeCheckHelperExtension")
 class Build {
     String SCM_REF
