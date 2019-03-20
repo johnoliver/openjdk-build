@@ -87,6 +87,10 @@ return {
         Map<String, ?> testConfig = defaultTestConfigurations
         List<Integer> javaVersions = defaultJavaVersions
 
+        if (gitRepo == null) {
+            gitRepo = defaultGitRepo
+        }
+
         if (testConfigurations != null) {
             testConfig = new JsonSlurper().parseText(testConfigurations) as Map
         }
