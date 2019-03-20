@@ -22,7 +22,8 @@ repositories {
 }
 
 task uberjar(type: Jar) {
-    baseName = project.name + '-all'
+    baseName = 'adopt-shared-lib'
+    version = ""
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
     with jar
 }

@@ -1,5 +1,6 @@
 @Library('local-lib@master')
-import common.*
+import common.VersionInfo
+import common.MetaData
 import groovy.json.JsonOutput
 
 import java.util.regex.Matcher

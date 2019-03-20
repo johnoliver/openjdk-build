@@ -1,4 +1,3 @@
-@Library('local-lib@master')
 import groovy.json.JsonSlurper
 
 import static groovy.json.JsonOutput.prettyPrint

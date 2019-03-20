@@ -1,4 +1,6 @@
 import common.VersionInfo
+import groovy.cli.picocli.CliBuilder
+import groovy.cli.picocli.OptionAccessor
 import groovy.json.JsonOutput
 
 import java.util.regex.Matcher
@@ -11,7 +13,9 @@ class ParseVersion {
         if (parsedArgs.s) {
             version = parseFromStdIn(args)
         } else {
-            version = new VersionInfo().parse(args[args.length - 2], args[args.length - 1])
+            def versionString = args[args.length - 2]
+            def adoptBuildNumber = args[args.length - 1]
+            version = new VersionInfo().parse(versionString, adoptBuildNumber)
         }
 
         printVersion(parsedArgs, version)
@@ -38,12 +42,11 @@ class ParseVersion {
                 return version
             }
         }
-        return null
+        throw new RuntimeException("No java versions found. Expected to read input from java -version")
     }
 
     private static OptionAccessor parseArgs(String[] args) {
         CliBuilder cliBuilder = new CliBuilder()
-
         cliBuilder.s('read input from stdin', args: 0)
         cliBuilder.f('print given field from data', args: 1)
 

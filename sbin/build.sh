@@ -378,7 +378,7 @@ buildSharedLibs() {
 
 parseJavaVersionString() {
   ADOPT_BUILD_NUMBER="${ADOPT_BUILD_NUMBER:-1}"
-  local version=$("$PRODUCT_HOME"/bin/java -version 2>&1 | java -cp "${LIB_DIR}/target/libs/pipelines-all-1.0.0-SNAPSHOT.jar" ParseVersion -s -f semver $ADOPT_BUILD_NUMBER)
+  local version=$("$PRODUCT_HOME"/bin/java -version 2>&1 | java -cp "${LIB_DIR}/target/libs/adopt-shared-lib.jar" ParseVersion -s -f semver $ADOPT_BUILD_NUMBER)
   echo $version
 }
 
@@ -443,7 +443,6 @@ removingUnnecessaryFiles() {
 
   if [ -d "$(ls -d ${BUILD_CONFIG[JRE_PATH]})" ]
   then
-    [ "${jreTargetPath}" == "${openJdkVersion}" ] && jreTargetPath="${openJdkVersion}.jre"
     echo "moving $(ls -d ${BUILD_CONFIG[JRE_PATH]}) to ${jreTargetPath}"
     rm -rf "${jreTargetPath}" || true
     mv "$(ls -d ${BUILD_CONFIG[JRE_PATH]})" "${jreTargetPath}"
