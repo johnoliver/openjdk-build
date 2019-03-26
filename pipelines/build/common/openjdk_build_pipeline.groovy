@@ -46,13 +46,8 @@ class Build {
     final def env
     final def currentBuild
 
-    public Build(def buildConfigArg, def context, def env, def currentBuild) {
-        if (String.class.isInstance(buildConfigArg)) {
-            this.buildConfig = new IndividualBuildConfig().fromJson(buildConfigArg as String);
-        } else {
-            this.buildConfig = buildConfigArg as IndividualBuildConfig;
-        }
-
+    public Build(IndividualBuildConfig buildConfig, def context, def env, def currentBuild) {
+        this.buildConfig = buildConfig;
         this.context = context
         this.currentBuild = currentBuild
         this.env = env
@@ -457,13 +452,23 @@ class Build {
     }
 }
 
-if (!binding.hasVariable("context")) {
-    context = this
+return {
+    buildConfigArg,
+    context,
+    env,
+    currentBuild ->
+        def buildConfig
+        if (String.class.isInstance(buildConfigArg)) {
+            buildConfig = new IndividualBuildConfig().fromJson(buildConfigArg as String);
+        } else {
+            buildConfig = buildConfigArg as IndividualBuildConfig;
+        }
+
+        return new Build(
+                buildConfig,
+                context,
+                env,
+                currentBuild)
 }
 
-return new Build(
-        BUILD_CONFIGURATION,
-        context,
-        env,
-        currentBuild)
 
