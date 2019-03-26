@@ -446,6 +446,7 @@ if (!binding.hasVariable("context")) {
 }
 
 if (!binding.hasVariable("BUILD_CONFIGURATION")) {
+    context.println "Missing BUILD_CONFIGURATION"
     BUILD_CONFIGURATION = "{}"
 }
 
