@@ -2,7 +2,6 @@ import common.MetaData
 @Library('local-lib@master')
 import common.VersionInfo
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 
 import java.util.regex.Matcher
 
@@ -460,7 +459,7 @@ if (!binding.hasVariable("context")) {
 }
 
 
-def buildConfig = JsonSlurper.parseText(BUILD_CONFIGURATION);
+def buildConfig = groovy.json.JsonSlurper.parseText(BUILD_CONFIGURATION.toString());
 
 context.println(buildConfig.getClass().getName())
 /*
