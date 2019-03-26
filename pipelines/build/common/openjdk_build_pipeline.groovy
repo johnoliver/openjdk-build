@@ -375,13 +375,13 @@ class Build {
         return fileName
     }
 
-    def build(def buildConfig) {
+    def build(def buildConfigArg) {
         try {
 
-            if (String.class.isInstance(buildConfig)) {
-                this.buildConfig = new IndividualBuildConfig().fromJson(buildConfig as String);
+            if (String.class.isInstance(buildConfigArg)) {
+                this.buildConfig = new IndividualBuildConfig().fromJson(buildConfigArg as String);
             } else {
-                this.buildConfig = buildConfig as IndividualBuildConfig;
+                this.buildConfig = buildConfigArg as IndividualBuildConfig;
             }
 
             context.println "Build config"
