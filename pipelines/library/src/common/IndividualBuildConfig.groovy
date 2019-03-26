@@ -54,7 +54,7 @@ public class IndividualBuildConfig implements Serializable {
         List<?> buildParams = []
 
         buildParams.add(['$class': 'LabelParameterValue', name: 'NODE_LABEL', label: NODE_LABEL])
-        buildParams.add(['$class': 'TextParameterValue', name: 'BUILD_CONFIGURATION', label: JsonOutput.prettyPrint(JsonOutput.toJson(toMap()))])
+        buildParams.add(['$class': 'TextParameterValue', name: 'BUILD_CONFIGURATION', value: JsonOutput.prettyPrint(JsonOutput.toJson(toMap()))])
         /*
         params
                 .findAll { it.key != 'NODE_LABEL' }
