@@ -107,7 +107,8 @@ class Build {
                         // example jobName: openjdk10_hs_externaltest_x86-64_linux
                         def jobName = determineTestJobName(testType)
 
-                        if (JobHelper.jobIsRunnable(jobName)) {
+                        def isRunnable = context.library(identifier: 'openjdk-jenkins-helper@master').JobHelper.jobIsRunnable(jobName)
+                        if (isRunnable) {
                             context.catchError {
                                 context.build job: jobName,
                                         propagate: false,
@@ -409,7 +410,7 @@ class Build {
                             context.checkout context.scm
                             try {
                                 List<String> envVars = buildConfig.toEnvVars()
-                                envVars.add("FILENAME=${filename}")
+                                envVars.add("FILENAME=${filename}" as String)
 
                                 context.withEnv(envVars) {
                                     context.sh(script: "./build-farm/make-adopt-build-farm.sh")
