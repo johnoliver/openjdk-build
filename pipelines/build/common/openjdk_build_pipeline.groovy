@@ -413,8 +413,8 @@ class Build {
                             }
                             context.checkout context.scm
                             try {
-                                Map<String, ?> envVars = buildConfig.toMap()
-                                envVars.put("FILENAME", filename)
+                                List<String> envVars = buildConfig.toEnvVars()
+                                envVars.add("FILENAME=${filename}")
 
                                 context.withEnv(envVars) {
                                     context.sh(script: "./build-farm/make-adopt-build-farm.sh")
