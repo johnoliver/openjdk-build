@@ -413,7 +413,10 @@ class Build {
                             }
                             context.checkout context.scm
                             try {
-                                context.withEnv(["FILENAME=${filename}"]) {
+                                Map<String, ?> envVars = buildConfig.toMap()
+                                envVars.put("FILENAME", filename)
+
+                                context.withEnv(envVars) {
                                     context.sh(script: "./build-farm/make-adopt-build-farm.sh")
                                     String consoleOut = context.sh(script: "chmod +x ./sbin/getBuiltVersion.sh;./sbin/getBuiltVersion.sh", returnStdout: true, returnStatus: false)
                                     versionInfo = parseVersionOutput(consoleOut)
