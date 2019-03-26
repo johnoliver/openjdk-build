@@ -1,3 +1,4 @@
+import common.IndividualBuildConfig
 import common.MetaData
 @Library('local-lib@master')
 import common.VersionInfo
@@ -39,23 +40,7 @@ limitations under the License.
  */
 
 class Build {
-    String SCM_REF
-    String NODE_LABEL
-    String JAVA_TO_BUILD
-    String JDK_BOOT_VERSION
-    String CONFIGURE_ARGS
-    String BUILD_ARGS
-    String ARCHITECTURE
-    String VARIANT
-    String TARGET_OS
-    String ADDITIONAL_FILE_NAME_TAG
-    String OVERRIDE_FILE_NAME_VERSION
-    boolean ENABLE_TESTS
-    boolean CLEAN_WORKSPACE
-    boolean RELEASE
-    String PUBLISH_NAME
-    String TEST_LIST
-    String ADOPT_BUILD_NUMBER
+    IndividualBuildConfig buildConfig;
 
     def context
     def env
@@ -63,7 +48,7 @@ class Build {
 
     Integer getJavaVersionNumber() {
         // version should be something like "jdk8u"
-        def matcher = (JAVA_TO_BUILD =~ /(\d+)/)
+        def matcher = (buildConfig.JAVA_TO_BUILD =~ /(\d+)/)
         List<String> list = matcher[0] as List
         return Integer.parseInt(list[1] as String)
     }
@@ -73,26 +58,26 @@ class Build {
         def variant
         def number = getJavaVersionNumber()
 
-        if (VARIANT == "openj9") {
+        if (buildConfig.VARIANT == "openj9") {
             variant = "j9"
         } else {
             variant = "hs"
         }
 
-        def arch = ARCHITECTURE
+        def arch = buildConfig.ARCHITECTURE
         if (arch == "x64") {
             arch = "x86-64"
         }
 
-        def os = TARGET_OS
+        def os = buildConfig.TARGET_OS
         if (os == "mac") {
             os = "macos"
         }
 
         def jobName = "openjdk${number}_${variant}_${testType}_${arch}_${os}"
 
-        if (ADDITIONAL_FILE_NAME_TAG) {
-            switch (ADDITIONAL_FILE_NAME_TAG) {
+        if (buildConfig.ADDITIONAL_FILE_NAME_TAG) {
+            switch (buildConfig.ADDITIONAL_FILE_NAME_TAG) {
                 case ~/.*linuxXL.*/: jobName += "_linuxXL"; break
                 case ~/.*macosXL.*/: jobName += "_macosXL"; break
             }
@@ -103,7 +88,7 @@ class Build {
     def runTests() {
         def testStages = [:]
 
-        List testList = TEST_LIST.split(",") as List
+        List testList = buildConfig.TEST_LIST.split(",") as List
         testList.each { testType ->
             // For each requested test, i.e 'openjdktest', 'systemtest', 'perftest', 'externaltest', call test job
             try {
@@ -121,7 +106,7 @@ class Build {
                                         parameters: [
                                                 context.string(name: 'UPSTREAM_JOB_NUMBER', value: "${env.BUILD_NUMBER}"),
                                                 context.string(name: 'UPSTREAM_JOB_NAME', value: "${env.JOB_NAME}"),
-                                                context.string(name: 'RELEASE_TAG', value: "${SCM_REF}")]
+                                                context.string(name: 'RELEASE_TAG', value: "${buildConfig.SCM_REF}")]
                             }
                         } else {
                             context.println "Requested test job that does not exist or is disabled: ${jobName}"
@@ -143,26 +128,26 @@ class Build {
             String versionOutput = matcher.group('version')
             context.println(versionOutput)
 
-            return new VersionInfo().parse(versionOutput, ADOPT_BUILD_NUMBER)
+            return new VersionInfo().parse(versionOutput, buildConfig.ADOPT_BUILD_NUMBER)
         }
         return null
     }
 
     def sign() {
         // Sign and archive jobs if needed
-        if (TARGET_OS == "windows" || TARGET_OS == "mac") {
+        if (buildConfig.TARGET_OS == "windows" || buildConfig.TARGET_OS == "mac") {
             context.node('master') {
                 context.stage("sign") {
                     def filter = ""
                     def certificate = ""
 
-                    def nodeFilter = "${TARGET_OS}&&build"
+                    def nodeFilter = "${buildConfig.TARGET_OS}&&build"
 
-                    if (TARGET_OS == "windows") {
+                    if (buildConfig.TARGET_OS == "windows") {
                         filter = "**/OpenJDK*_windows_*.zip"
                         certificate = "C:\\Users\\jenkins\\windows.p12"
 
-                    } else if (TARGET_OS == "mac") {
+                    } else if (buildConfig.TARGET_OS == "mac") {
                         filter = "**/OpenJDK*_mac_*.tar.gz"
                         certificate = "\"Developer ID Application: London Jamocha Community CIC\""
 
@@ -173,7 +158,7 @@ class Build {
                     def params = [
                             context.string(name: 'UPSTREAM_JOB_NUMBER', value: "${env.BUILD_NUMBER}"),
                             context.string(name: 'UPSTREAM_JOB_NAME', value: "${env.JOB_NAME}"),
-                            context.string(name: 'OPERATING_SYSTEM', value: "${TARGET_OS}"),
+                            context.string(name: 'OPERATING_SYSTEM', value: "${buildConfig.TARGET_OS}"),
                             context.string(name: 'FILTER', value: "${filter}"),
                             context.string(name: 'CERTIFICATE', value: "${certificate}"),
                             ['$class': 'LabelParameterValue', name: 'NODE_LABEL', label: "${nodeFilter}"],
@@ -207,7 +192,7 @@ class Build {
         def certificate = "Developer ID Installer: London Jamocha Community CIC"
 
         // currently only macos10.10 can build an installer
-        def nodeFilter = "${TARGET_OS}&&macos10.10&&build"
+        def nodeFilter = "${buildConfig.TARGET_OS}&&macos10.10&&build"
 
         def installerJob = context.build job: "build-scripts/release/create_installer_mac",
                 propagate: true,
@@ -250,10 +235,10 @@ class Build {
                         context.string(name: 'PRODUCT_MINOR_VERSION', value: "${versionData.minor}"),
                         context.string(name: 'PRODUCT_MAINTENANCE_VERSION', value: "${versionData.security}"),
                         context.string(name: 'PRODUCT_PATCH_VERSION', value: "${buildNumber}"),
-                        context.string(name: 'JVM', value: "${VARIANT}"),
+                        context.string(name: 'JVM', value: "${buildConfig.VARIANT}"),
                         context.string(name: 'SIGNING_CERTIFICATE', value: "${certificate}"),
-                        context.string(name: 'ARCH', value: "${ARCHITECTURE}"),
-                        ['$class': 'LabelParameterValue', name: 'NODE_LABEL', label: "${TARGET_OS}&&wix"]
+                        context.string(name: 'ARCH', value: "${buildConfig.ARCHITECTURE}"),
+                        ['$class': 'LabelParameterValue', name: 'NODE_LABEL', label: "${buildConfig.TARGET_OS}&&wix"]
                 ]
 
         context.copyArtifacts(
@@ -274,7 +259,7 @@ class Build {
         context.node('master') {
             context.stage("installer") {
                 try {
-                    switch (TARGET_OS) {
+                    switch (buildConfig.TARGET_OS) {
                         case "mac": buildMacInstaller(versionData); break
                         case "windows": buildWindowsInstaller(versionData); break
                         default: return; break
@@ -282,7 +267,7 @@ class Build {
                     context.sh 'for file in $(ls workspace/target/*.tar.gz workspace/target/*.pkg workspace/target/*.msi); do sha256sum "$file" > $file.sha256.txt ; done'
                     context.archiveArtifacts artifacts: "workspace/target/*"
                 } catch (e) {
-                    context.println("Failed to build installer ${TARGET_OS} ${e}")
+                    context.println("Failed to build installer ${buildConfig.TARGET_OS} ${e}")
                 }
             }
         }
@@ -301,7 +286,7 @@ class Build {
     }
 
     MetaData formMetadata(VersionInfo version) {
-        return new MetaData(TARGET_OS, SCM_REF, version, JAVA_TO_BUILD, VARIANT, ARCHITECTURE)
+        return new MetaData(buildConfig.TARGET_OS, buildConfig.SCM_REF, version, buildConfig.JAVA_TO_BUILD, buildConfig.VARIANT, buildConfig.ARCHITECTURE)
     }
 
     def writeMetadata(VersionInfo version) {
@@ -341,12 +326,12 @@ class Build {
     }
 
     def determineFileName() {
-        String javaToBuild = JAVA_TO_BUILD
-        String architecture = ARCHITECTURE
-        String os = TARGET_OS
-        String variant = VARIANT
-        String additionalFileNameTag = ADDITIONAL_FILE_NAME_TAG
-        String overrideFileNameVersion = OVERRIDE_FILE_NAME_VERSION
+        String javaToBuild = buildConfig.JAVA_TO_BUILD
+        String architecture = buildConfig.ARCHITECTURE
+        String os = buildConfig.TARGET_OS
+        String variant = buildConfig.VARIANT
+        String additionalFileNameTag = buildConfig.ADDITIONAL_FILE_NAME_TAG
+        String overrideFileNameVersion = buildConfig.OVERRIDE_FILE_NAME_VERSION
 
         def extension = "tar.gz"
 
@@ -364,8 +349,8 @@ class Build {
 
         if (overrideFileNameVersion) {
             fileName = "${fileName}_${overrideFileNameVersion}"
-        } else if (PUBLISH_NAME) {
-            def nameTag = PUBLISH_NAME
+        } else if (buildConfig.PUBLISH_NAME) {
+            def nameTag = buildConfig.PUBLISH_NAME
                     .replace("jdk-", "")
                     .replaceAll("\\+", "_")
 
@@ -388,20 +373,20 @@ class Build {
 
             def filename = determineFileName()
 
-            context.println "Executing tests: ${TEST_LIST}"
+            context.println "Executing tests: ${buildConfig.TEST_LIST}"
             context.println "Build num: ${env.BUILD_NUMBER}"
             context.println "File name: ${filename}"
 
-            def enableTests = Boolean.valueOf(ENABLE_TESTS)
-            def cleanWorkspace = Boolean.valueOf(CLEAN_WORKSPACE)
+            def enableTests = Boolean.valueOf(buildConfig.ENABLE_TESTS)
+            def cleanWorkspace = Boolean.valueOf(buildConfig.CLEAN_WORKSPACE)
 
             VersionInfo versionInfo = null
 
             context.stage("queue") {
                 def NodeHelper = context.library(identifier: 'openjdk-jenkins-helper@master').NodeHelper
 
-                if (NodeHelper.nodeIsOnline(NODE_LABEL)) {
-                    context.node(NODE_LABEL) {
+                if (NodeHelper.nodeIsOnline(buildConfig.NODE_LABEL)) {
+                    context.node(buildConfig.NODE_LABEL) {
                         context.stage("build") {
                             if (cleanWorkspace) {
                                 try {
@@ -420,19 +405,19 @@ class Build {
                                 }
                                 context.archiveArtifacts artifacts: "workspace/target/*"
                             } finally {
-                                if (TARGET_OS == "aix") {
+                                if (buildConfig.TARGET_OS == "aix") {
                                     context.cleanWs notFailBuild: true
                                 }
                             }
                         }
                     }
                 } else {
-                    context.error("No node of this type exists: ${NODE_LABEL}")
+                    context.error("No node of this type exists: ${buildConfig.NODE_LABEL}")
                     return
                 }
             }
 
-            if (enableTests && TEST_LIST.trim().length() > 0) {
+            if (enableTests && buildConfig.TEST_LIST.trim().length() > 0) {
                 try {
                     def testStages = runTests()
                     context.parallel testStages
@@ -458,44 +443,15 @@ if (!binding.hasVariable("context")) {
     context = this
 }
 
-
-def buildConfig = new groovy.json.JsonSlurper().parseText(BUILD_CONFIGURATION.toString());
-
-context.println(buildConfig.getClass().getName())
-/*
-
-if (String.class.isInstance(ENABLE_TESTS)) {
-    ENABLE_TESTS = Boolean.parseBoolean(ENABLE_TESTS as String)
+if (!binding.hasVariable("BUILD_CONFIGURATION")) {
+    BUILD_CONFIGURATION = "{}"
 }
 
-if (String.class.isInstance(CLEAN_WORKSPACE)) {
-    CLEAN_WORKSPACE = Boolean.parseBoolean(CLEAN_WORKSPACE as String)
-}
+IndividualBuildConfig buildConfig = new IndividualBuildConfig().fromJson(BUILD_CONFIGURATION);
 
-if (String.class.isInstance(RELEASE)) {
-    RELEASE = Boolean.parseBoolean(RELEASE as String)
-}
-
-
-
-return new Build(SCM_REF: SCM_REF,
-        NODE_LABEL: NODE_LABEL,
-        JAVA_TO_BUILD: JAVA_TO_BUILD,
-        JDK_BOOT_VERSION: JDK_BOOT_VERSION,
-        CONFIGURE_ARGS: CONFIGURE_ARGS,
-        BUILD_ARGS: BUILD_ARGS,
-        ARCHITECTURE: ARCHITECTURE,
-        VARIANT: VARIANT,
-        TARGET_OS: TARGET_OS,
-        ADDITIONAL_FILE_NAME_TAG: ADDITIONAL_FILE_NAME_TAG,
-        OVERRIDE_FILE_NAME_VERSION: OVERRIDE_FILE_NAME_VERSION,
-        ENABLE_TESTS: ENABLE_TESTS,
-        CLEAN_WORKSPACE: CLEAN_WORKSPACE,
-        PUBLISH_NAME: PUBLISH_NAME,
-        ADOPT_BUILD_NUMBER: ADOPT_BUILD_NUMBER,
-        TEST_LIST: TEST_LIST,
-        RELEASE: RELEASE,
+return new Build(buildConfig: buildConfig,
 
         context: context,
         env: env,
-        currentBuild: currentBuild)*/
+        currentBuild: currentBuild)
+

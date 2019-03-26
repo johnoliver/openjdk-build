@@ -1,4 +1,5 @@
 import Build
+import common.IndividualBuildConfig
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 
@@ -21,7 +22,9 @@ OpenJDK Runtime Environment AdoptOpenJDK (build 11.0.3+9-201903122221)
 OpenJDK 64-Bit Server VM AdoptOpenJDK (build 11.0.3+9-201903122221, mixed mode)"""
 
     def parse(String version) {
-        def build = new Build(ADOPT_BUILD_NUMBER: 23)
+        IndividualBuildConfig config = new IndividualBuildConfig();
+        config.ADOPT_BUILD_NUMBER = 23
+        def build = new Build(buildConfig: config)
         return build.parseVersionOutput("=JAVA VERSION OUTPUT=\n" + version + "\n=/JAVA VERSION OUTPUT=")
     }
 
