@@ -459,7 +459,7 @@ if (!binding.hasVariable("context")) {
 }
 
 
-def buildConfig = groovy.json.JsonSlurper.parseText(BUILD_CONFIGURATION.toString());
+def buildConfig = new groovy.json.JsonSlurper().parseText(BUILD_CONFIGURATION.toString());
 
 context.println(buildConfig.getClass().getName())
 /*
