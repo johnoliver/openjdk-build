@@ -40,13 +40,19 @@ limitations under the License.
  */
 
 class Build {
-    IndividualBuildConfig buildConfig;
+    final IndividualBuildConfig buildConfig;
 
     final def context
     final def env
     final def currentBuild
 
-    public Build(def context, def env, def currentBuild) {
+    public Build(def buildConfigArg, def context, def env, def currentBuild) {
+        if (String.class.isInstance(buildConfigArg)) {
+            this.buildConfig = new IndividualBuildConfig().fromJson(buildConfigArg as String);
+        } else {
+            this.buildConfig = buildConfigArg as IndividualBuildConfig;
+        }
+
         this.context = context
         this.currentBuild = currentBuild
         this.env = env
@@ -375,14 +381,8 @@ class Build {
         return fileName
     }
 
-    def build(def buildConfigArg) {
+    def build() {
         try {
-
-            if (String.class.isInstance(buildConfigArg)) {
-                this.buildConfig = new IndividualBuildConfig().fromJson(buildConfigArg as String);
-            } else {
-                this.buildConfig = buildConfigArg as IndividualBuildConfig;
-            }
 
             context.println "Build config"
             context.println buildConfig.toJson()
@@ -457,12 +457,13 @@ class Build {
     }
 }
 
-
 if (!binding.hasVariable("context")) {
     context = this
 }
 
-return new Build(context,
+return new Build(
+        BUILD_CONFIGURATION,
+        context,
         env,
         currentBuild)
 

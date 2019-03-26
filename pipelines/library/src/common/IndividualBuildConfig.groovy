@@ -49,7 +49,7 @@ public class IndividualBuildConfig implements Serializable {
             value != null
         }
     }
-    
+
     List<String> toEnvVars() {
         return toRawMap().collect { key, value ->
             if (value == null) {
