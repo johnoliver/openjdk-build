@@ -40,11 +40,24 @@ limitations under the License.
  */
 
 class Build {
-    IndividualBuildConfig buildConfig;
+    final IndividualBuildConfig buildConfig;
 
-    def context
-    def env
-    def currentBuild
+    final def context
+    final def env
+    final def currentBuild
+
+    public Build(buildConfig, def context, def env, def currentBuild) {
+
+        if (String.class.isInstance(buildConfig)) {
+            this.buildConfig = new IndividualBuildConfig().fromJson(buildConfig as String);
+        } else {
+            this.buildConfig = buildConfig as IndividualBuildConfig;
+        }
+        this.context = context
+        this.currentBuild = currentBuild
+        this.env = env
+    }
+
 
     Integer getJavaVersionNumber() {
         // version should be something like "jdk8u"
@@ -445,16 +458,8 @@ if (!binding.hasVariable("context")) {
     context = this
 }
 
-if (!binding.hasVariable("BUILD_CONFIGURATION")) {
-    context.println "Missing BUILD_CONFIGURATION"
-    BUILD_CONFIGURATION = "{}"
-}
-
-IndividualBuildConfig buildConfig = new IndividualBuildConfig().fromJson(BUILD_CONFIGURATION);
-
-return new Build(buildConfig: buildConfig,
-
-        context: context,
-        env: env,
-        currentBuild: currentBuild)
+return new Build(BUILD_CONFIGURATION,
+        context,
+        env,
+        currentBuild)
 

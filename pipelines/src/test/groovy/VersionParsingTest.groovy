@@ -1,7 +1,9 @@
-import Build
 import common.IndividualBuildConfig
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import testDoubles.ContextStub
+import testDoubles.CurrentBuildStub
+import testDoubles.EnvStub
 
 class VersionParsingTest {
 
@@ -24,7 +26,7 @@ OpenJDK 64-Bit Server VM AdoptOpenJDK (build 11.0.3+9-201903122221, mixed mode)"
     def parse(String version) {
         IndividualBuildConfig config = new IndividualBuildConfig();
         config.ADOPT_BUILD_NUMBER = 23
-        def build = new Build(buildConfig: config)
+        def build = new Build(config, new ContextStub(), new EnvStub(), new CurrentBuildStub())
         return build.parseVersionOutput("=JAVA VERSION OUTPUT=\n" + version + "\n=/JAVA VERSION OUTPUT=")
     }
 
