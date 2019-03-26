@@ -1,7 +1,8 @@
+import common.MetaData
 @Library('local-lib@master')
 import common.VersionInfo
-import common.MetaData
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 
 import java.util.regex.Matcher
 
@@ -453,9 +454,16 @@ class Build {
     }
 }
 
+
 if (!binding.hasVariable("context")) {
     context = this
 }
+
+
+def buildConfig = JsonSlurper.parseText(BUILD_CONFIGURATION);
+
+context.println(buildConfig.getClass().getName())
+/*
 
 if (String.class.isInstance(ENABLE_TESTS)) {
     ENABLE_TESTS = Boolean.parseBoolean(ENABLE_TESTS as String)
@@ -468,6 +476,8 @@ if (String.class.isInstance(CLEAN_WORKSPACE)) {
 if (String.class.isInstance(RELEASE)) {
     RELEASE = Boolean.parseBoolean(RELEASE as String)
 }
+
+
 
 return new Build(SCM_REF: SCM_REF,
         NODE_LABEL: NODE_LABEL,
@@ -489,4 +499,4 @@ return new Build(SCM_REF: SCM_REF,
 
         context: context,
         env: env,
-        currentBuild: currentBuild)
+        currentBuild: currentBuild)*/

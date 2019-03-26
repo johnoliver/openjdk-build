@@ -1,5 +1,7 @@
 package common
 
+import groovy.json.JsonOutput
+
 public class IndividualBuildConfig implements Serializable {
     String ARCHITECTURE
     String TARGET_OS
@@ -47,11 +49,13 @@ public class IndividualBuildConfig implements Serializable {
         ]
     }
 
-    List<?> toBuildParams(def context) {
-        def params = toMap()
+    List<?> toBuildParams() {
+        //def params = toMap()
         List<?> buildParams = []
 
-        buildParams.add(['$class': 'LabelParameterValue', name: 'NODE_LABEL', label: params.get("NODE_LABEL")])
+        buildParams.add(['$class': 'TextParameterValue', name: 'NODE_LABEL', label: NODE_LABEL])
+        buildParams.add(['$class': 'LabelParameterValue', name: 'BUILD_CONFIGURATION', label: JsonOutput.prettyPrint(JsonOutput.toJson(toMap()))])
+        /*
         params
                 .findAll { it.key != 'NODE_LABEL' }
                 .each({ name, value ->
@@ -62,7 +66,7 @@ public class IndividualBuildConfig implements Serializable {
                     default: context.echo("Ignoring config param: " + name + " " + value.getClass())
                 }
             }
-        })
+        })*/
 
 
         return buildParams
