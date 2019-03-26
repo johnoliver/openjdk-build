@@ -370,6 +370,8 @@ class Build {
 
     def build() {
         try {
+            context.println "Build config"
+            context.println buildConfig.toJson()
 
             def filename = determineFileName()
 

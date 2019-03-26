@@ -29,6 +29,11 @@ class IndividualBuildConfigTest {
         def json = config.toJson()
         def parsedConfig = new IndividualBuildConfig().fromJson(json);
 
+        parsedConfig.toRawMap()
+                .each { val ->
+            Assertions.assertNotNull(val.value, "${val.key} is null")
+        }
+
         Assertions.assertEquals(config.toJson(), parsedConfig.toJson())
     }
 
