@@ -401,6 +401,8 @@ buildSharedLibs() {
 
     # Test that the parser can execute as fail fast rather than waiting till after the build to find out
     ls -alh "${LIB_DIR}/target/libs/"
+    echo "$gradleJavaHome/bin/java -cp ${LIB_DIR}/target/libs/adopt-shared-lib.jar ParseVersion"
+
     "$gradleJavaHome"/bin/java -version 2>&1 | "$gradleJavaHome"/bin/java -cp "${LIB_DIR}/target/libs/adopt-shared-lib.jar" ParseVersion -s -f semver 1
 }
 
