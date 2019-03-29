@@ -404,7 +404,7 @@ buildSharedLibs() {
     unzip -l "${LIB_DIR}/target/libs/adopt-shared-lib.jar"
     echo "$gradleJavaHome/bin/java -cp ${LIB_DIR}/target/libs/adopt-shared-lib.jar:${LIB_DIR}/classes/groovy/main/ ParseVersion"
 
-    "$gradleJavaHome"/bin/java -version 2>&1 | "$gradleJavaHome"/bin/java -classpath "${LIB_DIR}/target/libs/adopt-shared-lib.jar" net.adoptopenjdk.build.ParseVersion -s -f semver 1
+    "$gradleJavaHome"/bin/java -version 2>&1 | "$gradleJavaHome"/bin/java -classpath "target/libs/adopt-shared-lib.jar" net.adoptopenjdk.build.ParseVersion -s -f semver 1
 }
 
 parseJavaVersionString() {
