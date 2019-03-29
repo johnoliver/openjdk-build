@@ -408,6 +408,7 @@ buildSharedLibs() {
 }
 
 parseJavaVersionString() {
+  cd "${LIB_DIR}"
   ADOPT_BUILD_NUMBER="${ADOPT_BUILD_NUMBER:-1}"
 
   local gradleJavaHome=$(getGradleHome)
