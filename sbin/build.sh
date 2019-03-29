@@ -645,9 +645,11 @@ loadConfigFromFile
 cd "${BUILD_CONFIG[WORKSPACE_DIR]}"
 
 parseArguments "$@"
-configureWorkspace
 
 buildSharedLibs
+
+configureWorkspace
+
 
 getOpenJDKUpdateAndBuildVersion
 configureCommandParameters
