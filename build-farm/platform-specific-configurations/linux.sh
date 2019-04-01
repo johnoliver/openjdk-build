@@ -98,6 +98,8 @@ then
       fi
     fi
     export JDK_BOOT_DIR=$JDK11_BOOT_DIR
+    keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts
+    keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts | grep baltimorecybertrustca
     $JDK11_BOOT_DIR/bin/javac TestDownload.java
     $JDK11_BOOT_DIR/bin/java TestDownload
     echo "JAVA WORKS"
