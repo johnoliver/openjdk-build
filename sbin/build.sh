@@ -380,7 +380,8 @@ getGradleHome() {
   if [ ${JDK8_BOOT_DIR+x} ]; then
     gradleJavaHome=${JDK8_BOOT_DIR}
   fi
-  if [ ${JDK11_BOOT_DIR+x} ]; then
+
+  if [ ${JDK11_BOOT_DIR+x} ] && [ "${BUILD_CONFIG[OS_ARCHITECTURE]}" != "arm" ]; then
     gradleJavaHome=${JDK11_BOOT_DIR}
   fi
 

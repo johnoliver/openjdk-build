@@ -96,14 +96,14 @@ then
         wget -q -O - "https://api.adoptopenjdk.net/v2/binary/releases/openjdk11?os=linux&release=latest&arch=${downloadArch}&type=jdk&openjdk_impl=hotspot&heap_size=normal" | tar xpzf - --strip-components=1 -C "$JDK11_BOOT_DIR"
       fi
     fi
-    export JDK_BOOT_DIR=$JDK11_BOOT_DIR
-    $JDK11_BOOT_DIR/bin/java --version
-    keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts
-    keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts | grep baltimorecybertrustca
-    export JAVA_HOME="$JDK11_BOOT_DIR"
-    $JDK11_BOOT_DIR/bin/javac TestDownload.java
-    $JDK11_BOOT_DIR/bin/java -Djavax.net.debug=all -Djavax.net.ssl.trustStore="$JDK11_BOOT_DIR/lib/security/cacerts" TestDownload
-    echo "JAVA WORKS"
+#    export JDK_BOOT_DIR=$JDK11_BOOT_DIR
+#    $JDK11_BOOT_DIR/bin/java --version
+#    keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts
+#    keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts | grep baltimorecybertrustca
+#    export JAVA_HOME="$JDK11_BOOT_DIR"
+#    $JDK11_BOOT_DIR/bin/javac TestDownload.java
+#    $JDK11_BOOT_DIR/bin/java -Djavax.net.debug=all -Djavax.net.ssl.trustStore="$JDK11_BOOT_DIR/lib/security/cacerts" TestDownload
+#    echo "JAVA WORKS"
 fi
 if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDK12_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDKHEAD_VERSION}" ] || [ "${VARIANT}" == "${BUILD_VARIANT_OPENJ9}" ]; then
     # If we have the RedHat devtoolset 7 installed, use gcc 7 from there, else /usr/local/gcc/bin
