@@ -381,7 +381,9 @@ getGradleHome() {
     gradleJavaHome=${JDK8_BOOT_DIR}
   fi
 
-  if [ ${JDK11_BOOT_DIR+x} ] && [ "${BUILD_CONFIG[OS_ARCHITECTURE]}" != "arm" ]; then
+  # Special case arm because for some unknown reason the JDK11_BOOT_DIR that arm downloads is unable to form connection
+  # to services.gradle.org
+  if [ ${JDK11_BOOT_DIR+x} ] && [ "${ARCHITECTURE}" != "arm" ]; then
     gradleJavaHome=${JDK11_BOOT_DIR}
   fi
 
