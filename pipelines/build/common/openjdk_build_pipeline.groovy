@@ -424,8 +424,12 @@ class Build {
                                 envVars.add("FILENAME=${filename}" as String)
 
                                 context.withEnv(envVars) {
+                                    String test = context.readFile("NOTICE")
+                                    context.println("NOTICE")
+                                    context.println(test)
                                     context.sh(script: "./build-farm/make-adopt-build-farm.sh")
                                     String consoleOut = context.sh(script: "chmod +x ./sbin/getBuiltVersion.sh;./sbin/getBuiltVersion.sh", returnStdout: true, returnStatus: false)
+
                                     versionInfo = parseVersionOutput(consoleOut)
                                 }
                                 writeMetadata(versionInfo)
