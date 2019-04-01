@@ -101,6 +101,7 @@ then
     $JDK11_BOOT_DIR/bin/java --version
     keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts
     keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts | grep baltimorecybertrustca
+    export JAVA_HOME="$JDK11_BOOT_DIR"
     $JDK11_BOOT_DIR/bin/javac TestDownload.java
     $JDK11_BOOT_DIR/bin/java -Djavax.net.debug=all -Djavax.net.ssl.trustStore="$JDK11_BOOT_DIR/lib/security/cacerts" TestDownload
     echo "JAVA WORKS"
