@@ -88,6 +88,9 @@ fi
 
 if [ "${JAVA_TO_BUILD}" == "${JDK12_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDKHEAD_VERSION}" ]
 then
+
+    rm -r "$PWD/jdk-11"
+    
     if [ ! -d "$JDK11_BOOT_DIR" ]; then
       export JDK11_BOOT_DIR="$PWD/jdk-11"
       if [ ! -d "$JDK11_BOOT_DIR/bin" ]; then
