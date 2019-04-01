@@ -94,11 +94,13 @@ then
         downloadArch="${ARCHITECTURE}"
         mkdir -p "$JDK11_BOOT_DIR"
         wget -q -O - "https://api.adoptopenjdk.net/v2/binary/nightly/openjdk11?os=linux&release=latest&arch=${downloadArch}&type=jdk&openjdk_impl=hotspot&heap_size=normal" | tar xpzf - --strip-components=1 -C "$JDK11_BOOT_DIR"
-        $JDK11_BOOT_DIR/bin/javac TestDownload.java
-        $JDK11_BOOT_DIR/bin/java TestDownload
+
       fi
     fi
     export JDK_BOOT_DIR=$JDK11_BOOT_DIR
+    $JDK11_BOOT_DIR/bin/javac TestDownload.java
+    $JDK11_BOOT_DIR/bin/java TestDownload
+    echo "JAVA WORKS"
 fi
 if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDK12_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDKHEAD_VERSION}" ] || [ "${VARIANT}" == "${BUILD_VARIANT_OPENJ9}" ]; then
     # If we have the RedHat devtoolset 7 installed, use gcc 7 from there, else /usr/local/gcc/bin
