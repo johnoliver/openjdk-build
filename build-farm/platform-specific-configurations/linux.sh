@@ -101,7 +101,7 @@ then
     keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts
     keytool --list --storepass changeit --keystore $JDK11_BOOT_DIR/lib/security/cacerts | grep baltimorecybertrustca
     $JDK11_BOOT_DIR/bin/javac TestDownload.java
-    $JDK11_BOOT_DIR/bin/java TestDownload
+    $JDK11_BOOT_DIR/bin/java -Djavax.net.ssl.trustStore="$JDK11_BOOT_DIR/lib/security/cacerts" TestDownload
     echo "JAVA WORKS"
 fi
 if [ "${JAVA_TO_BUILD}" == "${JDK11_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDK12_VERSION}" ] || [ "${JAVA_TO_BUILD}" == "${JDKHEAD_VERSION}" ] || [ "${VARIANT}" == "${BUILD_VARIANT_OPENJ9}" ]; then
