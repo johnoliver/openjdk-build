@@ -1,0 +1,7 @@
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iEYEABECAAYFAlrpefIACgkQwaYOrOcH/aUVGACfb0z+upkAoTK91nHuDQay9Wv9
+yewAn2ThUPcj6U4Ve61oetMXjdkm4Kn2
+=L20p
+-----END PGP SIGNATURE-----
