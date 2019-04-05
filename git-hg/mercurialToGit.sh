@@ -84,11 +84,14 @@ function addMercurialUpstream() {
 }
 
 function performMergeFromMercurialIntoGit() {
+  git fetch origin --tags
+  
   git fetch hg
   git fetch hg --tags
   git merge hg/"$BRANCH" -m "Merge $BRANCH" || (echo "The automatic update failed, time for manual intervention!" && exit 1)
 
 
+  git fetch origin --tags
   if git rev-parse -q --verify "origin/$BRANCH"; then
     echo "====Commit diff for branch $BRANCH===="
     git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' --abbrev-commit --date=relative $BRANCH..origin/$BRANCH
@@ -101,7 +104,6 @@ function performMergeFromMercurialIntoGit() {
     done
   fi
 
-  git fetch origin --tags
   git push -u origin "$BRANCH" || exit 1
   git push origin "$BRANCH" --tags || exit 1
 
