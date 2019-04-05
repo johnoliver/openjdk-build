@@ -87,7 +87,9 @@ function performMergeFromMercurialIntoGit() {
   git fetch origin --tags
   
   git fetch hg
-  git fetch hg --tags
+  git fetch hg --tags --dry-run
+
+  exit 1
   git merge hg/"$BRANCH" -m "Merge $BRANCH" || (echo "The automatic update failed, time for manual intervention!" && exit 1)
 
 
