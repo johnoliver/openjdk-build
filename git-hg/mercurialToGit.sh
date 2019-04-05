@@ -101,6 +101,7 @@ function performMergeFromMercurialIntoGit() {
     done
   fi
 
+  git fetch origin --tags
   git push -u origin "$BRANCH" || exit 1
   git push origin "$BRANCH" --tags || exit 1
 
