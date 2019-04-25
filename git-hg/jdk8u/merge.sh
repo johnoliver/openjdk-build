@@ -199,7 +199,8 @@ if [[ "$returnCode" -ne "0" ]]; then
     fixAutoConfigure
   else
     echo "Conflicts"
-    exit 1
+    echo "Fix and return"
+    bash
   fi
 fi
 
@@ -214,7 +215,8 @@ for module in "${MODULES[@]}" ; do
         git commit -a -m "Resolve conflicts on module $module when merging tag $tag"
       else
         echo "Failed to merge in module $module"
-        exit 1
+        echo "Fix and return"
+        bash
       fi
     fi
 

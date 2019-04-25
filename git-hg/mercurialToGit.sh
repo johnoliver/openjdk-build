@@ -24,7 +24,7 @@
 #
 ################################################################################
 
-set -euxo pipefail
+set -ux
 
 echo "Import common functionality"
 # shellcheck disable=SC1091
@@ -53,12 +53,13 @@ function checkArgs() {
 HG_REPO=$1
 GITHUB_REPO=$(echo "$HG_REPO" | cut -d/ -f2)
 BRANCH=${2:-master}
+OVERRIDE_WITH_UPSTREAM=${3:-false}
 
 function cloneGitHubRepo() {
   cd "$WORKSPACE" || exit 1
   # If we don't have a $GITHUB_REPO locally then clone it from AdoptOpenJDK/openjdk-$GITHUB_REPO.git
   if [ ! -d "$GITHUB_REPO" ] ; then
-    git clone git@github.com:AdoptOpenJDK/openjdk-"$GITHUB_REPO".git "$GITHUB_REPO" || exit 1
+    git clone https://github.com/AdoptOpenJDK/openjdk-$GITHUB_REPO.git "$GITHUB_REPO" || exit 1
   fi
 }
 
@@ -123,11 +124,37 @@ function performMergeIntoDevFromMaster() {
   git checkout -b dev-tmp master
 
   # place master commits on the end of dev
-  git rebase dev || exit 1
+  git rebase --onto dev origin/master dev-tmp
+
+  if [ $? != 0 ]; then
+    rebase=1
+    until [ $rebase == 0 ]
+    do
+      files=$(git diff --name-only --diff-filter=U)
+
+      # If there is a conflict either accept the incoming change or error out
+      if [ "$OVERRIDE_WITH_UPSTREAM" != "false" ]; then
+        git checkout --ours $files
+        git add $files
+      else
+        echo "Merge conflicts on $files"
+        git status
+        exit 1
+      fi
+
+      if [ $(git status -s | wc -l) == 0 ]; then
+        git rebase --skip
+      else
+        git add -A
+        git rebase --continue
+      fi
+      rebase=$?
+    done
+  fi
 
   # copy commits into dev
   git checkout dev
-  git rebase dev-tmp || exit 1
+  git merge dev-tmp || exit 1
 
   git branch -D dev-tmp || true
 
