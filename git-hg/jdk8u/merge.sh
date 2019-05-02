@@ -95,6 +95,8 @@ function updateRepo() {
   git fetch --all
   git fetch --tags
 
+  git filter-branch --force --index-filter   'git rm --cached --ignore-unmatch .hgtags'   --prune-empty --tag-name-filter cat -- --all
+
 }
 
 # We pass in the repo we want to mirror as the first arg

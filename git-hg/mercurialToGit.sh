@@ -116,47 +116,14 @@ function performMergeIntoDevFromMaster() {
     git reset --hard origin/dev || echo "Not resetting as no upstream exists"
   fi
 
-  # Rebase master onto dev
-
-
-  # Create tmp branch from master
-  git branch -D dev-tmp || true
-  git checkout -b dev-tmp master
-
-  # place master commits on the end of dev
-  git rebase --onto dev origin/master dev-tmp
-
-  if [ $? != 0 ]; then
-    rebase=1
-    until [ $rebase == 0 ]
-    do
-      files=$(git diff --name-only --diff-filter=U)
-
-      # If there is a conflict either accept the incoming change or error out
-      if [ "$OVERRIDE_WITH_UPSTREAM" != "false" ]; then
-        git checkout --ours $files
-        git add $files
-      else
-        echo "Merge conflicts on $files"
-        git status
-        exit 1
-      fi
-
-      if [ $(git status -s | wc -l) == 0 ]; then
-        git rebase --skip
-      else
-        git add -A
-        git rebase --continue
-      fi
-      rebase=$?
-    done
-  fi
-
   # copy commits into dev
   git checkout dev
-  git merge dev-tmp || exit 1
-
-  git branch -D dev-tmp || true
+  git merge --ff master
+  if [ $? != 0 ];then
+    echo "Merge conflict"
+    git status
+    exit 1
+  fi
 
   if git rev-parse -q --verify "origin/dev" ; then
     git log --oneline origin/dev..dev
