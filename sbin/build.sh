@@ -168,6 +168,7 @@ configuringVersionStringParameter()
   local dateSuffix=$(date -u +%Y%m%d%H%M)
 
   if [ "${BUILD_CONFIG[OPENJDK_CORE_VERSION]}" == "${JDK8_CORE_VERSION}" ]; then
+    openJdkVersion=$(echo "${openJdkVersion}" | egrep -o "8u[0-9]+\-((b[0-9]+)|ga)")
 
     if [ "${BUILD_CONFIG[RELEASE]}" == "false" ]; then
       addConfigureArg "--with-user-release-suffix=" "${dateSuffix}"
