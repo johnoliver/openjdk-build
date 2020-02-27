@@ -182,7 +182,7 @@ class Build {
                             context.string(name: 'VERSION', value: "${versionInfo.major}"),
                             context.string(name: 'FILTER', value: "${filter}"),
                             context.string(name: 'CERTIFICATE', value: "${certificate}"),
-                            ['$class': 'LabelParameterValue', name: 'NODE_LABEL', label: "${nodeFilter}"],
+                            ['$class': 'LabelParameterValue', name: '`NODE_LABEL`', label: "${nodeFilter}"],
                     ]
 
                     def signJob = context.build job: "build-scripts/release/sign_build",
